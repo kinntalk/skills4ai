@@ -1,0 +1,92 @@
+{
+  "skills": {
+    "image-generation": {
+      "name": "image-generation",
+      "description": "Converts Markdown documents to high-quality images (PNG/JPG)",
+      "keywords": ["image", "png", "jpg", "picture", "photo", "screenshot", "markdown", "render", "convert", "图片", "转换", "截图", "渲染", "生成图片", "生成png", "生成jpg", "markdown转图片", "md转图片", "文档转图片"],
+      "aliases": ["img-gen", "image-gen", "render-image", "markdown-to-image"]
+    },
+    "pdf-generation": {
+      "name": "pdf-generation",
+      "description": "Professional PDF generation from markdown using Pandoc",
+      "keywords": ["pdf", "document", "report", "whitepaper", "pandoc", "latex", "pdf", "文档", "报告", "白皮书", "pdf生成", "生成pdf", "markdown转pdf", "md转pdf", "文档转pdf"],
+      "aliases": ["pdf-gen", "pdf-creator", "markdown-to-pdf"]
+    },
+    "skill-creator": {
+      "name": "skill-creator",
+      "description": "Create new Trae skills from templates",
+      "keywords": ["create", "new", "init", "template", "skill", "scaffold", "创建", "新建", "初始化", "模板", "脚手架", "创建skill", "新建skill", "初始化skill"],
+      "aliases": ["create-skill", "new-skill", "init-skill", "skill-scaffold"]
+    },
+    "skill-installer": {
+      "name": "skill-installer",
+      "description": "Install and manage Trae skills from Git repositories",
+      "keywords": ["install", "update", "uninstall", "manage", "git", "repository", "安装", "更新", "卸载", "管理", "git仓库", "安装skill", "更新skill", "卸载skill"],
+      "aliases": ["skill-manager", "skill-updater", "install-skill", "update-skill"]
+    },
+    "skill-auditor": {
+      "name": "skill-auditor",
+      "description": "Audit Trae skills for compliance and best practices",
+      "keywords": ["audit", "check", "validate", "test", "compliance", "best-practices", "审计", "检查", "验证", "测试", "合规", "最佳实践", "审计skill", "检查skill", "验证skill"],
+      "aliases": ["skill-check", "skill-validator", "skill-tester", "skill-linter"]
+    },
+    "find-skills": {
+      "name": "find-skills",
+      "description": "Search and discover Trae skills from repositories",
+      "keywords": ["find", "search", "discover", "explore", "browse", "查找", "搜索", "发现", "探索", "浏览", "查找skill", "搜索skill", "发现skill"],
+      "aliases": ["skill-search", "skill-finder", "skill-discover"]
+    },
+    "demo-test-skill": {
+      "name": "demo-test-skill",
+      "description": "Example/demo skill for testing purposes",
+      "keywords": ["demo", "example", "test", "sample", "演示", "示例", "测试", "样例"],
+      "aliases": ["example-skill", "test-skill", "sample-skill"]
+    },
+    "test-skill": {
+      "name": "test-skill",
+      "description": "Test skill for development and validation",
+      "keywords": ["test", "validate", "debug", "development", "测试", "验证", "调试", "开发"],
+      "aliases": ["dev-test", "skill-test", "validation-skill"]
+    },
+    "file-manager-skill": {
+      "name": "file-manager-skill",
+      "description": "File management and duplicate detection",
+      "keywords": ["file", "manage", "duplicate", "finder", "search", "文件", "管理", "重复", "查找", "搜索", "文件管理", "重复文件", "查找文件"],
+      "aliases": ["file-manager", "duplicate-finder", "file-searcher"]
+    },
+    "dupeguru-tool": {
+      "name": "dupeguru-tool",
+      "description": "Duplicate file detection and management tool",
+      "keywords": ["duplicate", "dupeguru", "file", "detect", "重复", "文件", "检测", "重复文件", "文件检测"],
+      "aliases": ["dupe-guru", "duplicate-detector"]
+    }
+  },
+  "detection_rules": {
+    "priority_order": [
+      "image-generation",
+      "pdf-generation",
+      "skill-creator",
+      "skill-installer",
+      "skill-auditor",
+      "find-skills",
+      "file-manager-skill",
+      "dupeguru-tool"
+    ],
+    "exact_match": {
+      "image": "image-generation",
+      "pdf": "pdf-generation",
+      "create": "skill-creator",
+      "install": "skill-installer",
+      "audit": "skill-auditor",
+      "find": "find-skills"
+    },
+    "partial_match": {
+      "png": "image-generation",
+      "jpg": "image-generation",
+      "markdown": ["image-generation", "pdf-generation"],
+      "skill": ["skill-creator", "skill-installer", "skill-auditor"],
+      "file": ["file-manager-skill", "dupeguru-tool"],
+      "duplicate": ["file-manager-skill", "dupeguru-tool"]
+    }
+  }
+}
