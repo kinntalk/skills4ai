@@ -43,19 +43,17 @@ def scan_skills():
         except Exception:
             pass
         
-        # 检查是否是子目录 skill
-        if skill_dir.name in ['find-skills', 'skill-creator', 'pdf-generation', 'image-generation', 'skill-auditor', 'skill-installer']:
-            # 这些是远程安装的 skills，尝试从 skills.json 获取信息
-            try:
-                with open(REGISTRY_FILE, 'r', encoding='utf-8') as f:
-                    existing = json.load(f)
-                    if skill_name in existing.get('skills', {}):
-                        existing_info = existing['skills'][skill_name]
-                        source = existing_info.get('source', 'unknown')
-                        subdir = existing_info.get('subdir', '')
-                        version = existing_info.get('version', 'unknown')
-            except Exception:
-                pass
+        # 尝试从现有的 skills.json 获取信息（用于保留远程 skills 的版本信息）
+        try:
+            with open(REGISTRY_FILE, 'r', encoding='utf-8') as f:
+                existing = json.load(f)
+                if skill_name in existing.get('skills', {}):
+                    existing_info = existing['skills'][skill_name]
+                    source = existing_info.get('source', source)
+                    subdir = existing_info.get('subdir', subdir)
+                    version = existing_info.get('version', version)
+        except Exception:
+            pass
         
         skills[skill_name] = {
             "source": source,

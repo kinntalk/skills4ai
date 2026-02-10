@@ -130,25 +130,35 @@ def update_skill(name, force=False):
     repo_url = info.get('source')
     subdir = info.get('subdir', '')
     
-    if not repo_url:
-        print(f"{RED}Error: No source URL for '{name}'.{RESET}")
+    if not repo_url or repo_url == 'local':
+        print(f"{YELLOW}Skipping {name}: Local skill or no source URL.{RESET}")
         return
-        
-    # Construct install source string
-    install_source = repo_url
-    if subdir:
-         # Try to reconstruct the "user/repo/subdir" format if it was a GitHub URL
-         # Or just pass the repo URL and let install_skill handle the subdir via logic if we updated it
-         # But install_skill expects "user/repo" or URL.
-         # Actually install_skill logic handles git urls.
-         # If we have a subdir, we might need to be careful.
-         # Let's use the logic from before:
-         if "github.com" in repo_url and repo_url.endswith(".git"):
-             clean_url = repo_url.replace("https://github.com/", "").replace(".git", "")
-             install_source = f"{clean_url}/{subdir}"
     
-    # For now, let's assume the user is interactive.
-    print(f"Source inferred: {install_source}")
+    # Construct install source string
+    # Handle different URL formats:
+    # 1. Full GitHub URL: https://github.com/user/repo.git
+    # 2. Full GitHub URL without .git: https://github.com/user/repo
+    # 3. Short format: user/repo
+    # 4. With subdir: user/repo/subdir or https://github.com/user/repo/tree/main/subdir
+    install_source = repo_url
+    
+    if subdir:
+        # If we have a subdir, construct the appropriate source string
+        if "github.com" in repo_url:
+            # Remove .git suffix if present
+            clean_url = repo_url.rstrip('.git')
+            # Check if it's already a tree URL
+            if '/tree/' in clean_url:
+                install_source = clean_url
+            else:
+                # Construct: user/repo/subdir format for install_skill
+                clean_url = clean_url.replace("https://github.com/", "")
+                install_source = f"{clean_url}/{subdir}"
+        else:
+            # Non-GitHub URL with subdir
+            install_source = f"{repo_url}/{subdir}"
+    
+    print(f"Updating {name} from: {install_source}")
     
     # Backup existing skill before update
     backup_path = SKILLS_DIR / f"{name}-backup"
@@ -156,7 +166,7 @@ def update_skill(name, force=False):
     
     if skill_path.exists():
         if backup_path.exists():
-             safe_rmtree(backup_path)
+            safe_rmtree(backup_path)
         
         try:
             skill_path.rename(backup_path)
@@ -164,20 +174,22 @@ def update_skill(name, force=False):
         except Exception as e:
             print(f"{RED}Error backing up skill: {e}{RESET}")
             return
-
-    success = install_skill(install_source, SKILLS_DIR, run_audit=True)
+    
+    # Install the updated skill
+    # Pass force parameter to avoid interactive prompts
+    success = install_skill(install_source, SKILLS_DIR, run_audit=True, force=force)
     
     if success:
         print(f"{GREEN}Successfully updated {name}.{RESET}")
         # Clean up backup
         if backup_path.exists():
-             safe_rmtree(backup_path)
-             print(f"{GREEN}Removed backup.{RESET}")
+            safe_rmtree(backup_path)
+            print(f"{GREEN}Removed backup.{RESET}")
     else:
         print(f"{RED}Failed to update {name}. Restoring backup...{RESET}")
         if backup_path.exists():
             if skill_path.exists():
-                 safe_rmtree(skill_path)
+                safe_rmtree(skill_path)
             
             try:
                 backup_path.rename(skill_path)
