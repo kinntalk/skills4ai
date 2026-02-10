@@ -18,21 +18,21 @@
       "version": "89e7be87f2a2b6be3694dee8b5491c28db098b94",
       "updated_at": "2026-02-10T16:35:30.922297"
     },
-    "image-generation": {
-      "source": "https://github.com/glebis/claude-skills.git",
-      "subdir": "image-generation",
+    "skill-installer": {
+      "source": "local",
+      "subdir": "",
       "version": "unknown",
       "updated_at": "2026-02-10T16:35:30.922297"
     },
     "skill-auditor": {
-      "source": "https://github.com/glebis/claude-skills.git",
-      "subdir": "skill-auditor",
+      "source": "local",
+      "subdir": "",
       "version": "unknown",
       "updated_at": "2026-02-10T16:35:30.922297"
     },
-    "skill-installer": {
-      "source": "https://github.com/glebis/claude-skills.git",
-      "subdir": "skill-installer",
+    "image-generation": {
+      "source": "local",
+      "subdir": "",
       "version": "unknown",
       "updated_at": "2026-02-10T16:35:30.922297"
     }

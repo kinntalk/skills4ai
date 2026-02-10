@@ -48,18 +48,14 @@
 | find-skills | https://github.com/vercel-labs/skills.git | skills/find-skills | 556555c |
 | skill-creator | https://github.com/anthropics/skills.git | skills/skill-creator | unknown |
 | pdf-generation | https://github.com/glebis/claude-skills.git | pdf-generation | 89e7be8 |
-| image-generation | https://github.com/glebis/claude-skills.git | image-generation | unknown |
-| skill-auditor | https://github.com/glebis/claude-skills.git | skill-auditor | unknown |
-| skill-installer | https://github.com/glebis/claude-skills.git | skill-installer | unknown |
 
 ### 本地 Skills
 
 | Skill 名称 | Source | Subdir | Version |
 |-----------|--------|--------|---------|
-| demo-test-skill | local | | unknown |
-| test-skill | local | | unknown |
-| file-manager-skill | local | | unknown |
-| dupeguru-tool | local | | unknown |
+| skill-installer | local | | unknown |
+| skill-auditor | local | | unknown |
+| image-generation | local | | unknown |
 
 ---
 
@@ -121,8 +117,6 @@ python .trae/skills/skill-installer/scripts/sync_skills.py sync --dry-run
 | skill-installer | 安装、更新、卸载、管理、git仓库、安装skill、更新skill、卸载skill | install, update, uninstall, manage, git, repository |
 | skill-auditor | 审计、检查、验证、测试、合规、最佳实践、审计skill、检查skill、验证skill | audit, check, validate, test, compliance, best-practices |
 | find-skills | 查找、搜索、发现、探索、浏览、查找skill、搜索skill、发现skill | find, search, discover, explore, browse |
-| file-manager-skill | 文件、管理、重复、查找、搜索、文件管理、重复文件、查找文件 | file, manage, duplicate, finder, search |
-| dupeguru-tool | 重复、文件、检测、重复文件、文件检测 | duplicate, dupeguru, file, detect |
 
 ---
 
@@ -201,14 +195,10 @@ python .trae/skills/skill-installer/scripts/sync_skills.py sync --dry-run
 
 ### 2026-02-10
 
-- ✅ 完善 `skills.json`，添加所有已安装的 skills
-- ✅ 创建 `sync_skills.py` 自动扫描脚本
-- ✅ 创建 `skill_map.json` 关键词映射
-- ✅ 创建 `SKILLS_REGISTRY.md` 管理文档
-- ✅ 添加 image-generation 到 skills.json
-- ✅ 添加 skill-auditor 到 skills.json
-- ✅ 添加 skill-installer 到 skills.json
-- ✅ 添加本地 skills（demo-test-skill, test-skill, file-manager-skill, dupeguru-tool）
+- ✅ 完善 `skills.json`，清理无效 skills
+- ✅ 更新 `SKILLS_REGISTRY.md`，明确远程与本地 Skills 分类
+- ✅ 规范化本地 Skills (skill-installer, skill-auditor, image-generation) 的元数据
+- ✅ 移除已废弃的本地 Skills (demo-test-skill, test-skill, file-manager-skill, dupeguru-tool)
 
 ---
 

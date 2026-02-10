@@ -35,30 +35,6 @@
       "description": "Search and discover Trae skills from repositories",
       "keywords": ["find", "search", "discover", "explore", "browse", "查找", "搜索", "发现", "探索", "浏览", "查找skill", "搜索skill", "发现skill"],
       "aliases": ["skill-search", "skill-finder", "skill-discover"]
-    },
-    "demo-test-skill": {
-      "name": "demo-test-skill",
-      "description": "Example/demo skill for testing purposes",
-      "keywords": ["demo", "example", "test", "sample", "演示", "示例", "测试", "样例"],
-      "aliases": ["example-skill", "test-skill", "sample-skill"]
-    },
-    "test-skill": {
-      "name": "test-skill",
-      "description": "Test skill for development and validation",
-      "keywords": ["test", "validate", "debug", "development", "测试", "验证", "调试", "开发"],
-      "aliases": ["dev-test", "skill-test", "validation-skill"]
-    },
-    "file-manager-skill": {
-      "name": "file-manager-skill",
-      "description": "File management and duplicate detection",
-      "keywords": ["file", "manage", "duplicate", "finder", "search", "文件", "管理", "重复", "查找", "搜索", "文件管理", "重复文件", "查找文件"],
-      "aliases": ["file-manager", "duplicate-finder", "file-searcher"]
-    },
-    "dupeguru-tool": {
-      "name": "dupeguru-tool",
-      "description": "Duplicate file detection and management tool",
-      "keywords": ["duplicate", "dupeguru", "file", "detect", "重复", "文件", "检测", "重复文件", "文件检测"],
-      "aliases": ["dupe-guru", "duplicate-detector"]
     }
   },
   "detection_rules": {
@@ -68,9 +44,7 @@
       "skill-creator",
       "skill-installer",
       "skill-auditor",
-      "find-skills",
-      "file-manager-skill",
-      "dupeguru-tool"
+      "find-skills"
     ],
     "exact_match": {
       "image": "image-generation",
@@ -84,9 +58,7 @@
       "png": "image-generation",
       "jpg": "image-generation",
       "markdown": ["image-generation", "pdf-generation"],
-      "skill": ["skill-creator", "skill-installer", "skill-auditor"],
-      "file": ["file-manager-skill", "dupeguru-tool"],
-      "duplicate": ["file-manager-skill", "dupeguru-tool"]
+      "skill": ["skill-creator", "skill-installer", "skill-auditor"]
     }
   }
 }
