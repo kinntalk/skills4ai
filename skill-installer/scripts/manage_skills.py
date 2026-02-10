@@ -14,7 +14,7 @@ from pathlib import Path
 
 # Import install_skill to reuse installation logic
 # Assuming manage_skills.py is in the same directory as install_skill.py
-current_dir = Path(__file__).parent.resolve()
+current_dir = Path(__file__).parent
 sys.path.append(str(current_dir))
 try:
     from install_skill import install_skill, run_command
@@ -94,6 +94,32 @@ def check_updates():
     else:
         print(f"\n{GREEN}All skills are up to date.{RESET}")
 
+import shutil
+import time
+
+def safe_rmtree(path, retries=5, delay=0.5):
+    """
+    Safely remove a directory tree with retries for Windows file locking issues.
+    """
+    path = Path(path)
+    if not path.exists():
+        return True
+        
+    for i in range(retries):
+        try:
+            shutil.rmtree(path)
+            return True
+        except PermissionError:
+            if i < retries - 1:
+                time.sleep(delay)
+            else:
+                print(f"{RED}Error: Could not delete {path}. Is it in use?{RESET}")
+                return False
+        except Exception as e:
+            print(f"{RED}Error deleting {path}: {e}{RESET}")
+            return False
+    return False
+
 def update_skill(name, force=False):
     skills = load_registry()
     if name not in skills:
@@ -107,22 +133,57 @@ def update_skill(name, force=False):
     if not repo_url:
         print(f"{RED}Error: No source URL for '{name}'.{RESET}")
         return
-
-    source = repo_url
+        
+    # Construct install source string
+    install_source = repo_url
     if subdir:
-        if "github.com" in repo_url and repo_url.endswith(".git"):
+         # Try to reconstruct the "user/repo/subdir" format if it was a GitHub URL
+         # Or just pass the repo URL and let install_skill handle the subdir via logic if we updated it
+         # But install_skill expects "user/repo" or URL.
+         # Actually install_skill logic handles git urls.
+         # If we have a subdir, we might need to be careful.
+         # Let's use the logic from before:
+         if "github.com" in repo_url and repo_url.endswith(".git"):
              clean_url = repo_url.replace("https://github.com/", "").replace(".git", "")
-             source = f"{clean_url}/{subdir}"
+             install_source = f"{clean_url}/{subdir}"
     
-    print(f"🚀 Updating {name}...")
-    if force:
-        print(f"{YELLOW}Force mode enabled. Overwriting...{RESET}")
+    # For now, let's assume the user is interactive.
+    print(f"Source inferred: {install_source}")
     
-    success = install_skill(source, SKILLS_DIR, run_audit=True, force=force)
+    # Backup existing skill before update
+    backup_path = SKILLS_DIR / f"{name}-backup"
+    skill_path = SKILLS_DIR / name
+    
+    if skill_path.exists():
+        if backup_path.exists():
+             safe_rmtree(backup_path)
+        
+        try:
+            skill_path.rename(backup_path)
+            print(f"{YELLOW}Backed up existing skill to {backup_path}{RESET}")
+        except Exception as e:
+            print(f"{RED}Error backing up skill: {e}{RESET}")
+            return
+
+    success = install_skill(install_source, SKILLS_DIR, run_audit=True)
+    
     if success:
         print(f"{GREEN}Successfully updated {name}.{RESET}")
+        # Clean up backup
+        if backup_path.exists():
+             safe_rmtree(backup_path)
+             print(f"{GREEN}Removed backup.{RESET}")
     else:
-        print(f"{RED}Failed to update {name}.{RESET}")
+        print(f"{RED}Failed to update {name}. Restoring backup...{RESET}")
+        if backup_path.exists():
+            if skill_path.exists():
+                 safe_rmtree(skill_path)
+            
+            try:
+                backup_path.rename(skill_path)
+                print(f"{GREEN}Restored previous version.{RESET}")
+            except Exception as e:
+                print(f"{RED}Critical Error: Failed to restore backup! Manual intervention required at {backup_path}{RESET}")
 
 def main():
     parser = argparse.ArgumentParser(description="Manage Trae skills")

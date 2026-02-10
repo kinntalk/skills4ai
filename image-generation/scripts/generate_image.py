@@ -105,8 +105,8 @@ hr {
 """
 
 def generate_image(input_file, output_file, width=880):
-    input_path = Path(input_file).resolve()
-    output_path = Path(output_file).resolve()
+    input_path = Path(input_file)
+    output_path = Path(output_file)
     
     if not input_path.exists():
         print(f"Error: Input file '{input_path}' not found.")

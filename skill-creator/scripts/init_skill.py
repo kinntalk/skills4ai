@@ -127,10 +127,29 @@ Example helper script for {skill_name}
 This is a placeholder script that can be executed directly.
 Replace with actual implementation or delete if not needed.
 
+Best Practices for Skill Scripts:
+1. Cross-Platform Paths: Use `pathlib` for all file paths.
+   from pathlib import Path
+   path = Path("folder") / "file.txt"
+
+2. Safe Temporary Files: Use UUIDs for temp files to avoid encoding/locking issues on Windows.
+   import uuid
+   temp_name = f"temp_{{uuid.uuid4().hex}}.txt"
+
+3. Async File Operations: When calling external tools, verify file existence before proceeding.
+   import time
+   # Retry loop for file creation
+   for i in range(10):
+       if Path(output_file).exists(): break
+       time.sleep(0.5)
+
 Example real scripts from other skills:
 - pdf/scripts/fill_fillable_fields.py - Fills PDF form fields
 - pdf/scripts/convert_pdf_to_images.py - Converts PDF pages to images
 """
+
+import sys
+from pathlib import Path
 
 def main():
     print("This is an example script for {skill_name}")

@@ -56,7 +56,7 @@ def package_skill(skill_path, output_dir=None):
     # Determine output location
     skill_name = skill_path.name
     if output_dir:
-        output_path = Path(output_dir).resolve()
+        output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
     else:
         output_path = Path.cwd()

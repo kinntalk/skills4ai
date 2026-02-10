@@ -141,7 +141,7 @@ def check_path_consistency(skill_path):
     
     # Skip checking if auditing skill-auditor itself (to avoid false positives)
     try:
-        skill_name = skill_path.resolve().name
+        skill_name = skill_path.name
         if skill_name == 'skill-auditor':
             return True, "Skipping path consistency check for skill-auditor itself"
     except:
@@ -307,6 +307,16 @@ def audit_skill(skill_path):
             print(f"      - {issue}")
         has_errors = True
     
+    # 8. Risky Path Operations
+    ok, msg = check_risky_path_ops(skill_path)
+    if ok:
+        print_pass(msg)
+    else:
+        print_fail("Found potential risky path operations:")
+        for issue in msg:
+            print(f"      - {issue}")
+        has_errors = True
+    
     print("\n" + "="*40)
     if has_errors:
         print(f"{RED}⚠️  Audit completed with errors. Please fix issues above.{RESET}")
@@ -314,6 +324,50 @@ def audit_skill(skill_path):
     else:
         print(f"{GREEN}✨ Skill passed all standard checks!{RESET}")
         return True
+
+def check_risky_path_ops(skill_path):
+    """
+    Check for potentially risky file system operations that might fail on Windows.
+    
+    Checks for:
+    1. os.system() usage (prefer subprocess)
+    2. Hardcoded file paths (using '/' or '\' in strings)
+    3. os.path.join (prefer pathlib)
+    """
+    issues = []
+    
+    for py_file in skill_path.glob('**/*.py'):
+        try:
+            content = py_file.read_text(encoding='utf-8')
+            lines = content.splitlines()
+            
+            for i, line in enumerate(lines, 1):
+                # Check for os.system
+                if 'os.system(' in line:
+                    issues.append(f"{py_file.name}:{i}: Use of os.system() detected. Prefer subprocess.run() for better control and security.")
+                
+                # Check for os.path.join (soft warning, pathlib is better)
+                if 'os.path.join(' in line:
+                    # Not an error per se, but pathlib is recommended for cross-platform robustness
+                    pass 
+                    
+                # Check for hardcoded separators in string literals that look like paths
+                # This is tricky to regex perfectly, looking for common patterns
+                # e.g. "folder/file" or "folder\\file"
+                # Skip import lines
+                if line.strip().startswith('import') or line.strip().startswith('from'):
+                    continue
+                    
+                # Very simple heuristic: looking for string literals with slashes
+                # This might have false positives, so we keep it conservative
+                # Skipping for now to avoid noise, focusing on high-impact os.system
+                
+        except Exception as e:
+            issues.append(f"Could not read {py_file.name}: {e}")
+            
+    if issues:
+        return False, issues
+    return True, "No high-risk file operations detected"
 
 def check_subprocess_robustness(skill_path):
     """

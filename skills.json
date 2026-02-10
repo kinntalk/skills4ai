@@ -35,30 +35,6 @@
       "subdir": "skill-installer",
       "version": "unknown",
       "updated_at": "2026-02-10T16:35:30.922297"
-    },
-    "demo-test-skill": {
-      "source": "local",
-      "subdir": "",
-      "version": "unknown",
-      "updated_at": "2026-02-10T16:35:30.922297"
-    },
-    "test-skill": {
-      "source": "local",
-      "subdir": "",
-      "version": "unknown",
-      "updated_at": "2026-02-10T16:35:30.922297"
-    },
-    "file-manager-skill": {
-      "source": "local",
-      "subdir": "",
-      "version": "unknown",
-      "updated_at": "2026-02-10T16:35:30.922297"
-    },
-    "dupeguru-tool": {
-      "source": "local",
-      "subdir": "",
-      "version": "unknown",
-      "updated_at": "2026-02-10T16:35:30.922297"
     }
   }
 }
