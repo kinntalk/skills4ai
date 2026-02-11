@@ -4,13 +4,13 @@
       "source": "https://github.com/vercel-labs/skills.git",
       "subdir": "skills/find-skills",
       "version": "556555c2a7cf3ff5312db9b456e08749d6e5dc08",
-      "updated_at": "2026-02-11T12:01:24.146172"
+      "updated_at": "2026-02-10T17:17:13.811250"
     },
     "skill-creator": {
       "source": "https://github.com/anthropics/skills.git",
       "subdir": "skills/skill-creator",
-      "version": "1ed29a03dc852d30fa6ef2ca53a67dc2c2c2c563",
-      "updated_at": "2026-02-11T11:00:00.000000"
+      "version": "unknown",
+      "updated_at": "2026-02-10T16:30:00.000000"
     },
     "pdf-generation": {
       "source": "https://github.com/glebis/claude-skills.git",
