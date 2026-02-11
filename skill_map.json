@@ -35,6 +35,24 @@
       "description": "Search and discover Trae skills from repositories",
       "keywords": ["find", "search", "discover", "explore", "browse", "查找", "搜索", "发现", "探索", "浏览", "查找skill", "搜索skill", "发现skill"],
       "aliases": ["skill-search", "skill-finder", "skill-discover"]
+    },
+    "behavioral-product-design": {
+      "name": "behavioral-product-design",
+      "description": "Behavioral product design frameworks and psychology insights",
+      "keywords": ["behavioral", "psychology", "product", "design", "framework", "行为", "心理学", "产品设计", "框架"],
+      "aliases": ["lenny-skills", "behavior-design"]
+    },
+    "ui-ux-pro-max-skill": {
+      "name": "ui-ux-pro-max-skill",
+      "description": "Comprehensive UI/UX design capabilities and stacks",
+      "keywords": ["ui", "ux", "design", "interface", "experience", "stack", "界面", "交互", "体验", "设计"],
+      "aliases": ["ui-ux", "pro-max"]
+    },
+    "claude-skills": {
+      "name": "claude-skills",
+      "description": "Collection of specialized roles including Product Manager and Designer",
+      "keywords": ["product", "manager", "designer", "role", "persona", "pm", "产品经理", "设计师", "角色"],
+      "aliases": ["product-roles", "claude-collection"]
     }
   },
   "detection_rules": {
@@ -58,7 +76,13 @@
       "png": "image-generation",
       "jpg": "image-generation",
       "markdown": ["image-generation", "pdf-generation"],
-      "skill": ["skill-creator", "skill-installer", "skill-auditor"]
+      "skill": ["skill-creator", "skill-installer", "skill-auditor"],
+      "behavioral": "behavioral-product-design",
+      "psychology": "behavioral-product-design",
+      "ui": ["ui-ux-pro-max-skill", "claude-skills"],
+      "ux": ["ui-ux-pro-max-skill", "claude-skills"],
+      "design": ["ui-ux-pro-max-skill", "claude-skills", "behavioral-product-design"],
+      "product": ["claude-skills", "behavioral-product-design"]
     }
   }
 }

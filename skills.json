@@ -35,6 +35,24 @@
       "subdir": "",
       "version": "unknown",
       "updated_at": "2026-02-10T16:35:30.922297"
+    },
+    "behavioral-product-design": {
+      "source": "https://github.com/refoundai/lenny-skills.git",
+      "subdir": "skills/behavioral-product-design",
+      "version": "280a57aa42fed3b6f35f51f0d9e71013b4c8ae74",
+      "updated_at": "2026-02-11T10:50:32.756563"
+    },
+    "ui-ux-pro-max-skill": {
+      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git",
+      "subdir": "",
+      "version": "875d216631db6ef5b4b7f02e913029bad2fc6b87",
+      "updated_at": "2026-02-11T10:52:01.042489"
+    },
+    "claude-skills": {
+      "source": "https://github.com/borghei/claude-skills.git",
+      "subdir": "",
+      "version": "83743269a1fc19278f18c12f682467e1e92f463b",
+      "updated_at": "2026-02-11T10:52:38.068723"
     }
   }
 }

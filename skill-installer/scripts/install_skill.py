@@ -83,7 +83,8 @@ def parse_source(source):
     # Short format: user/repo or user/repo/subdir
     parts = source.split('/')
     if len(parts) >= 2:
-        repo_url = f"https://github.com/{parts[0]}/{parts[1]}.git"
+        github_base = os.environ.get("GITHUB_URL", "https://github.com").rstrip("/")
+        repo_url = f"{github_base}/{parts[0]}/{parts[1]}.git"
         if len(parts) > 2:
             subdir = "/".join(parts[2:])
         return repo_url, subdir
@@ -143,7 +144,14 @@ def install_skill(source, dest_root, run_audit=True, force=False):
                 return False
             
         # Determine skill name (from subdir name or repo name)
-        skill_name = source_path.name
+        if subdir:
+            skill_name = Path(subdir).name
+        else:
+            # Extract from repo URL: https://github.com/user/repo.git -> repo
+            skill_name = repo_url.rstrip('/').split('/')[-1]
+            if skill_name.endswith('.git'):
+                skill_name = skill_name[:-4]
+
         dest_path = dest_root / skill_name
         
         if dest_path.exists():

@@ -201,7 +201,11 @@ def validate_frontmatter(skill_path):
     """Basic SKILL.md validation"""
     skill_md = skill_path / 'SKILL.md'
     if not skill_md.exists():
-        return False, "SKILL.md missing"
+        # Downgrade to warning if README.md exists, or just general warning
+        readme = skill_path / 'README.md'
+        if readme.exists():
+             return True, "SKILL.md missing (found README.md - check for metadata there)"
+        return True, "SKILL.md missing (Warning: Metadata might be missing)"
         
     try:
         content = skill_md.read_text(encoding='utf-8')

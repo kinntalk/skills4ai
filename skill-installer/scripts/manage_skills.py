@@ -74,10 +74,18 @@ def check_updates():
             print(f"{YELLOW}Skipping {name}: Missing source or version info.{RESET}")
             continue
 
+        # Handle GITHUB_URL override for checks
+        check_url = repo_url
+        if "github.com" in repo_url:
+            github_base = os.environ.get("GITHUB_URL", "").rstrip("/")
+            if github_base and "github.com" not in github_base:
+                # Replace https://github.com with mirror base
+                check_url = repo_url.replace("https://github.com", github_base)
+
         print(f"Checking {name}...", end='', flush=True)
         
         # Check remote HEAD using git ls-remote
-        remote_head = run_command(['git', 'ls-remote', repo_url, 'HEAD'], capture_output=True, errors='replace')
+        remote_head = run_command(['git', 'ls-remote', check_url, 'HEAD'], capture_output=True)
         if remote_head:
             remote_hash = remote_head.split()[0]
             if remote_hash != current_version:
@@ -135,28 +143,62 @@ def update_skill(name, force=False):
         return
     
     # Construct install source string
-    # Handle different URL formats:
-    # 1. Full GitHub URL: https://github.com/user/repo.git
-    # 2. Full GitHub URL without .git: https://github.com/user/repo
-    # 3. Short format: user/repo
-    # 4. With subdir: user/repo/subdir or https://github.com/user/repo/tree/main/subdir
+    # Simplified logic: Use the stored repo_url directly, or combine with subdir if needed.
+    # install_skill.py handles full URLs and GITHUB_URL env var correctly.
+    
     install_source = repo_url
     
+    # If we have a subdir and the URL doesn't already point to it (simplistic check)
+    # Actually, install_skill expects "url" and "subdir" separately logic OR "url/subdir" string
+    # But parse_source in install_skill splits by space or tries to guess.
+    # Best way is to reconstruct the "user/repo/subdir" format IF it was a github URL,
+    # OR just pass the full URL and let install_skill handle it?
+    # install_skill(source, ...) calls parse_source(source).
+    
+    # Let's try to be smart but robust.
+    # If it's a standard GitHub URL, we can rely on install_skill's env var logic if we pass the full URL.
+    # But install_skill's parse_source logic for full URLs is:
+    # if source.startswith("https://"): return source, ""
+    # Unless it has /tree/main/
+    
+    # So if we have a subdir, we MUST provide it in a way parse_source understands.
+    # Option A: "https://github.com/user/repo/tree/main/subdir"
+    # Option B: "user/repo/subdir"
+    
     if subdir:
-        # If we have a subdir, construct the appropriate source string
-        if "github.com" in repo_url:
-            # Remove .git suffix if present
-            clean_url = repo_url.rstrip('.git')
-            # Check if it's already a tree URL
-            if '/tree/' in clean_url:
-                install_source = clean_url
-            else:
-                # Construct: user/repo/subdir format for install_skill
-                clean_url = clean_url.replace("https://github.com/", "")
-                install_source = f"{clean_url}/{subdir}"
+        if "github.com" in repo_url and not "tree" in repo_url:
+             # Try to construct tree URL which install_skill parses correctly
+             if repo_url.endswith(".git"):
+                 install_source = f"{repo_url[:-4]}/tree/main/{subdir}"
+             else:
+                 install_source = f"{repo_url}/tree/main/{subdir}"
         else:
-            # Non-GitHub URL with subdir
-            install_source = f"{repo_url}/{subdir}"
+             # Fallback for non-github or already complex URLs
+             # This might fail if install_skill doesn't support "URL/subdir" pattern for custom git
+             # But install_skill only supports subdir for:
+             # 1. /tree/main/ (GitHub specific)
+             # 2. user/repo/subdir (GitHub specific short form)
+             
+             # If we are using a mirror, the short form "user/repo" logic in install_skill 
+             # uses GITHUB_URL env var. So converting back to short form is actually SAFEST
+             # if we want to respect the env var dynamically!
+             
+             if "github.com" in repo_url:
+                 # Extract user/repo
+                 # https://github.com/user/repo.git -> user/repo
+                 try:
+                     parts = repo_url.rstrip('/').split('/')
+                     if parts[-1].endswith('.git'):
+                         repo_name = parts[-1][:-4]
+                     else:
+                         repo_name = parts[-1]
+                     user_name = parts[-2]
+                     install_source = f"{user_name}/{repo_name}/{subdir}"
+                 except:
+                     # Fallback
+                     install_source = f"{repo_url} --subdir {subdir}" # Hypothetical, but install_skill doesn't support flags in source string
+                     # Actually, let's just use the tree format, it's safer for the parser
+                     install_source = f"{repo_url}/tree/main/{subdir}"
     
     print(f"Updating {name} from: {install_source}")
     
