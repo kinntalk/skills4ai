@@ -10,6 +10,23 @@ import json
 import datetime
 from pathlib import Path
 
+try:
+    from messages import *
+except ImportError:
+    try:
+        sys.path.append(str(Path(__file__).parent))
+        from messages import *
+    except ImportError:
+        GREEN = "\033[92m"
+        RED = "\033[91m"
+        YELLOW = "\033[93m"
+        BLUE = "\033[94m"
+        RESET = "\033[0m"
+        MSG_SYNCED_SUCCESS = f"{GREEN}Synced {{count}} skills to registry{RESET}"
+        MSG_REGISTRY_FILE = f"   Registry file: {{path}}"
+        MSG_SKILLS_LIST = f"\nSkills List:"
+        MSG_DRY_RUN = f"Dry run: Would sync {{count}} skills"
+
 SKILLS_DIR = Path(__file__).parent.parent.parent
 REGISTRY_FILE = SKILLS_DIR / 'skills.json'
 
@@ -21,38 +38,36 @@ def scan_skills():
         if not skill_dir.is_dir() or skill_dir.name.startswith('.'):
             continue
         
-        skill_md = skill_dir / 'SKILL.md'
-        if not skill_md.exists():
-            continue
-        
-        skill_name = skill_dir.name
-        
-        # 从 SKILL.md 读取元数据
-        source = "unknown"
-        subdir = ""
+        # Check for git repo to get version
         version = "unknown"
-        
-        try:
-            content = skill_md.read_text(encoding='utf-8')
-            # 尝试从 SKILL.md 提取 source 信息
-            if 'source:' in content.lower():
-                for line in content.split('\n'):
-                    if 'source:' in line.lower():
-                        source = line.split(':', 1)[1].strip()
-                        break
-        except Exception:
-            pass
+        source = "local"
+        subdir = ""
+        skill_name = skill_dir.name
         
         # 尝试从现有的 skills.json 获取信息（用于保留远程 skills 的版本信息）
         try:
-            with open(REGISTRY_FILE, 'r', encoding='utf-8') as f:
-                existing = json.load(f)
+            if REGISTRY_FILE.exists():
+                content = REGISTRY_FILE.read_text(encoding='utf-8')
+                existing = json.loads(content)
                 if skill_name in existing.get('skills', {}):
                     existing_info = existing['skills'][skill_name]
                     source = existing_info.get('source', source)
                     subdir = existing_info.get('subdir', subdir)
                     version = existing_info.get('version', version)
         except Exception:
+            pass
+            
+        # Try to update version from git if possible (and if it's a git repo)
+        try:
+            git_dir = skill_dir / '.git'
+            if git_dir.exists():
+                    # It's a git repo root
+                    import subprocess
+                    # Added errors='replace' for robustness against non-UTF8 output
+                    result = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=skill_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors='replace')
+                    if result.returncode == 0:
+                        version = result.stdout.strip()
+        except:
             pass
         
         skills[skill_name] = {
@@ -68,45 +83,32 @@ def sync_registry():
     """同步 skills.json"""
     skills = scan_skills()
     
-    # 读取现有的 skills.json 以保留远程 skills 的版本信息
-    try:
-        with open(REGISTRY_FILE, 'r', encoding='utf-8') as f:
-            existing = json.load(f)
-            existing_skills = existing.get('skills', {})
-            
-            # 保留远程 skills 的版本信息
-            for skill_name in skills:
-                if skill_name in existing_skills:
-                    existing_info = existing_skills[skill_name]
-                    if existing_info.get('source') != 'local':
-                        # 保留远程 skill 的版本信息
-                        skills[skill_name]['version'] = existing_info.get('version', 'unknown')
-                        skills[skill_name]['source'] = existing_info.get('source', 'unknown')
-                        skills[skill_name]['subdir'] = existing_info.get('subdir', '')
-    except Exception as e:
-        print(f"Warning: Could not read existing registry: {e}")
-    
     # 写入更新后的 skills.json
-    with open(REGISTRY_FILE, 'w', encoding='utf-8') as f:
-        json.dump({"skills": skills}, f, indent=2, ensure_ascii=False)
-    
-    print(f"✅ Synced {len(skills)} skills to registry")
-    print(f"   Registry file: {REGISTRY_FILE}")
+    try:
+        with open(REGISTRY_FILE, 'w', encoding='utf-8') as f:
+            json.dump({"skills": skills}, f, indent=2, ensure_ascii=False)
+        
+        print(MSG_SYNCED_SUCCESS.format(count=len(skills)))
+        print(MSG_REGISTRY_FILE.format(path=REGISTRY_FILE))
+    except Exception as e:
+        print(f"{RED}Error writing registry: {e}{RESET}")
+        return False
     
     # 列出所有 skills
-    print(f"\n📋 Skills List:")
+    print(MSG_SKILLS_LIST)
     print(f"{'Name':<30} {'Source':<40} {'Version':<12}")
     print("-" * 85)
     for name, info in sorted(skills.items()):
         source = info.get('source', 'unknown')
         version = info.get('version', 'unknown')[:7] if info.get('version') != 'unknown' else 'unknown'
         print(f"{name:<30} {source:<40} {version:<12}")
+    return True
 
 def list_skills():
     """列出所有已安装的 skills"""
     skills = scan_skills()
     
-    print(f"\n📋 Installed Skills:")
+    print(MSG_SKILLS_LIST)
     print(f"{'Name':<30} {'Source':<40} {'Version':<12}")
     print("-" * 85)
     for name, info in sorted(skills.items()):
@@ -129,7 +131,7 @@ def main():
     elif args.command == 'sync':
         if args.dry_run:
             skills = scan_skills()
-            print(f"🔍 Dry run: Would sync {len(skills)} skills")
+            print(MSG_DRY_RUN.format(count=len(skills)))
             for name, info in sorted(skills.items()):
                 print(f"  - {name}: {info.get('source', 'unknown')}")
         else:

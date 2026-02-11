@@ -14,12 +14,21 @@ import time
 import json
 import datetime
 from pathlib import Path
-
-# ANSI colors
-GREEN = "\033[92m"
-RED = "\033[91m"
-YELLOW = "\033[93m"
-RESET = "\033[0m"
+try:
+    from messages import *
+except ImportError:
+    # Fallback if messages.py not found in same dir (e.g. running from root)
+    try:
+        sys.path.append(str(Path(__file__).parent))
+        from messages import *
+    except ImportError:
+        # Minimal fallback constants if all else fails
+        GREEN = "\033[92m"
+        RED = "\033[91m"
+        YELLOW = "\033[93m"
+        RESET = "\033[0m"
+        MSG_COMMAND_FAILED = f"{RED}Command failed: {{error}}{RESET}"
+        MSG_STDERR = f"Stderr: {{stderr}}"
 
 def run_command(cmd, cwd=None, capture_output=False):
     """Run a shell command and check for errors"""
@@ -32,9 +41,9 @@ def run_command(cmd, cwd=None, capture_output=False):
             return True
     except subprocess.CalledProcessError as e:
         if not capture_output:
-            print(f"{RED}Command failed: {e}{RESET}")
+            print(MSG_COMMAND_FAILED.format(error=e))
             stderr = e.stderr.decode('utf-8', errors='replace') if hasattr(e.stderr, 'decode') else e.stderr
-            print(f"Stderr: {stderr}")
+            print(MSG_STDERR.format(stderr=stderr))
         return False
 
 def update_registry(dest_root, skill_name, repo_url, subdir, commit_hash):
@@ -47,7 +56,7 @@ def update_registry(dest_root, skill_name, repo_url, subdir, commit_hash):
             content = registry_path.read_text(encoding='utf-8')
             registry = json.loads(content)
         except Exception as e:
-            print(f"{YELLOW}Warning: Could not read existing skills.json: {e}. Creating new one.{RESET}")
+            print(MSG_REGISTRY_READ_ERROR.format(error=e))
 
     registry['skills'][skill_name] = {
         'source': repo_url,
@@ -58,9 +67,9 @@ def update_registry(dest_root, skill_name, repo_url, subdir, commit_hash):
     
     try:
         registry_path.write_text(json.dumps(registry, indent=2), encoding='utf-8')
-        print(f"📝 Updated skills registry at {registry_path}")
+        print(MSG_REGISTRY_UPDATED.format(path=registry_path))
     except Exception as e:
-        print(f"{RED}Error writing to skills.json: {e}{RESET}")
+        print(MSG_REGISTRY_WRITE_ERROR.format(error=e))
 
 def parse_source(source):
     """
@@ -95,31 +104,31 @@ def install_skill(source, dest_root, run_audit=True, force=False):
     dest_root = Path(dest_root)
     repo_url, subdir = parse_source(source)
     
-    print(f"📦 Installing from: {repo_url}")
+    print(MSG_INSTALLING.format(url=repo_url))
     if subdir:
-        print(f"   Subdirectory: {subdir}")
-    print(f"   To: {dest_root}")
+        print(MSG_SUBDIR.format(subdir=subdir))
+    print(MSG_DESTINATION.format(path=dest_root))
 
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
         
         # Clone repo
-        print(f"⬇️  Cloning repository...")
+        print(MSG_CLONING)
         max_retries = 3
         for attempt in range(max_retries):
             if run_command(['git', 'clone', '--depth', '1', repo_url, '.'], cwd=temp_path):
                 break
-            print(f"{YELLOW}Retry {attempt + 1}/{max_retries}...{RESET}")
+            print(MSG_RETRY.format(attempt=attempt + 1, max_retries=max_retries))
             time.sleep(2 ** attempt)
         else:
-            print(f"{RED}Failed to clone repository after {max_retries} attempts.{RESET}")
+            print(MSG_CLONE_FAILED.format(max_retries=max_retries))
             return False
             
         # Get commit hash
         commit_hash = run_command(['git', 'rev-parse', 'HEAD'], cwd=temp_path, capture_output=True)
         if not commit_hash:
             commit_hash = "unknown"
-        print(f"   Version: {commit_hash[:7]}")
+        print(MSG_VERSION.format(version=commit_hash[:7]))
 
         # Determine source path
         source_path = temp_path
@@ -133,14 +142,14 @@ def install_skill(source, dest_root, run_audit=True, force=False):
             for prefix in common_prefixes:
                 alt_path = temp_path / prefix / subdir.split('/')[-1]
                 if alt_path.exists():
-                    print(f"{YELLOW}Warning: Subdirectory '{subdir}' not found. Found at '{prefix}/{subdir.split('/')[-1]}' instead.{RESET}")
+                    print(MSG_SUBDIR_FOUND_ALT.format(subdir=subdir, alt_path=f"{prefix}/{subdir.split('/')[-1]}"))
                     source_path = alt_path
                     subdir = f"{prefix}/{subdir.split('/')[-1]}"
                     found = True
                     break
             
             if not found and not source_path.exists():
-                print(f"{RED}Error: Subdirectory '{subdir}' not found in repository.{RESET}")
+                print(MSG_SUBDIR_NOT_FOUND.format(subdir=subdir))
                 return False
             
         # Determine skill name (from subdir name or repo name)
@@ -155,20 +164,20 @@ def install_skill(source, dest_root, run_audit=True, force=False):
         dest_path = dest_root / skill_name
         
         if dest_path.exists():
-            print(f"{YELLOW}Warning: Destination '{dest_path}' already exists.{RESET}")
+            print(MSG_DEST_EXISTS.format(path=dest_path))
             if force:
-                print(f"{YELLOW}Force mode enabled. Overwriting...{RESET}")
+                print(MSG_FORCE_OVERWRITE)
                 shutil.rmtree(dest_path)
             else:
-                overwrite = input("Overwrite? (y/N): ").lower()
+                overwrite = input(MSG_OVERWRITE_PROMPT).lower()
                 if overwrite != 'y':
-                    print("Installation aborted.")
+                    print(MSG_INSTALL_ABORTED)
                     return False
                 shutil.rmtree(dest_path)
             
         # Move files
         shutil.copytree(source_path, dest_path)
-        print(f"{GREEN}✅ Installed '{skill_name}' to {dest_path}{RESET}")
+        print(MSG_INSTALLED_SUCCESS.format(name=skill_name, path=dest_path))
         
         # Update Registry
         update_registry(dest_root, skill_name, repo_url, subdir, commit_hash)
@@ -177,13 +186,13 @@ def install_skill(source, dest_root, run_audit=True, force=False):
         if run_audit:
             audit_script = Path(__file__).parent.parent.parent / 'skill-auditor' / 'scripts' / 'audit_skill.py'
             if audit_script.exists():
-                print(f"\n🔍 Running skill-auditor...")
+                print(MSG_AUDIT_RUNNING)
                 try:
                     subprocess.run([sys.executable, str(audit_script), str(dest_path)], check=True)
                 except subprocess.CalledProcessError as e:
-                    print(f"{YELLOW}Warning: Audit failed: {e}{RESET}")
+                    print(MSG_AUDIT_FAILED.format(error=e))
             else:
-                print(f"{YELLOW}Warning: skill-auditor not found. Skipping audit.{RESET}")
+                print(MSG_AUDIT_SKIPPED)
                 
     return True
 

@@ -22,15 +22,43 @@ except ImportError:
     print("Error: Could not import install_skill.py. Make sure it is in the same directory.")
     sys.exit(1)
 
-# ANSI colors
-GREEN = "\033[92m"
-RED = "\033[91m"
-YELLOW = "\033[93m"
-BLUE = "\033[94m"
-RESET = "\033[0m"
+from pathlib import Path
+
+try:
+    from messages import *
+except ImportError:
+    try:
+        sys.path.append(str(Path(__file__).parent))
+        from messages import *
+    except ImportError:
+        GREEN = "\033[92m"
+        RED = "\033[91m"
+        YELLOW = "\033[93m"
+        BLUE = "\033[94m"
+        CYAN = "\033[96m"
+        RESET = "\033[0m"
+        MSG_COMMAND_FAILED = f"{RED}Command failed: {{error}}{RESET}"
+        MSG_NO_SKILLS_REGISTRY = "No skills found in registry."
 
 SKILLS_DIR = Path(__file__).parent.parent.parent
 REGISTRY_FILE = SKILLS_DIR / 'skills.json'
+
+def run_command(cmd, cwd=None, capture_output=False):
+    """Run a shell command and check for errors"""
+    try:
+        if capture_output:
+            # Removed errors='replace' to avoid TypeError in older python versions if check is strict, 
+            # but usually run_command in manage_skills was copy-pasted. 
+            # Assuming standard subprocess usage.
+            result = subprocess.run(cmd, check=True, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors='replace')
+            return result.stdout.strip()
+        else:
+            subprocess.run(cmd, check=True, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            return True
+    except subprocess.CalledProcessError as e:
+        if not capture_output:
+            print(MSG_COMMAND_FAILED.format(error=e))
+        return False
 
 def load_registry():
     if not REGISTRY_FILE.exists():
@@ -45,10 +73,10 @@ def load_registry():
 def list_skills():
     skills = load_registry()
     if not skills:
-        print("No skills found in registry (skills.json).")
+        print(MSG_NO_SKILLS_REGISTRY)
         return
 
-    print(f"\n{BLUE}Installed Skills:{RESET}")
+    print(MSG_INSTALLED_HEADER)
     print(f"{'Name':<25} {'Version':<10} {'Source'}")
     print("-" * 60)
     for name, info in skills.items():
@@ -60,18 +88,18 @@ def list_skills():
 def check_updates():
     skills = load_registry()
     if not skills:
-        print("No skills found in registry.")
+        print(MSG_NO_SKILLS_REGISTRY)
         return
 
-    print(f"\n{BLUE}Checking for updates...{RESET}")
+    print(MSG_CHECKING_UPDATES)
     updates_available = []
-
+    
     for name, info in skills.items():
         repo_url = info.get('source')
         current_version = info.get('version')
         
         if not repo_url or not current_version or current_version == 'unknown':
-            print(f"{YELLOW}Skipping {name}: Missing source or version info.{RESET}")
+            print(MSG_SKIPPING_SKILL.format(name=name))
             continue
 
         # Handle GITHUB_URL override for checks
@@ -82,25 +110,26 @@ def check_updates():
                 # Replace https://github.com with mirror base
                 check_url = repo_url.replace("https://github.com", github_base)
 
-        print(f"Checking {name}...", end='', flush=True)
+        print(MSG_CHECKING_SKILL.format(name=name), end='', flush=True)
         
         # Check remote HEAD using git ls-remote
         remote_head = run_command(['git', 'ls-remote', check_url, 'HEAD'], capture_output=True)
         if remote_head:
             remote_hash = remote_head.split()[0]
             if remote_hash != current_version:
-                print(f" {GREEN}Update available!{RESET} ({current_version[:7]} -> {remote_hash[:7]})")
+                print(MSG_UPDATE_AVAILABLE.format(current=current_version[:7], remote=remote_hash[:7]))
                 updates_available.append(name)
             else:
-                print(f" {GREEN}Up to date.{RESET}")
+                print(MSG_UP_TO_DATE)
         else:
-            print(f" {RED}Failed to check remote.{RESET}")
-
+            print(MSG_CHECK_FAILED)
+            
     if updates_available:
-        print(f"\n{YELLOW}Updates available for: {', '.join(updates_available)}{RESET}")
-        print(f"Run 'python manage_skills.py update <name>' to update.")
+        skills_str = ", ".join(updates_available)
+        print(MSG_UPDATES_FOUND.format(skills=skills_str))
+        print(MSG_RUN_UPDATE_HINT)
     else:
-        print(f"\n{GREEN}All skills are up to date.{RESET}")
+        print(MSG_ALL_UP_TO_DATE)
 
 import shutil
 import time
@@ -121,17 +150,17 @@ def safe_rmtree(path, retries=5, delay=0.5):
             if i < retries - 1:
                 time.sleep(delay)
             else:
-                print(f"{RED}Error: Could not delete {path}. Is it in use?{RESET}")
+                print(MSG_DELETE_LOCKED.format(path=path))
                 return False
         except Exception as e:
-            print(f"{RED}Error deleting {path}: {e}{RESET}")
+            print(MSG_DELETE_ERROR.format(path=path, error=e))
             return False
     return False
 
 def update_skill(name, force=False):
     skills = load_registry()
     if name not in skills:
-        print(f"{RED}Error: Skill '{name}' not found in registry.{RESET}")
+        print(MSG_SKILL_NOT_FOUND.format(name=name))
         return
 
     info = skills[name]
@@ -139,7 +168,7 @@ def update_skill(name, force=False):
     subdir = info.get('subdir', '')
     
     if not repo_url or repo_url == 'local':
-        print(f"{YELLOW}Skipping {name}: Local skill or no source URL.{RESET}")
+        print(MSG_SKILL_LOCAL.format(name=name))
         return
     
     # Construct install source string
@@ -200,7 +229,7 @@ def update_skill(name, force=False):
                      # Actually, let's just use the tree format, it's safer for the parser
                      install_source = f"{repo_url}/tree/main/{subdir}"
     
-    print(f"Updating {name} from: {install_source}")
+    print(MSG_UPDATING_FROM.format(name=name, source=install_source))
     
     # Backup existing skill before update
     backup_path = SKILLS_DIR / f"{name}-backup"
@@ -212,9 +241,9 @@ def update_skill(name, force=False):
         
         try:
             skill_path.rename(backup_path)
-            print(f"{YELLOW}Backed up existing skill to {backup_path}{RESET}")
+            print(MSG_BACKUP_CREATED.format(path=backup_path))
         except Exception as e:
-            print(f"{RED}Error backing up skill: {e}{RESET}")
+            print(MSG_BACKUP_ERROR.format(error=e))
             return
     
     # Install the updated skill
@@ -222,22 +251,22 @@ def update_skill(name, force=False):
     success = install_skill(install_source, SKILLS_DIR, run_audit=True, force=force)
     
     if success:
-        print(f"{GREEN}Successfully updated {name}.{RESET}")
+        print(MSG_UPDATE_SUCCESS.format(name=name))
         # Clean up backup
         if backup_path.exists():
             safe_rmtree(backup_path)
-            print(f"{GREEN}Removed backup.{RESET}")
+            print(MSG_BACKUP_REMOVED)
     else:
-        print(f"{RED}Failed to update {name}. Restoring backup...{RESET}")
+        print(MSG_UPDATE_FAILED.format(name=name))
         if backup_path.exists():
             if skill_path.exists():
                 safe_rmtree(skill_path)
             
             try:
                 backup_path.rename(skill_path)
-                print(f"{GREEN}Restored previous version.{RESET}")
+                print(MSG_RESTORE_SUCCESS)
             except Exception as e:
-                print(f"{RED}Critical Error: Failed to restore backup! Manual intervention required at {backup_path}{RESET}")
+                print(MSG_RESTORE_FAILED.format(path=backup_path))
 
 def main():
     parser = argparse.ArgumentParser(description="Manage Trae skills")

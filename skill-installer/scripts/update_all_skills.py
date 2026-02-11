@@ -10,24 +10,50 @@ import datetime
 import subprocess
 from pathlib import Path
 
-# ANSI colors
-GREEN = "\033[92m"
-RED = "\033[91m"
-YELLOW = "\033[93m"
-BLUE = "\033[94m"
-CYAN = "\033[96m"
-RESET = "\033[0m"
+try:
+    from messages import *
+except ImportError:
+    try:
+        sys.path.append(str(Path(__file__).parent))
+        from messages import *
+    except ImportError:
+        # Fallback to simple ANSI colors if messages.py not available
+        GREEN = "\033[92m"
+        RED = "\033[91m"
+        YELLOW = "\033[93m"
+        BLUE = "\033[94m"
+        CYAN = "\033[96m"
+        RESET = "\033[0m"
+        
+        # Define simple icons as fallback
+        ICON_OK = "[OK]"
+        ICON_ERROR = "[X]"
+        ICON_UPDATE = "[UPDATE]"
+        ICON_WARN = "[!]"
+        
+        MSG_START_UPDATE = f"{BLUE}Starting skills update process{RESET}"
+        MSG_PHASE_CHECK = f"{CYAN}Phase 1: Checking for updates...{RESET}"
+        MSG_PHASE_UPDATE = f"{CYAN}Phase 2: Updating skills...{RESET}"
+        MSG_NO_UPDATES = f"\n{GREEN}No updates available.{RESET}"
+        MSG_FOUND_UPDATES = f"\n{CYAN}Found {{count}} skill(s) with updates:{RESET}"
+        MSG_FORCE_HINT = f"\n{YELLOW}Use --force to proceed with updates{RESET}"
+        MSG_UPDATE_SUMMARY = f"{BLUE}Update Summary{RESET}"
+        MSG_TOTAL_CHECKED = f"Total skills checked: {{count}}"
+        MSG_UPDATES_AVAILABLE_COUNT = f"Updates available: {{count}}"
+        MSG_SUCCESS_COUNT = f"{GREEN}Successfully updated: {{count}}{RESET}"
+        MSG_FAILED_COUNT = f"{RED}Failed to update: {{count}}{RESET}"
 
 SKILLS_DIR = Path(__file__).parent.parent.parent
 REGISTRY_FILE = SKILLS_DIR / 'skills.json'
 LOG_FILE = SKILLS_DIR / 'skills_update.log'
 BACKUPS_DIR = SKILLS_DIR / 'backups'
 
-def log_message(message):
+def log_message(message, end='\n', flush=False):
     """Log message to both console and log file"""
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # Only prefix with timestamp for log file, keep console output clean
     log_entry = f"[{timestamp}] {message}"
-    print(log_entry)
+    print(message, end=end, flush=flush)
     
     try:
         with open(LOG_FILE, 'a', encoding='utf-8') as f:
@@ -70,8 +96,15 @@ def check_for_update(skill_name, info):
     
     log_message(f"Checking {skill_name}...", end='', flush=True)
     
+    # Handle GITHUB_URL override for checks
+    check_url = repo_url
+    if "github.com" in repo_url:
+        github_base = os.environ.get("GITHUB_URL", "").rstrip("/")
+        if github_base and "github.com" not in github_base:
+            check_url = repo_url.replace("https://github.com", github_base)
+
     # Check remote HEAD using git ls-remote
-    remote_head = run_command(['git', 'ls-remote', repo_url, 'HEAD'], capture_output=True)
+    remote_head = run_command(['git', 'ls-remote', check_url, 'HEAD'], capture_output=True)
     if remote_head:
         remote_hash = remote_head.split()[0]
         if remote_hash != current_version:
@@ -141,10 +174,10 @@ def update_skill(skill_name, info, remote_hash, force=False):
     success = install_skill(install_source, SKILLS_DIR, run_audit=True, force=force)
     
     if success:
-        log_message(f"{GREEN}✅ Successfully updated {skill_name}{RESET}")
+        log_message(f"{GREEN}{ICON_OK} Successfully updated {skill_name}{RESET}")
         return True
     else:
-        log_message(f"{RED}❌ Failed to update {skill_name}{RESET}")
+        log_message(f"{RED}{ICON_ERROR} Failed to update {skill_name}{RESET}")
         # Restore backup if available
         if backup_path and backup_path.exists():
             try:
@@ -153,9 +186,9 @@ def update_skill(skill_name, info, remote_hash, force=False):
                 if skill_path.exists():
                     shutil.rmtree(skill_path)
                 shutil.copytree(backup_path, skill_path)
-                log_message(f"{GREEN}Restored backup for {skill_name}{RESET}")
+                log_message(f"{GREEN}{ICON_OK} Restored backup for {skill_name}{RESET}")
             except Exception as e:
-                log_message(f"{RED}Error restoring backup: {e}{RESET}")
+                log_message(f"{RED}{ICON_ERROR} Error restoring backup: {e}{RESET}")
         return False
 
 def cleanup_old_backups(skill_name, keep=5):
@@ -181,7 +214,7 @@ def cleanup_old_backups(skill_name, keep=5):
 def update_all_skills(force=False):
     """Update all skills that have updates available"""
     log_message(f"{BLUE}{'='*60}{RESET}")
-    log_message(f"{BLUE}Starting skills update process{RESET}")
+    log_message(MSG_START_UPDATE)
     log_message(f"{BLUE}{'='*60}{RESET}\n")
     
     skills = load_registry()
@@ -190,7 +223,7 @@ def update_all_skills(force=False):
         return
     
     # Check for updates
-    log_message(f"{CYAN}Phase 1: Checking for updates...{RESET}")
+    log_message(MSG_PHASE_CHECK)
     log_message(f"{'-'*60}")
     
     updates = []
@@ -200,19 +233,19 @@ def update_all_skills(force=False):
             updates.append((skill_name, info, remote_hash))
     
     if not updates:
-        log_message(f"\n{GREEN}No updates available.{RESET}")
+        log_message(MSG_NO_UPDATES)
         return
     
-    log_message(f"\n{CYAN}Found {len(updates)} skill(s) with updates:{RESET}")
+    log_message(MSG_FOUND_UPDATES.format(count=len(updates)))
     for skill_name, info, remote_hash in updates:
         log_message(f"  - {skill_name}: {info.get('version', 'unknown')[:7]} -> {remote_hash[:7]}")
     
     if not force:
-        log_message(f"\n{YELLOW}Use --force to proceed with updates{RESET}")
+        log_message(MSG_FORCE_HINT)
         return
     
     # Update skills
-    log_message(f"\n{CYAN}Phase 2: Updating skills...{RESET}")
+    log_message(MSG_PHASE_UPDATE)
     log_message(f"{'-'*60}")
     
     success_count = 0
@@ -228,13 +261,13 @@ def update_all_skills(force=False):
     
     # Summary
     log_message(f"\n{BLUE}{'='*60}{RESET}")
-    log_message(f"{BLUE}Update Summary{RESET}")
+    log_message(MSG_UPDATE_SUMMARY)
     log_message(f"{BLUE}{'='*60}{RESET}")
-    log_message(f"Total skills checked: {len(skills)}")
-    log_message(f"Updates available: {len(updates)}")
-    log_message(f"{GREEN}Successfully updated: {success_count}{RESET}")
+    log_message(MSG_TOTAL_CHECKED.format(count=len(skills)))
+    log_message(MSG_UPDATES_AVAILABLE_COUNT.format(count=len(updates)))
+    log_message(MSG_SUCCESS_COUNT.format(count=success_count))
     if failed_count > 0:
-        log_message(f"{RED}Failed to update: {failed_count}{RESET}")
+        log_message(MSG_FAILED_COUNT.format(count=failed_count))
     log_message(f"Log file: {LOG_FILE}")
     log_message(f"Backups directory: {BACKUPS_DIR}")
 
@@ -265,12 +298,12 @@ def main():
                 updates.append((skill_name, info, remote_hash))
         
         if not updates:
-            log_message(f"\n{GREEN}No updates available.{RESET}")
+            log_message(MSG_NO_UPDATES)
         else:
-            log_message(f"\n{CYAN}Found {len(updates)} skill(s) with updates:{RESET}")
+            log_message(MSG_FOUND_UPDATES.format(count=len(updates)))
             for skill_name, info, remote_hash in updates:
                 log_message(f"  - {skill_name}: {info.get('version', 'unknown')[:7]} -> {remote_hash[:7]}")
-            log_message(f"\n{YELLOW}Run with --force to apply updates{RESET}")
+            log_message(MSG_FORCE_HINT)
     else:
         # Update all skills
         update_all_skills(force=args.force)

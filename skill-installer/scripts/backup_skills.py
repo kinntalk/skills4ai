@@ -11,13 +11,34 @@ import zipfile
 import shutil
 from pathlib import Path
 
-# ANSI colors
-GREEN = "\033[92m"
-RED = "\033[91m"
-YELLOW = "\033[93m"
-BLUE = "\033[94m"
-CYAN = "\033[96m"
-RESET = "\033[0m"
+try:
+    from messages import *
+except ImportError:
+    try:
+        sys.path.append(str(Path(__file__).parent))
+        from messages import *
+    except ImportError:
+        GREEN = "\033[92m"
+        RED = "\033[91m"
+        YELLOW = "\033[93m"
+        BLUE = "\033[94m"
+        CYAN = "\033[96m"
+        RESET = "\033[0m"
+        MSG_BACKING_UP = f"{CYAN}Backing up {{name}}...{RESET}"
+        MSG_BACKING_UP_ALL = f"{CYAN}Backing up all skills...{RESET}"
+        MSG_BACKUP_SUCCESS = f"{GREEN}Backed up {{name}} to {{path}}{RESET}"
+        MSG_BACKUP_ALL_SUCCESS = f"{GREEN}Backed up all skills to {{path}}{RESET}"
+        MSG_BACKUP_SIZE = f"Backup size: {{size:.2f}} MB"
+        MSG_NO_BACKUPS = "No backups found."
+        MSG_AVAILABLE_BACKUPS = f"\n{BLUE}Available Backups:{RESET}"
+        MSG_RESTORING = f"{CYAN}Restoring from {{name}}...{RESET}"
+        MSG_RESTORE_CANCELLED = "Restore cancelled."
+        MSG_RESTORE_CONFIRM = "This will overwrite existing skills. Continue? (y/N): "
+        MSG_RESTORE_SKILL_EXISTS = f"Skill '{{name}}' already exists. Overwrite? (y/N): "
+        MSG_RESTORED_SINGLE = f"{GREEN}Restored {{name}}{RESET}"
+        MSG_RESTORED_ALL = f"{GREEN}Restored all skills{RESET}"
+        MSG_CLEANING_BACKUPS = f"{CYAN}Cleaning up old backups (keeping {{keep}} most recent)...{RESET}"
+        MSG_REMOVED_BACKUP = f"{GREEN}Removed: {{name}}{RESET}"
 
 SKILLS_DIR = Path(__file__).parent.parent.parent
 REGISTRY_FILE = SKILLS_DIR / 'skills.json'
@@ -65,7 +86,7 @@ def create_backup(skill_name=None, output_dir=None):
         backup_filename = f"{skill_name}_{timestamp}.zip"
         backup_path = backup_dir / backup_filename
         
-        print(f"{CYAN}Backing up {skill_name}...{RESET}")
+        print(MSG_BACKING_UP.format(name=skill_name))
         
         try:
             with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
@@ -77,7 +98,7 @@ def create_backup(skill_name=None, output_dir=None):
                         arcname = file_path.relative_to(skill_path)
                         zipf.write(file_path, arcname)
             
-            print(f"{GREEN}✅ Backed up {skill_name} to {backup_path}{RESET}")
+            print(MSG_BACKUP_SUCCESS.format(name=skill_name, path=backup_path))
             return backup_path
         except Exception as e:
             print(f"{RED}Error backing up {skill_name}: {e}{RESET}")
@@ -92,7 +113,7 @@ def create_backup(skill_name=None, output_dir=None):
         backup_filename = f"all_skills_{timestamp}.zip"
         backup_path = backup_dir / backup_filename
         
-        print(f"{CYAN}Backing up all skills...{RESET}")
+        print(MSG_BACKING_UP_ALL)
         print(f"Total skills: {len(skills)}")
         
         try:
@@ -110,10 +131,11 @@ def create_backup(skill_name=None, output_dir=None):
                         if file_path.is_file():
                             arcname = Path(skill_name) / file_path.relative_to(skill_path)
                             zipf.write(file_path, arcname)
-                            print(f"  Added: {arcname}")
+                            # print(f"  Added: {arcname}")
             
-            print(f"{GREEN}✅ Backed up all skills to {backup_path}{RESET}")
-            print(f"Backup size: {backup_path.stat().st_size / 1024 / 1024:.2f} MB")
+            print(MSG_BACKUP_ALL_SUCCESS.format(path=backup_path))
+            size_mb = backup_path.stat().st_size / 1024 / 1024
+            print(MSG_BACKUP_SIZE.format(size=size_mb))
             return backup_path
         except Exception as e:
             print(f"{RED}Error backing up skills: {e}{RESET}")
@@ -122,16 +144,16 @@ def create_backup(skill_name=None, output_dir=None):
 def list_backups():
     """List all available backups"""
     if not BACKUPS_DIR.exists():
-        print("No backups found.")
+        print(MSG_NO_BACKUPS)
         return
     
     backups = sorted(BACKUPS_DIR.glob('*.zip'), key=lambda p: p.stat().st_mtime, reverse=True)
     
     if not backups:
-        print("No backups found.")
+        print(MSG_NO_BACKUPS)
         return
     
-    print(f"\n{BLUE}Available Backups:{RESET}")
+    print(MSG_AVAILABLE_BACKUPS)
     print(f"{'Filename':<40} {'Size (MB)':<15} {'Date'}")
     print("-" * 80)
     
@@ -157,7 +179,7 @@ def restore_backup(backup_file, skill_name=None, force=False):
         print(f"{RED}Error: Backup file not found: {backup_path}{RESET}")
         return False
     
-    print(f"{CYAN}Restoring from {backup_path.name}...{RESET}")
+    print(MSG_RESTORING.format(name=backup_path.name))
     
     try:
         with zipfile.ZipFile(backup_path, 'r') as zipf:
@@ -168,9 +190,9 @@ def restore_backup(backup_file, skill_name=None, force=False):
                 
                 if skill_path.exists():
                     if not force:
-                        confirm = input(f"Skill '{skill_name}' already exists. Overwrite? (y/N): ").lower()
+                        confirm = input(MSG_RESTORE_SKILL_EXISTS.format(name=skill_name)).lower()
                         if confirm != 'y':
-                            print("Restore cancelled.")
+                            print(MSG_RESTORE_CANCELLED)
                             return False
                     shutil.rmtree(skill_path)
                 
@@ -183,17 +205,17 @@ def restore_backup(backup_file, skill_name=None, force=False):
                 for file in skill_files:
                     zipf.extract(file, SKILLS_DIR)
                 
-                print(f"{GREEN}✅ Restored {skill_name}{RESET}")
+                print(MSG_RESTORED_SINGLE.format(name=skill_name))
             else:
                 # Restore all skills
                 if not force:
-                    confirm = input("This will overwrite existing skills. Continue? (y/N): ").lower()
+                    confirm = input(MSG_RESTORE_CONFIRM).lower()
                     if confirm != 'y':
-                        print("Restore cancelled.")
+                        print(MSG_RESTORE_CANCELLED)
                         return False
                 
                 zipf.extractall(SKILLS_DIR)
-                print(f"{GREEN}✅ Restored all skills{RESET}")
+                print(MSG_RESTORED_ALL)
         
         return True
     except Exception as e:
@@ -212,12 +234,12 @@ def cleanup_old_backups(keep=5):
         print("No old backups to clean up.")
         return
     
-    print(f"{CYAN}Cleaning up old backups (keeping {keep} most recent)...{RESET}")
+    print(MSG_CLEANING_BACKUPS.format(keep=keep))
     
     for old_backup in old_backups:
         try:
             old_backup.unlink()
-            print(f"{GREEN}Removed: {old_backup.name}{RESET}")
+            print(MSG_REMOVED_BACKUP.format(name=old_backup.name))
         except Exception as e:
             print(f"{RED}Error removing {old_backup.name}: {e}{RESET}")
 

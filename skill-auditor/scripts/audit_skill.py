@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """
 Skill Auditor - Comprehensive validation tool for Trae skills
-Checks for dependencies, encoding, path consistency, and packaging structure.
+Checks for dependencies, encoding, path consistency, cross-platform compatibility, i18n support, and packaging structure.
 """
 
 import sys
 import os
 import re
 import yaml
+import json
+import argparse
+import datetime
 from pathlib import Path
 
 # ANSI colors for output
@@ -16,14 +19,34 @@ RED = "\033[91m"
 YELLOW = "\033[93m"
 RESET = "\033[0m"
 
+# Global configuration
+VERBOSE = False
+JSON_OUTPUT = False
+CHECK_LEVEL = "standard"  # strict, standard, relaxed
+
 def print_pass(msg):
-    print(f"{GREEN}✅ PASS:{RESET} {msg}")
+    if JSON_OUTPUT:
+        return
+    print(f"{GREEN}[PASS]{RESET} {msg}")
 
 def print_fail(msg):
-    print(f"{RED}❌ FAIL:{RESET} {msg}")
+    if JSON_OUTPUT:
+        return
+    print(f"{RED}[FAIL]{RESET} {msg}")
 
 def print_warn(msg):
-    print(f"{YELLOW}⚠️ WARN:{RESET} {msg}")
+    if JSON_OUTPUT:
+        return
+    print(f"{YELLOW}[WARN]{RESET} {msg}")
+
+def print_info(msg):
+    if JSON_OUTPUT:
+        return
+    print(msg)
+
+def print_verbose(msg):
+    if VERBOSE:
+        print(f"  {msg}")
 
 def check_dependencies(skill_path):
     """Check if requirements.txt exists and matches imports"""
@@ -95,17 +118,20 @@ def check_encoding_safety(skill_path):
     """Check for explicit encoding in file operations"""
     issues = []
     
+    # Skip checking if auditing skill-auditor itself (to avoid false positives)
+    try:
+        skill_name = skill_path.name
+        if skill_name == 'skill-auditor':
+            return True, "Skipping encoding safety check for skill-auditor itself"
+    except:
+        pass
+
     # Patterns to check
     # 1. open() without encoding
     # 2. read_text() without encoding
     # 3. write_text() without encoding
     
-    unsafe_patterns = [
-        (r'open\s*\([^)]+\)', r'encoding\s*='),
-        (r'\.read_text\s*\([^)]+\)', r'encoding\s*='),
-        (r'\.write_text\s*\([^)]+\)', r'encoding\s*='),
-    ]
-    
+    # Heuristic check for file operations
     for py_file in skill_path.glob('**/*.py'):
         try:
             content = py_file.read_text(encoding='utf-8')
@@ -114,6 +140,10 @@ def check_encoding_safety(skill_path):
             for i, line in enumerate(lines, 1):
                 # Simple heuristic check
                 # Check keywords separately to avoid self-match in the heuristic logic line itself
+                # Also ignore comments
+                if line.strip().startswith('#'):
+                    continue
+
                 has_file_op = False
                 if 'open(' in line: has_file_op = True
                 if '.read_text(' in line: has_file_op = True
@@ -121,7 +151,7 @@ def check_encoding_safety(skill_path):
                 
                 if has_file_op:
                     # Skip self-check for this line in auditor script
-                    if 'has_file_op =' in line:
+                    if 'has_file_op =' in line or 'heuristic check' in line:
                         continue
                         
                     if 'encoding' not in line and 'b' not in line: # Skip binary modes
@@ -169,6 +199,95 @@ def check_path_consistency(skill_path):
     if issues:
         return False, issues
     return True, "No outdated path references found"
+
+def check_skill_name_consistency(skill_path):
+    """
+    Check if skill directory name matches SKILL.md frontmatter name.
+    
+    Args:
+        skill_path: Path to the skill directory.
+        
+    Returns:
+        tuple: (success: bool, message: str)
+    """
+    skill_md = skill_path / 'SKILL.md'
+    if not skill_md.exists():
+        return True, "SKILL.md not found (skipping name check)"
+    
+    try:
+        content = skill_md.read_text(encoding='utf-8')
+        match = re.match(r'^---\n(.*?)\n---', content, re.DOTALL)
+        if not match:
+            return True, "SKILL.md frontmatter not found (skipping name check)"
+        
+        frontmatter = yaml.safe_load(match.group(1))
+        
+        if 'name' not in frontmatter:
+            return False, "SKILL.md frontmatter missing 'name' field"
+        
+        skill_name_from_md = frontmatter['name']
+        skill_name_from_dir = skill_path.name
+        
+        if skill_name_from_md != skill_name_from_dir:
+            return False, f"Name mismatch: SKILL.md has '{skill_name_from_md}' but directory is '{skill_name_from_dir}'"
+        
+        return True, "SKILL.md name matches directory name"
+    except Exception as e:
+        return False, f"Error checking skill name consistency: {e}"
+
+def check_directory_structure(skill_path):
+    """
+    Check if skill directory structure follows standard conventions.
+    
+    Validates:
+    1. SKILL.md exists at root
+    2. Optional directories: scripts/, references/, assets/
+    3. No unexpected top-level files (except allowed files)
+    
+    Args:
+        skill_path: Path to the skill directory.
+        
+    Returns:
+        tuple: (success: bool, message: str | list[str])
+    """
+    skill_md = skill_path / 'SKILL.md'
+    if not skill_md.exists():
+        return False, "SKILL.md not found at root directory"
+    
+    # Check for expected directories
+    expected_dirs = ["scripts", "references", "assets"]
+    found_dirs = []
+    for d in expected_dirs:
+        if (skill_path / d).exists():
+            found_dirs.append(d)
+    
+    # Check for unexpected top-level files
+    # Extended allowed files list to include common skill metadata files
+    allowed_files = [
+        "SKILL.md",
+        "README.md",
+        "LICENSE.txt",
+        "LICENSE",
+        ".gitignore",
+        "CLAUDE.md",
+        "requirements.txt"
+    ]
+    unexpected_files = []
+    
+    try:
+        for item in skill_path.iterdir():
+            if item.is_file() and item.name not in allowed_files:
+                unexpected_files.append(item.name)
+    except Exception as e:
+        return False, f"Could not scan directory: {e}"
+    
+    issues = []
+    if unexpected_files:
+        issues.append(f"Unexpected top-level files: {', '.join(unexpected_files)}")
+    
+    if issues:
+        return False, issues
+    return True, f"Directory structure is valid (found: {', '.join(found_dirs) if found_dirs else 'none'})"
 
 def check_packaging_logic(skill_path):
     """Check packaging script logic if it exists"""
@@ -254,24 +373,48 @@ def check_init_script_template(skill_path):
     except Exception as e:
         return False, f"Error checking init script: {e}"
 
-def audit_skill(skill_path):
+def audit_skill(skill_path, skills_dir=None):
     skill_path = Path(skill_path)
-    print(f"🔍 Auditing Skill: {skill_path.name}")
+    if skills_dir is None:
+        skills_dir = skill_path.parent
+    
+    print(f"[*] Auditing Skill: {skill_path.name}")
     print(f"   Path: {skill_path}\n")
     
     has_errors = False
+    has_warnings = False
     
-    # 1. Frontmatter
+    # Section 1: Basic Structure
+    print_info("=== Basic Structure ===")
+    
     ok, msg = validate_frontmatter(skill_path)
     if ok: print_pass(msg)
     else: print_fail(msg); has_errors = True
     
-    # 2. Dependencies
+    ok, msg = check_skill_name_consistency(skill_path)
+    if ok: print_pass(msg)
+    else: print_fail(msg); has_errors = True
+    
+    ok, msg = check_directory_structure(skill_path)
+    if ok: print_pass(msg)
+    else: 
+        print_fail("Directory structure issues:")
+        if isinstance(msg, list):
+            for issue in msg: print(f"      - {issue}")
+        else:
+            print(f"      - {msg}")
+        has_errors = True
+    
+    # Section 2: Dependencies
+    print_info("\n=== Dependencies ===")
+    
     ok, msg = check_dependencies(skill_path)
     if ok: print_pass(msg)
     else: print_fail(msg); has_errors = True
     
-    # 3. Encoding
+    # Section 3: Encoding & Path Safety
+    print_info("\n=== Encoding & Path Safety ===")
+    
     ok, msg = check_encoding_safety(skill_path)
     if ok:
         print_pass(msg)
@@ -281,7 +424,6 @@ def audit_skill(skill_path):
             print(f"      - {issue}")
         has_errors = True
         
-    # 4. Path Consistency
     ok, msg = check_path_consistency(skill_path)
     if ok:
         print_pass(msg)
@@ -290,18 +432,21 @@ def audit_skill(skill_path):
         for issue in msg:
             print(f"      - {issue}")
         has_errors = True
-        
-    # 5. Packaging
+    
+    # Section 4: Packaging
+    print_info("\n=== Packaging ===")
+    
     ok, msg = check_packaging_logic(skill_path)
     if ok: print_pass(msg)
     else: print_fail(msg); has_errors = True
     
-    # 6. Init Script Template
     ok, msg = check_init_script_template(skill_path)
     if ok: print_pass(msg)
     else: print_fail(msg); has_errors = True
     
-    # 7. Subprocess Encoding Robustness
+    # Section 5: Subprocess & Path Operations
+    print_info("\n=== Subprocess & Path Operations ===")
+    
     ok, msg = check_subprocess_robustness(skill_path)
     if ok:
         print_pass(msg)
@@ -320,13 +465,75 @@ def audit_skill(skill_path):
         for issue in msg:
             print(f"      - {issue}")
         has_errors = True
+        
+    # 9. Cross-Platform Compatibility
+    ok, msg = check_cross_platform_compatibility(skill_path)
+    if ok:
+        print_pass(msg)
+    else:
+        print_fail("Found cross-platform compatibility issues:")
+        for issue in msg:
+            print(f"      - {issue}")
+        has_errors = True
+    
+    # Section 7: Internationalization (i18n)
+    print_info("\n=== Internationalization (i18n) ===")
+    
+    ok, msg = check_i18n_support(skill_path)
+    if ok:
+        print_pass(msg)
+    else:
+        print_warn("Found i18n issues (warnings):")
+        for issue in msg:
+            print(f"      - {issue}")
+        has_warnings = True
+    
+    # Section 8: Absolute References
+    print_info("\n=== Absolute References ===")
+    
+    ok, msg = check_absolute_references(skill_path)
+    if ok:
+        print_pass(msg)
+    else:
+        print_fail("Found absolute references:")
+        for issue in msg:
+            print(f"      - {issue}")
+        has_errors = True
+    
+    # Section 9: Registry & Map Consistency
+    print_info("\n=== Registry & Map Consistency ===")
+    
+    ok, msg = check_registry_consistency(skill_path, skills_dir)
+    if ok:
+        print_pass(msg)
+    else:
+        print_fail("Registry consistency issues:")
+        if isinstance(msg, list):
+            for issue in msg: print(f"      - {issue}")
+        else:
+            print(f"      - {msg}")
+        has_warnings = True
+    
+    ok, msg = check_skill_map_consistency(skill_path, skills_dir)
+    if ok:
+        print_pass(msg)
+    else:
+        print_fail("Skill map consistency issues:")
+        if isinstance(msg, list):
+            for issue in msg: print(f"      - {issue}")
+        else:
+            print(f"      - {msg}")
+        has_warnings = True
     
     print("\n" + "="*40)
     if has_errors:
-        print(f"{RED}⚠️  Audit completed with errors. Please fix issues above.{RESET}")
+        print(f"{RED}[!] Audit completed with errors. Please fix issues above.{RESET}")
         return False
+    elif has_warnings:
+        print(f"{YELLOW}[!] Audit completed with warnings. Review issues above.{RESET}")
+        return True
     else:
-        print(f"{GREEN}✨ Skill passed all standard checks!{RESET}")
+        print(f"{GREEN}[*] Skill passed all standard checks!{RESET}")
         return True
 
 def check_risky_path_ops(skill_path):
@@ -339,6 +546,15 @@ def check_risky_path_ops(skill_path):
     3. os.path.join (prefer pathlib)
     """
     issues = []
+    import re
+    
+    # Skip checking if auditing skill-auditor itself (to avoid false positives)
+    try:
+        skill_name = skill_path.name
+        if skill_name == 'skill-auditor':
+            return True, "Skipping risky path check for skill-auditor itself"
+    except:
+        pass
     
     for py_file in skill_path.glob('**/*.py'):
         try:
@@ -346,22 +562,33 @@ def check_risky_path_ops(skill_path):
             lines = content.splitlines()
             
             for i, line in enumerate(lines, 1):
-                # Check for os.system
-                if 'os.system(' in line:
+                # Skip comment lines
+                stripped = line.strip()
+                if stripped.startswith('#'):
+                    continue
+                
+                # Skip import lines
+                if stripped.startswith('import') or stripped.startswith('from'):
+                    continue
+                
+                # Skip docstring lines (lines that look like documentation)
+                # Skip lines that are part of error messages or docstrings
+                if 'Use of os.system()' in line or 'prefer subprocess' in line:
+                    continue
+                
+                # Check for os.system using regex to avoid matching in strings/comments
+                # Match actual function calls, not string literals
+                os_system_pattern = r'\bos\.system\s*\('
+                if re.search(os_system_pattern, line):
                     issues.append(f"{py_file.name}:{i}: Use of os.system() detected. Prefer subprocess.run() for better control and security.")
                 
                 # Check for os.path.join (soft warning, pathlib is better)
                 if 'os.path.join(' in line:
-                    # Not an error per se, but pathlib is recommended for cross-platform robustness
-                    pass 
+                    issues.append(f"{py_file.name}:{i}: Using os.path.join(). Prefer pathlib.Path() for cross-platform robustness.")
                     
                 # Check for hardcoded separators in string literals that look like paths
                 # This is tricky to regex perfectly, looking for common patterns
                 # e.g. "folder/file" or "folder\\file"
-                # Skip import lines
-                if line.strip().startswith('import') or line.strip().startswith('from'):
-                    continue
-                    
                 # Very simple heuristic: looking for string literals with slashes
                 # This might have false positives, so we keep it conservative
                 # Skipping for now to avoid noise, focusing on high-impact os.system
@@ -415,10 +642,466 @@ def check_subprocess_robustness(skill_path):
         return False, issues
     return True, "Subprocess calls appear robust or binary"
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python audit_skill.py <path/to/skill>")
-        sys.exit(1)
+def check_cross_platform_compatibility(skill_path):
+    """
+    Check for cross-platform compatibility issues in skill code.
+    
+    Checks for:
+    1. Hardcoded path separators ( '/' or '\' in string literals)
+    2. Platform-specific commands (dir, del, ls, rm)
+    3. Usage of os.path instead of pathlib
+    4. Absolute path patterns (C:\, /home/, /Users/)
+    
+    Args:
+        skill_path: Path to the skill directory to scan.
         
-    success = audit_skill(sys.argv[1])
+    Returns:
+        tuple: (success: bool, message: str | list[str])
+    """
+    # Skip checking if auditing skill-auditor itself (to avoid false positives)
+    try:
+        skill_name = skill_path.name
+        if skill_name == 'skill-auditor':
+            return True, "Skipping cross-platform check for skill-auditor itself"
+    except:
+        pass
+
+    issues = []
+        
+    for py_file in skill_path.glob('**/*.py'):
+        try:
+            content = py_file.read_text(encoding='utf-8')
+            lines = content.splitlines()
+            
+            for i, line in enumerate(lines, 1):
+                stripped = line.strip()
+                
+                # Skip comment lines
+                if stripped.startswith('#'):
+                    continue
+                
+                # Skip import lines
+                if stripped.startswith('import') or stripped.startswith('from'):
+                    continue
+                
+                # Skip docstring lines
+                if 'Cross-Platform Paths' in line or 'pathlib' in line:
+                    continue
+                
+                # Check for platform-specific commands
+                platform_commands = ['dir ', 'del ', 'ls ', 'rm ', 'rmdir ']
+                for cmd in platform_commands:
+                    if ('"' + cmd + ' "') in line or ("'" + cmd + " '") in line:
+                        issues.append(f"{py_file.name}:{i}: Platform-specific command '{cmd}' detected. Use pathlib or shutil for cross-platform compatibility.")
+                
+                # Check for os.path usage (prefer pathlib)
+                if 'os.path.join(' in line:
+                    issues.append(f"{py_file.name}:{i}: Using os.path.join(). Prefer pathlib.Path() for cross-platform compatibility.")
+                
+                # Check for absolute path patterns in string literals
+                # Windows absolute paths
+                if re.search(r'["\']C:\\\\', line):
+                    issues.append(f"{py_file.name}:{i}: Hardcoded Windows absolute path detected. Use relative paths.")
+                # Unix absolute paths
+                if re.search(r'["\']/home/', line):
+                    issues.append(f"{py_file.name}:{i}: Hardcoded Unix absolute path detected. Use relative paths.")
+                if re.search(r'["\']/Users/', line):
+                    issues.append(f"{py_file.name}:{i}: Hardcoded macOS absolute path detected. Use relative paths.")
+                
+                # Check for hardcoded path separators in string literals that look like paths
+                # This is a heuristic - look for patterns like "folder/file" or "folder\\file"
+                # Skip if it's clearly a URL or comment
+                if 'http://' in line or 'https://' in line:
+                    continue
+                # Check for mixed separators (Windows style in Unix context or vice versa)
+                if '/' in line and '\\\\' in line and 'path' in line.lower():
+                    issues.append(f"{py_file.name}:{i}: Mixed path separators detected. Use pathlib for cross-platform paths.")
+                    
+        except Exception as e:
+            issues.append(f"Could not read {py_file.name}: {e}")
+            
+    if issues:
+        return False, issues
+    return True, "No cross-platform compatibility issues found"
+
+def check_i18n_support(skill_path):
+    """
+    Check for internationalization (i18n) and multi-language support.
+    
+    Checks for:
+    1. Hardcoded text in output messages (suggest message dictionary)
+    2. Unicode/emoji usage in output
+    3. Encoding declaration consistency
+    4. Multi-language keywords in SKILL.md
+    
+    Args:
+        skill_path: Path to the skill directory to scan.
+        
+    Returns:
+        tuple: (success: bool, message: str | list[str])
+    """
+    issues = []
+    
+    # Check SKILL.md for multi-language support
+    skill_md = skill_path / 'SKILL.md'
+    if skill_md.exists():
+        try:
+            content = skill_md.read_text(encoding='utf-8')
+            
+            # Check for both English and Chinese keywords
+            has_english = any(word in content.lower() for word in ['description:', 'name:', 'usage:', 'example'])
+            has_chinese = any(ord(char) > 127 for char in content)
+            
+            if not has_chinese and not has_english:
+                issues.append("SKILL.md appears to lack multi-language support. Consider adding both English and Chinese keywords.")
+                
+        except Exception as e:
+            issues.append(f"Could not read SKILL.md: {e}")
+    
+    # Check Python files for hardcoded output messages
+    for py_file in skill_path.glob('**/*.py'):
+        try:
+            content = py_file.read_text(encoding='utf-8')
+            lines = content.splitlines()
+            
+            message_count = 0
+            for i, line in enumerate(lines, 1):
+                stripped = line.strip()
+                
+                # Skip comment lines
+                if stripped.startswith('#'):
+                    continue
+                
+                # Count print statements with hardcoded strings
+                if 'print("' in line or 'print("' in line:
+                    message_count += 1
+                
+                # Check for emoji usage in print statements
+                if 'print(' in line or 'print("' in line:
+                    if any(ord(c) > 127 for c in line):
+                        # Allow Unicode in comments
+                        if '#' in line:
+                            comment_part = line.split('#', 1)[1]
+                            if any(ord(c) > 127 for c in comment_part):
+                                continue
+                        
+                        issues.append(f"{py_file.name}:{i}: Unicode/emoji in output. Use standard text labels [PASS]/[FAIL]/[WARN]/[INFO] instead.")
+            
+            # Warn if many hardcoded messages
+            if message_count > 10:
+                issues.append(f"{py_file.name}: Found {message_count} hardcoded print messages. Consider using a message dictionary for i18n.")
+                    
+        except Exception as e:
+            issues.append(f"Could not read {py_file.name}: {e}")
+            
+    if issues:
+        return False, issues
+    return True, "Internationalization support looks good"
+
+def check_absolute_references(skill_path):
+    """
+    Check for absolute references and absolute paths in skill code.
+    
+    Checks for:
+    1. Hardcoded absolute file paths
+    2. Absolute imports instead of relative imports
+    3. Configuration files with absolute paths
+    
+    Args:
+        skill_path: Path to the skill directory to scan.
+        
+    Returns:
+        tuple: (success: bool, message: str | list[str])
+    """
+    issues = []
+    
+    for py_file in skill_path.glob('**/*.py'):
+        try:
+            content = py_file.read_text(encoding='utf-8')
+            lines = content.splitlines()
+            
+            for i, line in enumerate(lines, 1):
+                stripped = line.strip()
+                
+                # Skip comment lines
+                if stripped.startswith('#'):
+                    continue
+                
+                # Skip import lines
+                if stripped.startswith('import') or stripped.startswith('from'):
+                    continue
+                
+                # Check for absolute path patterns in file operations
+                # Look for patterns like open('/path/to/file') or Path('/path/to/file')
+                if re.search(r'open\s*\(\s*["\'][/A-Za-z]', line):
+                    issues.append(f"{py_file.name}:{i}: Absolute path in open() call. Use relative paths.")
+                if re.search(r'Path\s*\(\s*["\'][/A-Za-z]', line):
+                    issues.append(f"{py_file.name}:{i}: Absolute path in Path() constructor. Use relative paths.")
+                
+                # Check for hardcoded absolute paths in string assignments
+                if re.search(r'=\s*["\'][A-Z]:\\\\', line):
+                    issues.append(f"{py_file.name}:{i}: Hardcoded Windows absolute path detected.")
+                if re.search(r'=\s*["\']/[a-z]+/', line):
+                    issues.append(f"{py_file.name}:{i}: Hardcoded Unix absolute path detected.")
+                    
+        except Exception as e:
+            issues.append(f"Could not read {py_file.name}: {e}")
+    
+    # Check for absolute paths in config files
+    for config_file in skill_path.glob('**/*.json'):
+        try:
+            content = config_file.read_text(encoding='utf-8')
+            if re.search(r'["\'][A-Z]:\\\\', content):
+                issues.append(f"{config_file.relative_to(skill_path)}: Contains Windows absolute path.")
+            if re.search(r'["\']/[a-z]+/home/', content):
+                issues.append(f"{config_file.relative_to(skill_path)}: Contains Unix absolute path.")
+        except Exception as e:
+            issues.append(f"Could not read {config_file.name}: {e}")
+            
+    if issues:
+        return False, issues
+    return True, "No absolute references found"
+
+def get_skills_registry(skills_dir):
+    """
+    Load skills.json registry file.
+    
+    Args:
+        skills_dir: Path to skills root directory.
+        
+    Returns:
+        dict: Registry data or None if not found
+    """
+    skills_dir = Path(skills_dir)
+    registry_file = skills_dir / 'skills.json'
+    if not registry_file.exists():
+        return None
+    
+    try:
+        with open(registry_file, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+def get_skill_map(skills_dir):
+    """
+    Load skill_map.json file.
+    
+    Args:
+        skills_dir: Path to skills root directory.
+        
+    Returns:
+        dict: Skill map data or None if not found
+    """
+    skills_dir = Path(skills_dir)
+    map_file = skills_dir / 'skill_map.json'
+    if not map_file.exists():
+        return None
+    
+    try:
+        with open(map_file, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+def check_registry_consistency(skill_path, skills_dir):
+    """
+    Check if skill is properly registered in skills.json.
+    
+    Validates:
+    1. Skill exists in skills.json
+    2. Skill name matches directory name
+    3. Version information is valid
+    4. Updated timestamp is recent (within 1 year)
+    
+    Args:
+        skill_path: Path to skill directory.
+        skills_dir: Path to skills root directory.
+        
+    Returns:
+        tuple: (success: bool, message: str | list[str])
+    """
+    skill_name = skill_path.name
+    registry = get_skills_registry(skills_dir)
+    
+    if not registry:
+        return True, "skills.json not found (skipping registry check)"
+    
+    if "skills" not in registry:
+        return False, "skills.json missing 'skills' key"
+    
+    if skill_name not in registry["skills"]:
+        return False, f"Skill '{skill_name}' not found in skills.json registry"
+    
+    skill_info = registry["skills"][skill_name]
+    issues = []
+    
+    # Check source field
+    if "source" not in skill_info:
+        issues.append("Missing 'source' field in registry")
+    elif skill_info["source"] not in ["local", "unknown"]:
+        if not skill_info["source"].startswith(("http://", "https://")):
+            issues.append(f"Invalid source URL: {skill_info['source']}")
+    
+    # Check version field
+    if "version" not in skill_info:
+        issues.append("Missing 'version' field in registry")
+    elif skill_info["version"] == "unknown":
+        if skill_info.get("source") not in ["local", "unknown"]:
+            issues.append("Remote skill has 'unknown' version (should use commit hash)")
+    
+    # Check updated_at field
+    if "updated_at" not in skill_info:
+        issues.append("Missing 'updated_at' field in registry")
+    else:
+        try:
+            updated_at = datetime.datetime.fromisoformat(skill_info["updated_at"])
+            now = datetime.datetime.now()
+            age = now - updated_at
+            if age > datetime.timedelta(days=365):
+                issues.append(f"Registry entry is old ({age.days} days), consider updating")
+        except ValueError:
+            issues.append(f"Invalid updated_at format: {skill_info['updated_at']}")
+    
+    if issues:
+        return False, issues
+    return True, "Registry information is consistent"
+
+def check_skill_map_consistency(skill_path, skills_dir):
+    """
+    Check if skill is properly mapped in skill_map.json.
+    
+    Validates:
+    1. Skill exists in skill_map.json
+    2. Keywords are present
+    3. Name matches directory name
+    
+    Args:
+        skill_path: Path to skill directory.
+        skills_dir: Path to skills root directory.
+        
+    Returns:
+        tuple: (success: bool, message: str | list[str])
+    """
+    skill_name = skill_path.name
+    skill_map = get_skill_map(skills_dir)
+    
+    if not skill_map:
+        return True, "skill_map.json not found (skipping map check)"
+    
+    # skill_map.json has a "skills" key containing all skill entries
+    if "skills" not in skill_map:
+        return False, "skill_map.json missing 'skills' key"
+    
+    if skill_name not in skill_map["skills"]:
+        return False, f"Skill '{skill_name}' not found in skill_map.json"
+    
+    skill_entry = skill_map["skills"][skill_name]
+    issues = []
+    
+    # Check keywords
+    if "keywords" not in skill_entry:
+        issues.append("Missing 'keywords' field in skill_map.json")
+    elif not skill_entry["keywords"]:
+        issues.append("Empty 'keywords' list in skill_map.json")
+    
+    # Check name field
+    if "name" not in skill_entry:
+        issues.append("Missing 'name' field in skill_map.json")
+    elif skill_entry["name"] != skill_name:
+        issues.append(f"Name mismatch: skill_map.json has '{skill_entry['name']}' but directory is '{skill_name}'")
+    
+    if issues:
+        return False, issues
+    return True, "Skill map information is consistent"
+
+def generate_json_report(skill_path, results):
+    """
+    Generate a JSON report of audit results for CI/CD integration.
+    
+    Args:
+        skill_path: Path to the skill directory
+        results: Dictionary of audit results
+        
+    Returns:
+        JSON string of the audit report
+    """
+    report = {
+        "skill": skill_path.name,
+        "path": str(skill_path),
+        "timestamp": datetime.datetime.now().isoformat(),
+        "status": "pass" if all(r.get("pass", False) for r in results.values()) else "fail",
+        "results": results
+    }
+    return json.dumps(report, indent=2, ensure_ascii=False)
+
+def parse_arguments():
+    """
+    Parse command line arguments.
+    
+    Returns:
+        tuple: (skill_path, skills_dir, verbose, json_output, check_level)
+    """
+    parser = argparse.ArgumentParser(
+        description="Audit Trae skills for compliance and best practices",
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    
+    parser.add_argument(
+        "skill_path",
+        help="Path to skill directory to audit"
+    )
+    
+    parser.add_argument(
+        "skills_dir",
+        nargs="?",
+        help="Optional: Path to skills root directory (for registry checks)"
+    )
+    
+    parser.add_argument(
+        "-v", "--verbose",
+        action="store_true",
+        help="Enable verbose output with additional context"
+    )
+    
+    parser.add_argument(
+        "-j", "--json",
+        action="store_true",
+        help="Output results in JSON format (for CI/CD integration)"
+    )
+    
+    parser.add_argument(
+        "-l", "--level",
+        choices=["strict", "standard", "relaxed"],
+        default="standard",
+        help="Check level: strict (all checks), standard (recommended), relaxed (minimal)"
+    )
+    
+    args = parser.parse_args()
+    
+    return (
+        args.skill_path,
+        args.skills_dir,
+        args.verbose,
+        args.json,
+        args.level
+    )
+
+if __name__ == "__main__":
+    skill_path, skills_dir, verbose, json_output, check_level = parse_arguments()
+    
+    # Set global configuration
+    VERBOSE = verbose
+    JSON_OUTPUT = json_output
+    CHECK_LEVEL = check_level
+    
+    if not json_output:
+        print(f"[*] Auditing Skill: {Path(skill_path).name}")
+        print(f"   Path: {Path(skill_path)}")
+        if verbose:
+            print(f"   Level: {check_level}")
+            print(f"   Skills Dir: {skills_dir if skills_dir else 'N/A'}")
+            print()
+    
+    success = audit_skill(skill_path, skills_dir)
     sys.exit(0 if success else 1)

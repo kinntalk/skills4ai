@@ -120,45 +120,31 @@ Examples:
 **Any unneeded directories can be deleted.** Not every skill requires all three types of resources.
 """
 
-EXAMPLE_SCRIPT = '''#!/usr/bin/env python3
-"""
-Example helper script for {skill_name}
-
-This is a placeholder script that can be executed directly.
-Replace with actual implementation or delete if not needed.
-
-Best Practices for Skill Scripts:
-1. Cross-Platform Paths: Use `pathlib` for all file paths.
-   from pathlib import Path
-   path = Path("folder") / "file.txt"
-
-2. Safe Temporary Files: Use UUIDs for temp files to avoid encoding/locking issues on Windows.
-   import uuid
-   temp_name = f"temp_{{uuid.uuid4().hex}}.txt"
-
-3. Async File Operations: When calling external tools, verify file existence before proceeding.
-   import time
-   # Retry loop for file creation
-   for i in range(10):
-       if Path(output_file).exists(): break
-       time.sleep(0.5)
-
-Example real scripts from other skills:
-- pdf/scripts/fill_fillable_fields.py - Fills PDF form fields
-- pdf/scripts/convert_pdf_to_images.py - Converts PDF pages to images
-"""
-
-import sys
+EXAMPLE_SCRIPT = """import sys
+import os
 from pathlib import Path
 
+# Add project root to sys.path if needed
+# sys.path.append(str(Path(__file__).parent.parent))
+
 def main():
-    print("This is an example script for {skill_name}")
-    # TODO: Add actual script logic here
-    # This could be data processing, file conversion, API calls, etc.
+    \"\"\"
+    Example main function for {skill_name}.
+    \"\"\"
+    
+    # Example: Working with paths safely
+    current_dir = Path(__file__).parent
+    assets_dir = current_dir.parent / 'assets'
+    
+    print(f"Running {{Path(__file__).name}}...")
+    print(f"Assets directory: {{assets_dir}}")
+    
+    # Your logic here
+    pass
 
 if __name__ == "__main__":
     main()
-'''
+"""
 
 EXAMPLE_REFERENCE = """# Reference Documentation for {skill_title}
 
@@ -223,6 +209,13 @@ Note: This is a text placeholder. Actual assets can be any file type.
 """
 
 
+EXAMPLE_REQUIREMENTS = """# Dependencies for {skill_name}
+# Add your Python dependencies here (one per line)
+# Example:
+# requests>=2.25.0
+# pandas>=1.2.0
+"""
+
 def title_case_skill_name(skill_name):
     """Convert hyphenated skill name to Title Case for display."""
     return ' '.join(word.capitalize() for word in skill_name.split('-'))
@@ -244,15 +237,15 @@ def init_skill(skill_name, path):
 
     # Check if directory already exists
     if skill_dir.exists():
-        print(f"❌ Error: Skill directory already exists: {skill_dir}")
+        print(f"[FAIL] Error: Skill directory already exists: {skill_dir}")
         return None
 
     # Create skill directory
     try:
         skill_dir.mkdir(parents=True, exist_ok=False)
-        print(f"✅ Created skill directory: {skill_dir}")
+        print(f"[PASS] Created skill directory: {skill_dir}")
     except Exception as e:
-        print(f"❌ Error creating directory: {e}")
+        print(f"[FAIL] Error creating directory: {e}")
         return None
 
     # Create SKILL.md from template
@@ -265,9 +258,9 @@ def init_skill(skill_name, path):
     skill_md_path = skill_dir / 'SKILL.md'
     try:
         skill_md_path.write_text(skill_content, encoding='utf-8')
-        print("✅ Created SKILL.md")
+        print("[PASS] Created SKILL.md")
     except Exception as e:
-        print(f"❌ Error creating SKILL.md: {e}")
+        print(f"[FAIL] Error creating SKILL.md: {e}")
         return None
 
     # Create resource directories with example files
@@ -279,27 +272,32 @@ def init_skill(skill_name, path):
         example_script.write_text(EXAMPLE_SCRIPT.format(skill_name=skill_name), encoding='utf-8')
         if os.name != 'nt':
             example_script.chmod(0o755)
-        print("✅ Created scripts/example.py")
+        print("[PASS] Created scripts/example.py")
+
+        # Create scripts/requirements.txt
+        requirements_file = scripts_dir / 'requirements.txt'
+        requirements_file.write_text(EXAMPLE_REQUIREMENTS.format(skill_name=skill_name), encoding='utf-8')
+        print("[PASS] Created scripts/requirements.txt")
 
         # Create references/ directory with example reference doc
         references_dir = skill_dir / 'references'
         references_dir.mkdir(exist_ok=True)
         example_reference = references_dir / 'api_reference.md'
         example_reference.write_text(EXAMPLE_REFERENCE.format(skill_title=skill_title), encoding='utf-8')
-        print("✅ Created references/api_reference.md")
+        print("[PASS] Created references/api_reference.md")
 
         # Create assets/ directory with example asset placeholder
         assets_dir = skill_dir / 'assets'
         assets_dir.mkdir(exist_ok=True)
         example_asset = assets_dir / 'example_asset.txt'
         example_asset.write_text(EXAMPLE_ASSET, encoding='utf-8')
-        print("✅ Created assets/example_asset.txt")
+        print("[PASS] Created assets/example_asset.txt")
     except Exception as e:
-        print(f"❌ Error creating resource directories: {e}")
+        print(f"[FAIL] Error creating resource directories: {e}")
         return None
 
     # Print next steps
-    print(f"\n✅ Skill '{skill_name}' initialized successfully at {skill_dir}")
+    print(f"\n[PASS] Skill '{skill_name}' initialized successfully at {skill_dir}")
     print("\nNext steps:")
     print("1. Edit SKILL.md to complete the TODO items and update the description")
     print("2. Customize or delete the example files in scripts/, references/, and assets/")
@@ -325,7 +323,7 @@ def main():
     skill_name = sys.argv[1]
     path = sys.argv[3]
 
-    print(f"🚀 Initializing skill: {skill_name}")
+    print(f"[*] Initializing skill: {skill_name}")
     print(f"   Location: {path}")
     print()
 
