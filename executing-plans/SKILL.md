@@ -1,6 +1,22 @@
 ---
 name: executing-plans
 description: Use when you have a written implementation plan to execute in a separate session with review checkpoints
+keywords:
+  - execute
+  - plan
+  - implementation
+  - task
+  - checkpoint
+  - review
+  - 执行
+  - 计划
+  - 任务
+  - 检查点
+  - 审查
+aliases:
+  - executing-plans
+  - execute-plan
+  - plan-execution
 ---
 
 # Executing Plans

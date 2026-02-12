@@ -1,6 +1,23 @@
 ---
 name: finishing-a-development-branch
 description: Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup
+keywords:
+  - finish
+  - merge
+  - pr
+  - pull-request
+  - branch
+  - cleanup
+  - integrate
+  - 完成
+  - 合并
+  - 分支
+  - 清理
+  - 集成
+aliases:
+  - finishing-a-development-branch
+  - finish-branch
+  - merge-branch
 ---
 
 # Finishing a Development Branch

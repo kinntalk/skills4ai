@@ -1,6 +1,26 @@
 ---
 name: systematic-debugging
 description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes
+keywords:
+  - debug
+  - bug
+  - fix
+  - error
+  - failure
+  - issue
+  - troubleshoot
+  - root-cause
+  - investigate
+  - 调试
+  - 修复
+  - 错误
+  - 问题
+  - 故障排除
+  - 根因分析
+aliases:
+  - systematic-debugging
+  - debug
+  - troubleshooting
 ---
 
 # Systematic Debugging

@@ -13,6 +13,8 @@ Examples:
 
 import sys
 import os
+import json
+import datetime
 from pathlib import Path
 try:
     from messages import *
@@ -254,6 +256,62 @@ def title_case_skill_name(skill_name):
     """Convert hyphenated skill name to Title Case for display."""
     return ' '.join(word.capitalize() for word in skill_name.split('-'))
 
+def update_registry(dest_root, skill_name):
+    """Update the skills.json registry file with new skill."""
+    registry_path = dest_root / 'skills.json'
+    registry = {'skills': {}}
+    
+    if registry_path.exists():
+        try:
+            content = registry_path.read_text(encoding='utf-8')
+            registry = json.loads(content)
+        except Exception as e:
+            print(f"Warning: Could not read skills.json: {e}")
+    
+    registry['skills'][skill_name] = {
+        'source': 'local',
+        'subdir': '',
+        'version': 'unknown',
+        'updated_at': datetime.datetime.now().isoformat()
+    }
+    
+    try:
+        registry_path.write_text(json.dumps(registry, indent=2), encoding='utf-8')
+        print(f"Updated skills.json with '{skill_name}'")
+    except Exception as e:
+        print(f"Warning: Could not update skills.json: {e}")
+
+def update_skill_map(dest_root, skill_name, skill_dir):
+    """Update the skill_map.json file with new skill metadata."""
+    skill_map_path = dest_root / 'skill_map.json'
+    skill_map = {'skills': {}, 'detection_rules': {'priority_order': [], 'exact_match': {}, 'partial_match': {}}}
+    
+    if skill_map_path.exists():
+        try:
+            content = skill_map_path.read_text(encoding='utf-8')
+            skill_map = json.loads(content)
+        except Exception as e:
+            print(f"Warning: Could not read skill_map.json: {e}")
+    
+    skill_map['skills'][skill_name] = {
+        'name': skill_name,
+        'description': f"TODO: Add description for {skill_name}",
+        'keywords': [skill_name.replace('-', ' ')],
+        'aliases': [skill_name]
+    }
+    
+    if skill_name not in skill_map['detection_rules']['priority_order']:
+        skill_map['detection_rules']['priority_order'].append(skill_name)
+    
+    skill_name_lower = skill_name.lower().replace('-', ' ')
+    skill_map['detection_rules']['exact_match'][skill_name_lower] = skill_name
+    
+    try:
+        skill_map_path.write_text(json.dumps(skill_map, indent=2, ensure_ascii=False), encoding='utf-8')
+        print(f"Updated skill_map.json with '{skill_name}'")
+    except Exception as e:
+        print(f"Warning: Could not update skill_map.json: {e}")
+
 def init_skill(skill_name, path):
     """
     Initialize a new skill directory with template SKILL.md.
@@ -328,6 +386,11 @@ def init_skill(skill_name, path):
     except Exception as e:
         print(MSG_RESOURCE_ERROR.format(e=e))
         return None
+
+    # Update skills.json and skill_map.json
+    dest_root = Path(path).resolve()
+    update_registry(dest_root, skill_name)
+    update_skill_map(dest_root, skill_name, skill_dir)
 
     # Print next steps
     print(MSG_INIT_SUCCESS.format(skill_name=skill_name, skill_dir=skill_dir))

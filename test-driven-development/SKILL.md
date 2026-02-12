@@ -1,6 +1,21 @@
 ---
 name: test-driven-development
 description: Use when implementing any feature or bugfix, before writing implementation code
+keywords:
+  - tdd
+  - test
+  - testing
+  - unit-test
+  - red-green
+  - refactor
+  - 测试驱动开发
+  - 单元测试
+  - 测试
+  - 重构
+aliases:
+  - tdd
+  - test-driven
+  - test-first
 ---
 
 # Test-Driven Development (TDD)

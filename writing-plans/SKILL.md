@@ -1,6 +1,24 @@
 ---
 name: writing-plans
 description: Use when you have a spec or requirements for a multi-step task, before touching code
+keywords:
+  - plan
+  - planning
+  - spec
+  - requirements
+  - implementation
+  - design
+  - architecture
+  - 计划
+  - 规划
+  - 规格
+  - 需求
+  - 实现
+  - 架构
+aliases:
+  - writing-plans
+  - planning
+  - implementation-plan
 ---
 
 # Writing Plans

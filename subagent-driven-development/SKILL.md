@@ -1,6 +1,22 @@
 ---
 name: subagent-driven-development
 description: Use when executing implementation plans with independent tasks in the current session
+keywords:
+  - subagent
+  - agent
+  - parallel
+  - task
+  - execute
+  - plan
+  - 子代理
+  - 并行
+  - 任务
+  - 执行
+  - 计划
+aliases:
+  - subagent-driven-development
+  - subagent
+  - agent-driven
 ---
 
 # Subagent-Driven Development

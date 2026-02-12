@@ -240,8 +240,235 @@
     "test-driven-development": {
       "name": "test-driven-development",
       "description": "Use when implementing any feature or bugfix, before writing implementation code",
-      "keywords": [],
-      "aliases": []
+      "keywords": [
+        "tdd",
+        "test",
+        "testing",
+        "unit-test",
+        "red-green",
+        "refactor",
+        "测试驱动开发",
+        "单元测试",
+        "测试",
+        "重构"
+      ],
+      "aliases": [
+        "tdd",
+        "test-driven",
+        "test-first"
+      ]
+    },
+    "brainstorming": {
+      "name": "brainstorming",
+      "description": "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.",
+      "keywords": [
+        "brainstorm",
+        "idea",
+        "design",
+        "creative",
+        "explore",
+        "requirements",
+        "intent",
+        "feature",
+        "component",
+        "functionality",
+        "头脑风暴",
+        "创意",
+        "设计",
+        "探索",
+        "需求",
+        "功能",
+        "组件"
+      ],
+      "aliases": [
+        "brainstorming",
+        "idea-exploration",
+        "design-thinking"
+      ]
+    },
+    "systematic-debugging": {
+      "name": "systematic-debugging",
+      "description": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
+      "keywords": [
+        "debug",
+        "bug",
+        "fix",
+        "error",
+        "failure",
+        "issue",
+        "troubleshoot",
+        "root-cause",
+        "investigate",
+        "调试",
+        "修复",
+        "错误",
+        "问题",
+        "故障排除",
+        "根因分析"
+      ],
+      "aliases": [
+        "systematic-debugging",
+        "debug",
+        "troubleshooting"
+      ]
+    },
+    "writing-plans": {
+      "name": "writing-plans",
+      "description": "Use when you have a spec or requirements for a multi-step task, before touching code",
+      "keywords": [
+        "plan",
+        "planning",
+        "spec",
+        "requirements",
+        "implementation",
+        "design",
+        "architecture",
+        "计划",
+        "规划",
+        "规格",
+        "需求",
+        "实现",
+        "架构"
+      ],
+      "aliases": [
+        "writing-plans",
+        "planning",
+        "implementation-plan"
+      ]
+    },
+    "executing-plans": {
+      "name": "executing-plans",
+      "description": "Use when you have a written implementation plan to execute in a separate session with review checkpoints",
+      "keywords": [
+        "execute",
+        "plan",
+        "implementation",
+        "task",
+        "checkpoint",
+        "review",
+        "执行",
+        "计划",
+        "任务",
+        "检查点",
+        "审查"
+      ],
+      "aliases": [
+        "executing-plans",
+        "execute-plan",
+        "plan-execution"
+      ]
+    },
+    "requesting-code-review": {
+      "name": "requesting-code-review",
+      "description": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements",
+      "keywords": [
+        "review",
+        "code-review",
+        "pr",
+        "pull-request",
+        "merge",
+        "quality",
+        "verify",
+        "代码审查",
+        "审查",
+        "合并",
+        "质量",
+        "验证"
+      ],
+      "aliases": [
+        "requesting-code-review",
+        "code-review",
+        "review"
+      ]
+    },
+    "using-git-worktrees": {
+      "name": "using-git-worktrees",
+      "description": "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification",
+      "keywords": [
+        "git",
+        "worktree",
+        "branch",
+        "isolate",
+        "workspace",
+        "feature",
+        "git分支",
+        "工作树",
+        "隔离",
+        "工作区"
+      ],
+      "aliases": [
+        "using-git-worktrees",
+        "git-worktree",
+        "worktree"
+      ]
+    },
+    "verification-before-completion": {
+      "name": "verification-before-completion",
+      "description": "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always",
+      "keywords": [
+        "verify",
+        "verification",
+        "complete",
+        "done",
+        "test",
+        "check",
+        "evidence",
+        "验证",
+        "完成",
+        "检查",
+        "测试",
+        "证据"
+      ],
+      "aliases": [
+        "verification-before-completion",
+        "verify",
+        "completion-check"
+      ]
+    },
+    "finishing-a-development-branch": {
+      "name": "finishing-a-development-branch",
+      "description": "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup",
+      "keywords": [
+        "finish",
+        "merge",
+        "pr",
+        "pull-request",
+        "branch",
+        "cleanup",
+        "integrate",
+        "完成",
+        "合并",
+        "分支",
+        "清理",
+        "集成"
+      ],
+      "aliases": [
+        "finishing-a-development-branch",
+        "finish-branch",
+        "merge-branch"
+      ]
+    },
+    "subagent-driven-development": {
+      "name": "subagent-driven-development",
+      "description": "Use when executing implementation plans with independent tasks in the current session",
+      "keywords": [
+        "subagent",
+        "agent",
+        "parallel",
+        "task",
+        "execute",
+        "plan",
+        "子代理",
+        "并行",
+        "任务",
+        "执行",
+        "计划"
+      ],
+      "aliases": [
+        "subagent-driven-development",
+        "subagent",
+        "agent-driven"
+      ]
     }
   },
   "detection_rules": {
@@ -252,7 +479,16 @@
       "skill-installer",
       "skill-auditor",
       "find-skills",
-      "test-driven-development"
+      "brainstorming",
+      "systematic-debugging",
+      "test-driven-development",
+      "writing-plans",
+      "executing-plans",
+      "requesting-code-review",
+      "using-git-worktrees",
+      "verification-before-completion",
+      "finishing-a-development-branch",
+      "subagent-driven-development"
     ],
     "exact_match": {
       "image": "image-generation",
@@ -261,6 +497,16 @@
       "install": "skill-installer",
       "audit": "skill-auditor",
       "find": "find-skills",
+      "brainstorm": "brainstorming",
+      "debug": "systematic-debugging",
+      "tdd": "test-driven-development",
+      "plan": "writing-plans",
+      "execute": "executing-plans",
+      "review": "requesting-code-review",
+      "worktree": "using-git-worktrees",
+      "verify": "verification-before-completion",
+      "finish": "finishing-a-development-branch",
+      "subagent": "subagent-driven-development",
       "test driven development": "test-driven-development",
       "skill creator": "skill-creator",
       "new": "skill-creator",
@@ -309,6 +555,47 @@
       "脚手架": "skill-creator",
       "结构": "skill-creator",
       "设置": "skill-creator",
+      "idea": "brainstorming",
+      "design": [
+        "brainstorming",
+        "ui-ux-pro-max-skill",
+        "claude-skills",
+        "behavioral-product-design"
+      ],
+      "creative": "brainstorming",
+      "头脑风暴": "brainstorming",
+      "创意": "brainstorming",
+      "bug": "systematic-debugging",
+      "fix": "systematic-debugging",
+      "error": "systematic-debugging",
+      "调试": "systematic-debugging",
+      "修复": "systematic-debugging",
+      "test": "test-driven-development",
+      "testing": "test-driven-development",
+      "unit-test": "test-driven-development",
+      "测试": "test-driven-development",
+      "planning": "writing-plans",
+      "spec": "writing-plans",
+      "requirements": "writing-plans",
+      "计划": "writing-plans",
+      "规划": "writing-plans",
+      "execution": "executing-plans",
+      "执行": "executing-plans",
+      "code-review": "requesting-code-review",
+      "pr": "requesting-code-review",
+      "pull-request": [
+        "requesting-code-review",
+        "finishing-a-development-branch"
+      ],
+      "merge": "finishing-a-development-branch",
+      "git": "using-git-worktrees",
+      "branch": "using-git-worktrees",
+      "isolate": "using-git-worktrees",
+      "done": "verification-before-completion",
+      "complete": "verification-before-completion",
+      "验证": "verification-before-completion",
+      "agent": "subagent-driven-development",
+      "parallel": "subagent-driven-development",
       "behavioral": "behavioral-product-design",
       "psychology": "behavioral-product-design",
       "ui": [
@@ -318,11 +605,6 @@
       "ux": [
         "ui-ux-pro-max-skill",
         "claude-skills"
-      ],
-      "design": [
-        "ui-ux-pro-max-skill",
-        "claude-skills",
-        "behavioral-product-design"
       ],
       "product": [
         "claude-skills",

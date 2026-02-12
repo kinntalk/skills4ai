@@ -103,6 +103,19 @@ def update_skill_map(dest_root, skill_name, skill_path):
         except Exception as e:
             print(f"Warning: Could not parse SKILL.md: {e}")
     
+    # Auto-generate keywords if not provided
+    if not keywords:
+        keywords = [skill_name.replace('-', ' ')]
+        if description:
+            words = re.findall(r'\b[a-zA-Z]{4,}\b', description.lower())
+            keywords.extend(words[:5])
+        keywords = list(set(keywords))
+        print(f"Auto-generated keywords for '{skill_name}': {keywords}")
+    
+    # Auto-generate aliases if not provided
+    if not aliases:
+        aliases = [skill_name]
+    
     # Add skill to skill_map
     skill_map['skills'][skill_name] = {
         'name': skill_name,

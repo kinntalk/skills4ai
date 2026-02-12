@@ -1,6 +1,23 @@
 ---
 name: requesting-code-review
 description: Use when completing tasks, implementing major features, or before merging to verify work meets requirements
+keywords:
+  - review
+  - code-review
+  - pr
+  - pull-request
+  - merge
+  - quality
+  - verify
+  - 代码审查
+  - 审查
+  - 合并
+  - 质量
+  - 验证
+aliases:
+  - requesting-code-review
+  - code-review
+  - review
 ---
 
 # Requesting Code Review
