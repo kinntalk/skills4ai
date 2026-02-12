@@ -1,2 +1,3 @@
-# No external python packages required
+# Python packages required
+PyYAML>=6.0
 # Git CLI is used via subprocess

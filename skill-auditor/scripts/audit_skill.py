@@ -13,39 +13,69 @@ import argparse
 import datetime
 from pathlib import Path
 
-# ANSI colors for output
+# Initialize ANSI color support
+def init_color_support():
+    """Initialize color output support based on terminal capabilities."""
+    # Check if we're on Windows and if ANSI colors are supported
+    if sys.platform == 'win32':
+        # Windows 10+ supports ANSI colors in modern terminals
+        # Enable for Windows if not already enabled
+        try:
+            import ctypes
+            kernel32 = ctypes.windll.kernel32
+            # Enable ANSI colors on Windows console
+            kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
+            return True
+        except:
+            # Fallback: assume no color support
+            return False
+    return True
+
+# Global color support flag
+COLOR_SUPPORT = init_color_support()
+
+# ANSI colors for output (only used if supported)
 GREEN = "\033[92m"
 RED = "\033[91m"
 YELLOW = "\033[93m"
 RESET = "\033[0m"
 
-# Global configuration
-VERBOSE = False
-JSON_OUTPUT = False
-CHECK_LEVEL = "standard"  # strict, standard, relaxed
+# Text labels for terminals without color support
+PASS_TEXT = "[PASS]"
+FAIL_TEXT = "[FAIL]"
+WARN_TEXT = "[WARN]"
 
-def print_pass(msg):
-    if JSON_OUTPUT:
+def print_pass(msg, json_output=False):
+    if json_output:
         return
-    print(f"{GREEN}[PASS]{RESET} {msg}")
+    if COLOR_SUPPORT:
+        print(f"{GREEN}{PASS_TEXT}{RESET} {msg}")
+    else:
+        print(f"{PASS_TEXT} {msg}")
 
-def print_fail(msg):
-    if JSON_OUTPUT:
+def print_fail(msg, json_output=False):
+    if json_output:
         return
-    print(f"{RED}[FAIL]{RESET} {msg}")
+    if COLOR_SUPPORT:
+        print(f"{RED}{FAIL_TEXT}{RESET} {msg}")
+    else:
+        print(f"{FAIL_TEXT} {msg}")
 
-def print_warn(msg):
-    if JSON_OUTPUT:
+def print_warn(msg, json_output=False):
+    if json_output:
         return
-    print(f"{YELLOW}[WARN]{RESET} {msg}")
+    if COLOR_SUPPORT:
+        print(f"{YELLOW}{WARN_TEXT}{RESET} {msg}")
+    else:
+        print(f"{WARN_TEXT} {msg}")
 
-def print_info(msg):
-    if JSON_OUTPUT:
+def print_info(msg, json_output=False):
+    if json_output:
         return
     print(msg)
 
-def print_verbose(msg):
-    if VERBOSE:
+def print_verbose(msg, verbose=False):
+    if verbose:
         print(f"  {msg}")
 
 def check_dependencies(skill_path):
@@ -118,14 +148,6 @@ def check_encoding_safety(skill_path):
     """Check for explicit encoding in file operations"""
     issues = []
     
-    # Skip checking if auditing skill-auditor itself (to avoid false positives)
-    try:
-        skill_name = skill_path.name
-        if skill_name == 'skill-auditor':
-            return True, "Skipping encoding safety check for skill-auditor itself"
-    except:
-        pass
-
     # Patterns to check
     # 1. open() without encoding
     # 2. read_text() without encoding
@@ -168,14 +190,6 @@ def check_encoding_safety(skill_path):
 def check_path_consistency(skill_path):
     """Check for outdated .codebuddy paths"""
     issues = []
-    
-    # Skip checking if auditing skill-auditor itself (to avoid false positives)
-    try:
-        skill_name = skill_path.name
-        if skill_name == 'skill-auditor':
-            return True, "Skipping path consistency check for skill-auditor itself"
-    except:
-        pass
     
     for file_path in skill_path.glob('**/*'):
         if not file_path.is_file():
@@ -263,6 +277,7 @@ def check_directory_structure(skill_path):
     
     # Check for unexpected top-level files
     # Extended allowed files list to include common skill metadata files
+    # and reference documentation files
     allowed_files = [
         "SKILL.md",
         "README.md",
@@ -272,12 +287,25 @@ def check_directory_structure(skill_path):
         "CLAUDE.md",
         "requirements.txt"
     ]
+    # Patterns for reference documentation files
+    ref_doc_patterns = [
+        r'.*-tracing\.md$',
+        r'.*-guide\.md$',
+        r'.*-protocol\.md$',
+        r'.*-reference\.md$',
+        r'.*-workflow\.md$',
+        r'.*-methodology\.md$'
+    ]
     unexpected_files = []
     
     try:
         for item in skill_path.iterdir():
-            if item.is_file() and item.name not in allowed_files:
-                unexpected_files.append(item.name)
+            if item.is_file():
+                if item.name not in allowed_files:
+                    # Check if it matches reference documentation patterns
+                    is_ref_doc = any(re.match(pattern, item.name) for pattern in ref_doc_patterns)
+                    if not is_ref_doc:
+                        unexpected_files.append(item.name)
     except Exception as e:
         return False, f"Could not scan directory: {e}"
     
@@ -373,7 +401,20 @@ def check_init_script_template(skill_path):
     except Exception as e:
         return False, f"Error checking init script: {e}"
 
-def audit_skill(skill_path, skills_dir=None):
+def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, check_level="standard"):
+    """
+    Audit a skill for compliance and best practices.
+    
+    Args:
+        skill_path: Path to the skill directory to audit
+        skills_dir: Optional path to skills root directory (for registry checks)
+        verbose: Enable verbose output
+        json_output: Output in JSON format
+        check_level: Check strictness - "strict", "standard", or "relaxed"
+    
+    Returns:
+        bool: True if audit passed, False otherwise
+    """
     skill_path = Path(skill_path)
     if skills_dir is None:
         skills_dir = skill_path.parent
@@ -384,21 +425,33 @@ def audit_skill(skill_path, skills_dir=None):
     has_errors = False
     has_warnings = False
     
+    # Determine which checks to run based on check_level
+    # strict: all checks, i18n issues are errors
+    # standard: all checks, i18n issues are warnings (default)
+    # relaxed: only critical checks (basic structure, dependencies, encoding)
+    run_i18n_checks = check_level in ["strict", "standard"]
+    run_packaging_checks = check_level in ["strict", "standard"]
+    run_subprocess_checks = check_level in ["strict", "standard"]
+    run_cross_platform_checks = check_level in ["strict", "standard"]
+    run_absolute_ref_checks = check_level in ["strict", "standard"]
+    run_registry_checks = check_level in ["strict", "standard"]
+    i18n_as_error = (check_level == "strict")
+    
     # Section 1: Basic Structure
-    print_info("=== Basic Structure ===")
+    print_info("=== Basic Structure ===", json_output)
     
     ok, msg = validate_frontmatter(skill_path)
-    if ok: print_pass(msg)
-    else: print_fail(msg); has_errors = True
+    if ok: print_pass(msg, json_output)
+    else: print_fail(msg, json_output); has_errors = True
     
     ok, msg = check_skill_name_consistency(skill_path)
-    if ok: print_pass(msg)
-    else: print_fail(msg); has_errors = True
+    if ok: print_pass(msg, json_output)
+    else: print_fail(msg, json_output); has_errors = True
     
     ok, msg = check_directory_structure(skill_path)
-    if ok: print_pass(msg)
+    if ok: print_pass(msg, json_output)
     else: 
-        print_fail("Directory structure issues:")
+        print_fail("Directory structure issues:", json_output)
         if isinstance(msg, list):
             for issue in msg: print(f"      - {issue}")
         else:
@@ -406,124 +459,133 @@ def audit_skill(skill_path, skills_dir=None):
         has_errors = True
     
     # Section 2: Dependencies
-    print_info("\n=== Dependencies ===")
+    print_info("\n=== Dependencies ===", json_output)
     
     ok, msg = check_dependencies(skill_path)
-    if ok: print_pass(msg)
-    else: print_fail(msg); has_errors = True
+    if ok: print_pass(msg, json_output)
+    else: print_fail(msg, json_output); has_errors = True
     
     # Section 3: Encoding & Path Safety
-    print_info("\n=== Encoding & Path Safety ===")
+    print_info("\n=== Encoding & Path Safety ===", json_output)
     
     ok, msg = check_encoding_safety(skill_path)
     if ok:
-        print_pass(msg)
+        print_pass(msg, json_output)
     else:
-        print_fail("Found potential encoding issues:")
+        print_fail("Found potential encoding issues:", json_output)
         for issue in msg:
             print(f"      - {issue}")
         has_errors = True
         
     ok, msg = check_path_consistency(skill_path)
     if ok:
-        print_pass(msg)
+        print_pass(msg, json_output)
     else:
-        print_fail("Found path inconsistencies:")
+        print_fail("Found path inconsistencies:", json_output)
         for issue in msg:
             print(f"      - {issue}")
         has_errors = True
     
     # Section 4: Packaging
-    print_info("\n=== Packaging ===")
-    
-    ok, msg = check_packaging_logic(skill_path)
-    if ok: print_pass(msg)
-    else: print_fail(msg); has_errors = True
-    
-    ok, msg = check_init_script_template(skill_path)
-    if ok: print_pass(msg)
-    else: print_fail(msg); has_errors = True
+    if run_packaging_checks:
+        print_info("\n=== Packaging ===", json_output)
+        
+        ok, msg = check_packaging_logic(skill_path)
+        if ok: print_pass(msg, json_output)
+        else: print_fail(msg, json_output); has_errors = True
+        
+        ok, msg = check_init_script_template(skill_path)
+        if ok: print_pass(msg, json_output)
+        else: print_fail(msg, json_output); has_errors = True
     
     # Section 5: Subprocess & Path Operations
-    print_info("\n=== Subprocess & Path Operations ===")
-    
-    ok, msg = check_subprocess_robustness(skill_path)
-    if ok:
-        print_pass(msg)
-    else:
-        print_fail("Found potential subprocess robustness issues:")
-        for issue in msg:
-            print(f"      - {issue}")
-        has_errors = True
-    
-    # 8. Risky Path Operations
-    ok, msg = check_risky_path_ops(skill_path)
-    if ok:
-        print_pass(msg)
-    else:
-        print_fail("Found potential risky path operations:")
-        for issue in msg:
-            print(f"      - {issue}")
-        has_errors = True
+    if run_subprocess_checks:
+        print_info("\n=== Subprocess & Path Operations ===", json_output)
         
-    # 9. Cross-Platform Compatibility
-    ok, msg = check_cross_platform_compatibility(skill_path)
-    if ok:
-        print_pass(msg)
-    else:
-        print_fail("Found cross-platform compatibility issues:")
-        for issue in msg:
-            print(f"      - {issue}")
-        has_errors = True
+        ok, msg = check_subprocess_robustness(skill_path)
+        if ok:
+            print_pass(msg, json_output)
+        else:
+            print_fail("Found potential subprocess robustness issues:", json_output)
+            for issue in msg:
+                print(f"      - {issue}")
+            has_errors = True
+        
+        ok, msg = check_risky_path_ops(skill_path)
+        if ok:
+            print_pass(msg, json_output)
+        else:
+            print_fail("Found potential risky path operations:", json_output)
+            for issue in msg:
+                print(f"      - {issue}")
+            has_errors = True
+    
+    # Cross-Platform Compatibility
+    if run_cross_platform_checks:
+        ok, msg = check_cross_platform_compatibility(skill_path)
+        if ok:
+            print_pass(msg, json_output)
+        else:
+            print_fail("Found cross-platform compatibility issues:", json_output)
+            for issue in msg:
+                print(f"      - {issue}")
+            has_errors = True
     
     # Section 7: Internationalization (i18n)
-    print_info("\n=== Internationalization (i18n) ===")
-    
-    ok, msg = check_i18n_support(skill_path)
-    if ok:
-        print_pass(msg)
-    else:
-        print_warn("Found i18n issues (warnings):")
-        for issue in msg:
-            print(f"      - {issue}")
-        has_warnings = True
+    if run_i18n_checks:
+        print_info("\n=== Internationalization (i18n) ===", json_output)
+        
+        ok, msg = check_i18n_support(skill_path)
+        if ok:
+            print_pass(msg, json_output)
+        else:
+            if i18n_as_error:
+                print_fail("Found i18n issues:", json_output)
+                has_errors = True
+            else:
+                print_warn("Found i18n issues (warnings):", json_output)
+                has_warnings = True
+            for issue in msg:
+                print(f"      - {issue}")
     
     # Section 8: Absolute References
-    print_info("\n=== Absolute References ===")
-    
-    ok, msg = check_absolute_references(skill_path)
-    if ok:
-        print_pass(msg)
-    else:
-        print_fail("Found absolute references:")
-        for issue in msg:
-            print(f"      - {issue}")
-        has_errors = True
+    if run_absolute_ref_checks:
+        print_info("\n=== Absolute References ===", json_output)
+        
+        ok, msg = check_absolute_references(skill_path)
+        if ok:
+            print_pass(msg, json_output)
+        else:
+            print_fail("Found absolute references:", json_output)
+            for issue in msg:
+                print(f"      - {issue}")
+            has_errors = True
     
     # Section 9: Registry & Map Consistency
-    print_info("\n=== Registry & Map Consistency ===")
-    
-    ok, msg = check_registry_consistency(skill_path, skills_dir)
-    if ok:
-        print_pass(msg)
-    else:
-        print_fail("Registry consistency issues:")
-        if isinstance(msg, list):
-            for issue in msg: print(f"      - {issue}")
+    if run_registry_checks:
+        print_info("\n=== Registry & Map Consistency ===", json_output)
+        
+        ok, msg = check_registry_consistency(skill_path, skills_dir)
+        if ok:
+            print_pass(msg, json_output)
         else:
-            print(f"      - {msg}")
-        has_warnings = True
-    
-    ok, msg = check_skill_map_consistency(skill_path, skills_dir)
-    if ok:
-        print_pass(msg)
-    else:
-        print_fail("Skill map consistency issues:")
-        if isinstance(msg, list):
-            for issue in msg: print(f"      - {issue}")
+            print_fail("Registry consistency issues:", json_output)
+            if isinstance(msg, list):
+                for issue in msg: print(f"      - {issue}")
+            else:
+                print(f"      - {msg}")
+            has_warnings = True
+        
+        ok, msg = check_skill_map_consistency(skill_path, skills_dir)
+        if ok:
+            print_pass(msg, json_output)
         else:
-            print(f"      - {msg}")
-        has_warnings = True
+            print_fail("Skill map consistency issues:", json_output)
+            if isinstance(msg, list):
+                for issue in msg: print(f"      - {issue}")
+            else:
+                print(f"      - {msg}")
+            has_warnings = True
     
     print("\n" + "="*40)
     if has_errors:
@@ -547,14 +609,6 @@ def check_risky_path_ops(skill_path):
     """
     issues = []
     import re
-    
-    # Skip checking if auditing skill-auditor itself (to avoid false positives)
-    try:
-        skill_name = skill_path.name
-        if skill_name == 'skill-auditor':
-            return True, "Skipping risky path check for skill-auditor itself"
-    except:
-        pass
     
     for py_file in skill_path.glob('**/*.py'):
         try:
@@ -650,7 +704,7 @@ def check_cross_platform_compatibility(skill_path):
     1. Hardcoded path separators ( '/' or '\' in string literals)
     2. Platform-specific commands (dir, del, ls, rm)
     3. Usage of os.path instead of pathlib
-    4. Absolute path patterns (C:\, /home/, /Users/)
+    4. Absolute path patterns (C:\\, /home/, /Users/)
     
     Args:
         skill_path: Path to the skill directory to scan.
@@ -658,14 +712,6 @@ def check_cross_platform_compatibility(skill_path):
     Returns:
         tuple: (success: bool, message: str | list[str])
     """
-    # Skip checking if auditing skill-auditor itself (to avoid false positives)
-    try:
-        skill_name = skill_path.name
-        if skill_name == 'skill-auditor':
-            return True, "Skipping cross-platform check for skill-auditor itself"
-    except:
-        pass
-
     issues = []
         
     for py_file in skill_path.glob('**/*.py'):
@@ -730,9 +776,9 @@ def check_i18n_support(skill_path):
     
     Checks for:
     1. Hardcoded text in output messages (suggest message dictionary)
-    2. Unicode/emoji usage in output
-    3. Encoding declaration consistency
-    4. Multi-language keywords in SKILL.md
+    2. Unicode/emoji usage in output (no emoji allowed in skill code)
+    3. Encoding declaration consistency (note: encoding='utf-8' is recommended for Chinese files, not mandatory)
+    4. Multi-language keywords in SKILL.md (suggestion, not requirement)
     
     Args:
         skill_path: Path to the skill directory to scan.
@@ -742,7 +788,7 @@ def check_i18n_support(skill_path):
     """
     issues = []
     
-    # Check SKILL.md for multi-language support
+    # Check SKILL.md for multi-language support (informational only)
     skill_md = skill_path / 'SKILL.md'
     if skill_md.exists():
         try:
@@ -752,8 +798,10 @@ def check_i18n_support(skill_path):
             has_english = any(word in content.lower() for word in ['description:', 'name:', 'usage:', 'example'])
             has_chinese = any(ord(char) > 127 for char in content)
             
+            # This is just a suggestion, not a requirement
+            # Note: encoding='utf-8' is recommended for Chinese files but not mandatory
             if not has_chinese and not has_english:
-                issues.append("SKILL.md appears to lack multi-language support. Consider adding both English and Chinese keywords.")
+                issues.append("Suggestion: Consider adding both English and Chinese keywords in SKILL.md for better discoverability.")
                 
         except Exception as e:
             issues.append(f"Could not read SKILL.md: {e}")
@@ -773,30 +821,44 @@ def check_i18n_support(skill_path):
                     continue
                 
                 # Count print statements with hardcoded strings
-                if 'print("' in line or 'print("' in line:
+                if 'print("' in line or "print('" in line:
                     message_count += 1
                 
-                # Check for emoji usage in print statements
-                if 'print(' in line or 'print("' in line:
-                    if any(ord(c) > 127 for c in line):
+                # Check for emoji usage in print statements (STRICT: no emoji allowed in skill code)
+                if 'print(' in line:
+                    # Check for emoji characters (Unicode ranges for emojis)
+                    # Emojis are in various ranges: U+2600-27BF, U+1F300-1F9FF, etc.
+                    has_emoji = False
+                    for c in line:
+                        # Check common emoji ranges
+                        if (0x2600 <= ord(c) <= 0x27BF) or (0x1F300 <= ord(c) <= 0x1F9FF):
+                            has_emoji = True
+                            break
+                    
+                    if has_emoji:
                         # Allow Unicode in comments
                         if '#' in line:
                             comment_part = line.split('#', 1)[1]
-                            if any(ord(c) > 127 for c in comment_part):
+                            emoji_in_comment = False
+                            for c in comment_part:
+                                if (0x2600 <= ord(c) <= 0x27BF) or (0x1F300 <= ord(c) <= 0x1F9FF):
+                                    emoji_in_comment = True
+                                    break
+                            if emoji_in_comment:
                                 continue
                         
-                        issues.append(f"{py_file.name}:{i}: Unicode/emoji in output. Use standard text labels [PASS]/[FAIL]/[WARN]/[INFO] instead.")
+                        issues.append(f"{py_file.name}:{i}: Emoji found in output statement. Emoji is not allowed in skill code. Use standard text labels [PASS]/[FAIL]/[WARN]/[INFO] instead.")
             
-            # Warn if many hardcoded messages
-            if message_count > 10:
-                issues.append(f"{py_file.name}: Found {message_count} hardcoded print messages. Consider using a message dictionary for i18n.")
+            # Warn if many hardcoded messages (informational only)
+            if message_count > 20:
+                issues.append(f"Suggestion: {py_file.name} has {message_count} print statements. Consider using a message dictionary for better i18n support when applicable.")
                     
         except Exception as e:
             issues.append(f"Could not read {py_file.name}: {e}")
             
     if issues:
         return False, issues
-    return True, "Internationalization support looks good"
+    return True, "Internationalization check completed"
 
 def check_absolute_references(skill_path):
     """
@@ -956,7 +1018,11 @@ def check_registry_consistency(skill_path, skills_dir):
     else:
         try:
             updated_at = datetime.datetime.fromisoformat(skill_info["updated_at"])
-            now = datetime.datetime.now()
+            # Ensure both datetimes are timezone-aware or both are naive
+            now = datetime.datetime.now(datetime.timezone.utc)
+            # If updated_at is naive, assume UTC
+            if updated_at.tzinfo is None:
+                updated_at = updated_at.replace(tzinfo=datetime.timezone.utc)
             age = now - updated_at
             if age > datetime.timedelta(days=365):
                 issues.append(f"Registry entry is old ({age.days} days), consider updating")
@@ -1090,11 +1156,6 @@ def parse_arguments():
 if __name__ == "__main__":
     skill_path, skills_dir, verbose, json_output, check_level = parse_arguments()
     
-    # Set global configuration
-    VERBOSE = verbose
-    JSON_OUTPUT = json_output
-    CHECK_LEVEL = check_level
-    
     if not json_output:
         print(f"[*] Auditing Skill: {Path(skill_path).name}")
         print(f"   Path: {Path(skill_path)}")
@@ -1103,5 +1164,11 @@ if __name__ == "__main__":
             print(f"   Skills Dir: {skills_dir if skills_dir else 'N/A'}")
             print()
     
-    success = audit_skill(skill_path, skills_dir)
+    success = audit_skill(
+        skill_path, 
+        skills_dir, 
+        verbose=verbose, 
+        json_output=json_output, 
+        check_level=check_level
+    )
     sys.exit(0 if success else 1)

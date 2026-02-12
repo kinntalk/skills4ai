@@ -14,11 +14,50 @@ Examples:
 import sys
 import os
 from pathlib import Path
-
+try:
+    from messages import *
+except ImportError:
+    # Fallback if messages.py not found in same dir
+    ICON_FAIL = "[FAIL]"
+    ICON_PASS = "[PASS]"
+    ICON_INFO = "[*]"
+    COLOR_GREEN = "\033[92m"
+    COLOR_RED = "\033[91m"
+    COLOR_YELLOW = "\033[93m"
+    COLOR_BLUE = "\033[94m"
+    COLOR_CYAN = "\033[96m"
+    COLOR_RESET = "\033[0m"
+    MSG_INITIALIZING = f"{ICON_INFO} Initializing skill: {skill_name}"
+    MSG_LOCATION = f"   Location: {path}"
+    MSG_DIR_EXISTS = f"{COLOR_RED}[FAIL] Error: Skill directory already exists: {skill_dir}{COLOR_RESET}"
+    MSG_DIR_CREATED = f"{COLOR_GREEN}[PASS] Created skill directory: {skill_dir}{COLOR_RESET}"
+    MSG_DIR_CREATE_ERROR = f"{COLOR_RED}[FAIL] Error creating directory: {e}{COLOR_RESET}"
+    MSG_SKILL_MD_CREATED = f"{COLOR_GREEN}[PASS] Created SKILL.md{COLOR_RESET}"
+    MSG_SKILL_MD_ERROR = f"{COLOR_RED}[FAIL] Error creating SKILL.md: {e}{COLOR_RESET}"
+    MSG_SCRIPT_CREATED = f"{COLOR_GREEN}[PASS] Created scripts/example.py{COLOR_RESET}"
+    MSG_REQUIREMENTS_CREATED = f"{COLOR_GREEN}[PASS] Created scripts/requirements.txt{COLOR_RESET}"
+    MSG_REFERENCE_CREATED = f"{COLOR_GREEN}[PASS] Created references/api_reference.md{COLOR_RESET}"
+    MSG_ASSET_CREATED = f"{COLOR_GREEN}[PASS] Created assets/example_asset.txt{COLOR_RESET}"
+    MSG_RESOURCE_ERROR = f"{COLOR_RED}[FAIL] Error creating resource directories: {e}{COLOR_RESET}"
+    MSG_INIT_SUCCESS = f"{COLOR_GREEN}[PASS] Skill '{skill_name}' initialized successfully at {skill_dir}{COLOR_RESET}"
+    MSG_NEXT_STEPS = f"\n{ICON_INFO} Next steps:"
+    MSG_STEP_1 = "1. Edit SKILL.md to complete TODO items and update description"
+    MSG_STEP_2 = "2. Customize or delete example files in scripts/, references/, and assets/"
+    MSG_STEP_3 = "3. Run validator when ready to check skill structure"
+    MSG_USAGE = "Usage: init_skill.py <skill-name> --path <path>"
+    MSG_SKILL_NAME_REQ = "\nSkill name requirements:"
+    MSG_REQ_HYPHEN = "  - Hyphen-case identifier (e.g., 'data-analyzer')"
+    MSG_REQ_LOWERCASE = "  - Lowercase letters, digits, and hyphens only"
+    MSG_REQ_MAX_CHARS = "  - Max 40 characters"
+    MSG_REQ_MATCH = "  - Must match directory name exactly"
+    MSG_EXAMPLES = "\nExamples:"
+    MSG_EXAMPLE_1 = "  init_skill.py my-new-skill --path skills/public"
+    MSG_EXAMPLE_2 = "  init_skill.py my-api-helper --path skills/private"
+    MSG_EXAMPLE_3 = "  init_skill.py custom-skill --path /custom/location"
 
 SKILL_TEMPLATE = """---
 name: {skill_name}
-description: "TODO: Complete and informative explanation of what the skill does and when to use it. Include WHEN to use this skill - specific scenarios, file types, or tasks that trigger it."
+description: "TODO: Complete and informative explanation of what this skill does and when to use it. Include WHEN to use this skill - specific scenarios, file types, or tasks that trigger it."
 ---
 
 # {skill_title}
@@ -37,7 +76,7 @@ description: "TODO: Complete and informative explanation of what the skill does 
 - Structure: ## Overview → ## Workflow Decision Tree → ## Step 1 → ## Step 2...
 
 **2. Task-Based** (best for tool collections)
-- Works well when the skill offers different operations/capabilities
+- Works well when skill offers different operations/capabilities
 - Example: PDF skill with "Quick Start" → "Merge PDFs" → "Split PDFs" → "Extract Text"
 - Structure: ## Overview → ## Quick Start → ## Task Category 1 → ## Task Category 2...
 
@@ -47,15 +86,15 @@ description: "TODO: Complete and informative explanation of what the skill does 
 - Structure: ## Overview → ## Guidelines → ## Specifications → ## Usage...
 
 **4. Capabilities-Based** (best for integrated systems)
-- Works well when the skill provides multiple interrelated features
+- Works well when skill provides multiple interrelated features
 - Example: Product Management with "Core Capabilities" → numbered capability list
 - Structure: ## Overview → ## Core Capabilities → ### 1. Feature → ### 2. Feature...
 
 Patterns can be mixed and matched as needed. Most skills combine patterns (e.g., start with task-based, add workflow for complex operations).
 
-Delete this entire "Structuring This Skill" section when done - it's just guidance.]
+Delete this entire "Structuring This Skill" section when done - it's just guidance.
 
-## [TODO: Replace with the first main section based on chosen structure]
+## [TODO: Replace with first main section based on chosen structure]
 
 [TODO: Add content here. See examples in existing skills:
 - Code samples for technical skills
@@ -89,7 +128,7 @@ Documentation and reference material intended to be loaded into context to infor
 **Appropriate for:** In-depth documentation, API references, database schemas, comprehensive guides, or any detailed information that Claude should reference while working.
 
 ### assets/
-Files not intended to be loaded into context, but rather used within the output Claude produces.
+Files not intended to be loaded into context, but rather used within output Claude produces.
 
 **Examples from other skills:**
 - Brand styling: PowerPoint template files (.pptx), logo files
@@ -116,31 +155,27 @@ Examples:
 ]
 
 ---
-
 **Any unneeded directories can be deleted.** Not every skill requires all three types of resources.
 """
 
-EXAMPLE_SCRIPT = """import sys
-import os
-from pathlib import Path
+EXAMPLE_SCRIPT = """#!/usr/bin/env python3
+"""
+Example helper script for {skill_name}
 
-# Add project root to sys.path if needed
-# sys.path.append(str(Path(__file__).parent.parent))
+This is a placeholder script that can be executed directly.
+Replace with actual implementation or delete if not needed.
+
+Example real scripts from other skills:
+- pdf/scripts/fill_fillable_fields.py - Fills PDF form fields
+- pdf/scripts/convert_pdf_to_images.py - Converts PDF pages to images
+"""
 
 def main():
-    \"\"\"
-    Example main function for {skill_name}.
-    \"\"\"
-    
-    # Example: Working with paths safely
-    current_dir = Path(__file__).parent
-    assets_dir = current_dir.parent / 'assets'
-    
     print(f"Running {{Path(__file__).name}}...")
     print(f"Assets directory: {{assets_dir}}")
     
-    # Your logic here
-    pass
+    # TODO: Add actual script logic here
+    # This could be data processing, file conversion, API calls, etc.
 
 if __name__ == "__main__":
     main()
@@ -208,7 +243,6 @@ Example asset files from other skills:
 Note: This is a text placeholder. Actual assets can be any file type.
 """
 
-
 EXAMPLE_REQUIREMENTS = """# Dependencies for {skill_name}
 # Add your Python dependencies here (one per line)
 # Example:
@@ -219,7 +253,6 @@ EXAMPLE_REQUIREMENTS = """# Dependencies for {skill_name}
 def title_case_skill_name(skill_name):
     """Convert hyphenated skill name to Title Case for display."""
     return ' '.join(word.capitalize() for word in skill_name.split('-'))
-
 
 def init_skill(skill_name, path):
     """
@@ -233,19 +266,19 @@ def init_skill(skill_name, path):
         Path to created skill directory, or None if error
     """
     # Determine skill directory path
-    skill_dir = Path(path) / skill_name
+    skill_dir = Path(path).resolve() / skill_name
 
     # Check if directory already exists
     if skill_dir.exists():
-        print(f"[FAIL] Error: Skill directory already exists: {skill_dir}")
+        print(MSG_DIR_EXISTS.format(skill_dir=skill_dir))
         return None
 
     # Create skill directory
     try:
         skill_dir.mkdir(parents=True, exist_ok=False)
-        print(f"[PASS] Created skill directory: {skill_dir}")
+        print(MSG_DIR_CREATED.format(skill_dir=skill_dir))
     except Exception as e:
-        print(f"[FAIL] Error creating directory: {e}")
+        print(MSG_DIR_CREATE_ERROR.format(e=e))
         return None
 
     # Create SKILL.md from template
@@ -258,9 +291,9 @@ def init_skill(skill_name, path):
     skill_md_path = skill_dir / 'SKILL.md'
     try:
         skill_md_path.write_text(skill_content, encoding='utf-8')
-        print("[PASS] Created SKILL.md")
+        print(MSG_SKILL_MD_CREATED)
     except Exception as e:
-        print(f"[FAIL] Error creating SKILL.md: {e}")
+        print(MSG_SKILL_MD_ERROR.format(e=e))
         return None
 
     # Create resource directories with example files
@@ -272,59 +305,58 @@ def init_skill(skill_name, path):
         example_script.write_text(EXAMPLE_SCRIPT.format(skill_name=skill_name), encoding='utf-8')
         if os.name != 'nt':
             example_script.chmod(0o755)
-        print("[PASS] Created scripts/example.py")
+        print(MSG_SCRIPT_CREATED)
 
         # Create scripts/requirements.txt
         requirements_file = scripts_dir / 'requirements.txt'
         requirements_file.write_text(EXAMPLE_REQUIREMENTS.format(skill_name=skill_name), encoding='utf-8')
-        print("[PASS] Created scripts/requirements.txt")
+        print(MSG_REQUIREMENTS_CREATED)
 
         # Create references/ directory with example reference doc
         references_dir = skill_dir / 'references'
         references_dir.mkdir(exist_ok=True)
         example_reference = references_dir / 'api_reference.md'
         example_reference.write_text(EXAMPLE_REFERENCE.format(skill_title=skill_title), encoding='utf-8')
-        print("[PASS] Created references/api_reference.md")
+        print(MSG_REFERENCE_CREATED)
 
         # Create assets/ directory with example asset placeholder
         assets_dir = skill_dir / 'assets'
         assets_dir.mkdir(exist_ok=True)
         example_asset = assets_dir / 'example_asset.txt'
         example_asset.write_text(EXAMPLE_ASSET, encoding='utf-8')
-        print("[PASS] Created assets/example_asset.txt")
+        print(MSG_ASSET_CREATED)
     except Exception as e:
-        print(f"[FAIL] Error creating resource directories: {e}")
+        print(MSG_RESOURCE_ERROR.format(e=e))
         return None
 
     # Print next steps
-    print(f"\n[PASS] Skill '{skill_name}' initialized successfully at {skill_dir}")
-    print("\nNext steps:")
-    print("1. Edit SKILL.md to complete the TODO items and update the description")
-    print("2. Customize or delete the example files in scripts/, references/, and assets/")
-    print("3. Run the validator when ready to check the skill structure")
+    print(MSG_INIT_SUCCESS.format(skill_name=skill_name, skill_dir=skill_dir))
+    print(MSG_NEXT_STEPS)
+    print(MSG_STEP_1)
+    print(MSG_STEP_2)
+    print(MSG_STEP_3)
 
     return skill_dir
 
-
 def main():
     if len(sys.argv) < 4 or sys.argv[2] != '--path':
-        print("Usage: init_skill.py <skill-name> --path <path>")
-        print("\nSkill name requirements:")
-        print("  - Hyphen-case identifier (e.g., 'data-analyzer')")
-        print("  - Lowercase letters, digits, and hyphens only")
-        print("  - Max 40 characters")
-        print("  - Must match directory name exactly")
-        print("\nExamples:")
-        print("  init_skill.py my-new-skill --path skills/public")
-        print("  init_skill.py my-api-helper --path skills/private")
-        print("  init_skill.py custom-skill --path /custom/location")
+        print(MSG_USAGE)
+        print(MSG_SKILL_NAME_REQ)
+        print(MSG_REQ_HYPHEN)
+        print(MSG_REQ_LOWERCASE)
+        print(MSG_REQ_MAX_CHARS)
+        print(MSG_REQ_MATCH)
+        print(MSG_EXAMPLES)
+        print(MSG_EXAMPLE_1)
+        print(MSG_EXAMPLE_2)
+        print(MSG_EXAMPLE_3)
         sys.exit(1)
 
     skill_name = sys.argv[1]
     path = sys.argv[3]
 
-    print(f"[*] Initializing skill: {skill_name}")
-    print(f"   Location: {path}")
+    print(MSG_INITIALIZING.format(skill_name=skill_name))
+    print(MSG_LOCATION.format(path=path))
     print()
 
     result = init_skill(skill_name, path)
@@ -333,7 +365,6 @@ def main():
         sys.exit(0)
     else:
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

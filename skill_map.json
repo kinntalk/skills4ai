@@ -3,56 +3,206 @@
     "image-generation": {
       "name": "image-generation",
       "description": "Converts Markdown documents to high-quality images (PNG/JPG)",
-      "keywords": ["image", "png", "jpg", "picture", "photo", "screenshot", "markdown", "render", "convert", "图片", "转换", "截图", "渲染", "生成图片", "生成png", "生成jpg", "markdown转图片", "md转图片", "文档转图片"],
-      "aliases": ["img-gen", "image-gen", "render-image", "markdown-to-image"]
+      "keywords": [
+        "image",
+        "png",
+        "jpg",
+        "picture",
+        "photo",
+        "screenshot",
+        "markdown",
+        "render",
+        "convert",
+        "图片",
+        "转换",
+        "截图",
+        "渲染",
+        "生成图片",
+        "生成png",
+        "生成jpg",
+        "markdown转图片",
+        "md转图片",
+        "文档转图片"
+      ],
+      "aliases": [
+        "img-gen",
+        "image-gen",
+        "render-image",
+        "markdown-to-image"
+      ]
     },
     "pdf-generation": {
       "name": "pdf-generation",
       "description": "Professional PDF generation from markdown using Pandoc",
-      "keywords": ["pdf", "document", "report", "whitepaper", "pandoc", "latex", "pdf", "文档", "报告", "白皮书", "pdf生成", "生成pdf", "markdown转pdf", "md转pdf", "文档转pdf"],
-      "aliases": ["pdf-gen", "pdf-creator", "markdown-to-pdf"]
+      "keywords": [
+        "pdf",
+        "document",
+        "report",
+        "whitepaper",
+        "pandoc",
+        "latex",
+        "pdf",
+        "文档",
+        "报告",
+        "白皮书",
+        "pdf生成",
+        "生成pdf",
+        "markdown转pdf",
+        "md转pdf",
+        "文档转pdf"
+      ],
+      "aliases": [
+        "pdf-gen",
+        "pdf-creator",
+        "markdown-to-pdf"
+      ]
     },
     "skill-creator": {
       "name": "skill-creator",
-      "description": "Create new Trae skills from templates",
-      "keywords": ["create", "new", "init", "template", "skill", "scaffold", "创建", "新建", "初始化", "模板", "脚手架", "创建skill", "新建skill", "初始化skill"],
-      "aliases": ["create-skill", "new-skill", "init-skill", "skill-scaffold"]
+      "description": "Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabilities with specialized knowledge, workflows, or tool integrations.",
+      "keywords": [],
+      "aliases": []
     },
     "skill-installer": {
       "name": "skill-installer",
       "description": "Install and manage Trae skills from Git repositories",
-      "keywords": ["install", "update", "uninstall", "manage", "git", "repository", "安装", "更新", "卸载", "管理", "git仓库", "安装skill", "更新skill", "卸载skill"],
-      "aliases": ["skill-manager", "skill-updater", "install-skill", "update-skill"]
+      "keywords": [
+        "install",
+        "update",
+        "uninstall",
+        "manage",
+        "git",
+        "repository",
+        "安装",
+        "更新",
+        "卸载",
+        "管理",
+        "git仓库",
+        "安装skill",
+        "更新skill",
+        "卸载skill"
+      ],
+      "aliases": [
+        "skill-manager",
+        "skill-updater",
+        "install-skill",
+        "update-skill"
+      ]
     },
     "skill-auditor": {
       "name": "skill-auditor",
       "description": "Audit Trae skills for compliance and best practices",
-      "keywords": ["audit", "check", "validate", "test", "compliance", "best-practices", "审计", "检查", "验证", "测试", "合规", "最佳实践", "审计skill", "检查skill", "验证skill"],
-      "aliases": ["skill-check", "skill-validator", "skill-tester", "skill-linter"]
+      "keywords": [
+        "audit",
+        "check",
+        "validate",
+        "test",
+        "compliance",
+        "best-practices",
+        "审计",
+        "检查",
+        "验证",
+        "测试",
+        "合规",
+        "最佳实践",
+        "审计skill",
+        "检查skill",
+        "验证skill"
+      ],
+      "aliases": [
+        "skill-check",
+        "skill-validator",
+        "skill-tester",
+        "skill-linter"
+      ]
     },
     "find-skills": {
       "name": "find-skills",
       "description": "Search and discover Trae skills from repositories",
-      "keywords": ["find", "search", "discover", "explore", "browse", "查找", "搜索", "发现", "探索", "浏览", "查找skill", "搜索skill", "发现skill"],
-      "aliases": ["skill-search", "skill-finder", "skill-discover"]
+      "keywords": [
+        "find",
+        "search",
+        "discover",
+        "explore",
+        "browse",
+        "查找",
+        "搜索",
+        "发现",
+        "探索",
+        "浏览",
+        "查找skill",
+        "搜索skill",
+        "发现skill"
+      ],
+      "aliases": [
+        "skill-search",
+        "skill-finder",
+        "skill-discover"
+      ]
     },
     "behavioral-product-design": {
       "name": "behavioral-product-design",
       "description": "Behavioral product design frameworks and psychology insights",
-      "keywords": ["behavioral", "psychology", "product", "design", "framework", "行为", "心理学", "产品设计", "框架"],
-      "aliases": ["lenny-skills", "behavior-design"]
+      "keywords": [
+        "behavioral",
+        "psychology",
+        "product",
+        "design",
+        "framework",
+        "行为",
+        "心理学",
+        "产品设计",
+        "框架"
+      ],
+      "aliases": [
+        "lenny-skills",
+        "behavior-design"
+      ]
     },
     "ui-ux-pro-max-skill": {
       "name": "ui-ux-pro-max-skill",
       "description": "Comprehensive UI/UX design capabilities and stacks",
-      "keywords": ["ui", "ux", "design", "interface", "experience", "stack", "界面", "交互", "体验", "设计"],
-      "aliases": ["ui-ux", "pro-max"]
+      "keywords": [
+        "ui",
+        "ux",
+        "design",
+        "interface",
+        "experience",
+        "stack",
+        "界面",
+        "交互",
+        "体验",
+        "设计"
+      ],
+      "aliases": [
+        "ui-ux",
+        "pro-max"
+      ]
     },
     "claude-skills": {
       "name": "claude-skills",
       "description": "Collection of specialized roles including Product Manager and Designer",
-      "keywords": ["product", "manager", "designer", "role", "persona", "pm", "产品经理", "设计师", "角色"],
-      "aliases": ["product-roles", "claude-collection"]
+      "keywords": [
+        "product",
+        "manager",
+        "designer",
+        "role",
+        "persona",
+        "pm",
+        "产品经理",
+        "设计师",
+        "角色"
+      ],
+      "aliases": [
+        "product-roles",
+        "claude-collection"
+      ]
+    },
+    "test-driven-development": {
+      "name": "test-driven-development",
+      "description": "Use when implementing any feature or bugfix, before writing implementation code",
+      "keywords": [],
+      "aliases": []
     }
   },
   "detection_rules": {
@@ -62,7 +212,8 @@
       "skill-creator",
       "skill-installer",
       "skill-auditor",
-      "find-skills"
+      "find-skills",
+      "test-driven-development"
     ],
     "exact_match": {
       "image": "image-generation",
@@ -70,19 +221,41 @@
       "create": "skill-creator",
       "install": "skill-installer",
       "audit": "skill-auditor",
-      "find": "find-skills"
+      "find": "find-skills",
+      "test driven development": "test-driven-development",
+      "skill creator": "skill-creator"
     },
     "partial_match": {
       "png": "image-generation",
       "jpg": "image-generation",
-      "markdown": ["image-generation", "pdf-generation"],
-      "skill": ["skill-creator", "skill-installer", "skill-auditor"],
+      "markdown": [
+        "image-generation",
+        "pdf-generation"
+      ],
+      "skill": [
+        "skill-creator",
+        "skill-installer",
+        "skill-auditor"
+      ],
       "behavioral": "behavioral-product-design",
       "psychology": "behavioral-product-design",
-      "ui": ["ui-ux-pro-max-skill", "claude-skills"],
-      "ux": ["ui-ux-pro-max-skill", "claude-skills"],
-      "design": ["ui-ux-pro-max-skill", "claude-skills", "behavioral-product-design"],
-      "product": ["claude-skills", "behavioral-product-design"]
+      "ui": [
+        "ui-ux-pro-max-skill",
+        "claude-skills"
+      ],
+      "ux": [
+        "ui-ux-pro-max-skill",
+        "claude-skills"
+      ],
+      "design": [
+        "ui-ux-pro-max-skill",
+        "claude-skills",
+        "behavioral-product-design"
+      ],
+      "product": [
+        "claude-skills",
+        "behavioral-product-design"
+      ]
     }
   }
 }

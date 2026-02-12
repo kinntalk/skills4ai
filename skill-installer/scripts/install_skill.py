@@ -13,6 +13,8 @@ import tempfile
 import time
 import json
 import datetime
+import re
+import yaml
 from pathlib import Path
 try:
     from messages import *
@@ -70,6 +72,71 @@ def update_registry(dest_root, skill_name, repo_url, subdir, commit_hash):
         print(MSG_REGISTRY_UPDATED.format(path=registry_path))
     except Exception as e:
         print(MSG_REGISTRY_WRITE_ERROR.format(error=e))
+
+def update_skill_map(dest_root, skill_name, skill_path):
+    """Update the skill_map.json file with skill metadata"""
+    skill_map_path = dest_root / 'skill_map.json'
+    skill_map = {'skills': {}, 'detection_rules': {'priority_order': [], 'exact_match': {}, 'partial_match': {}}}
+    
+    if skill_map_path.exists():
+        try:
+            content = skill_map_path.read_text(encoding='utf-8')
+            skill_map = json.loads(content)
+        except Exception as e:
+            print(f"Warning: Could not read skill_map.json: {e}")
+    
+    # Extract metadata from SKILL.md
+    skill_md = skill_path / 'SKILL.md'
+    description = ""
+    keywords = []
+    aliases = []
+    
+    if skill_md.exists():
+        try:
+            content = skill_md.read_text(encoding='utf-8')
+            match = re.match(r'^---\n(.*?)\n---', content, re.DOTALL)
+            if match:
+                frontmatter = yaml.safe_load(match.group(1))
+                description = frontmatter.get('description', '')
+                keywords = frontmatter.get('keywords', [])
+                aliases = frontmatter.get('aliases', [])
+        except Exception as e:
+            print(f"Warning: Could not parse SKILL.md: {e}")
+    
+    # Add skill to skill_map
+    skill_map['skills'][skill_name] = {
+        'name': skill_name,
+        'description': description,
+        'keywords': keywords,
+        'aliases': aliases
+    }
+    
+    # Add to priority_order if not already present
+    if skill_name not in skill_map['detection_rules']['priority_order']:
+        skill_map['detection_rules']['priority_order'].append(skill_name)
+    
+    # Add exact matches based on skill name
+    skill_name_lower = skill_name.lower().replace('-', ' ')
+    skill_map['detection_rules']['exact_match'][skill_name_lower] = skill_name
+    
+    # Add partial matches based on keywords
+    for keyword in keywords:
+        keyword_lower = keyword.lower()
+        if keyword_lower not in skill_map['detection_rules']['partial_match']:
+            skill_map['detection_rules']['partial_match'][keyword_lower] = skill_name
+        elif isinstance(skill_map['detection_rules']['partial_match'][keyword_lower], str):
+            # Convert to list if multiple skills match
+            existing = skill_map['detection_rules']['partial_match'][keyword_lower]
+            skill_map['detection_rules']['partial_match'][keyword_lower] = [existing, skill_name]
+        elif isinstance(skill_map['detection_rules']['partial_match'][keyword_lower], list):
+            if skill_name not in skill_map['detection_rules']['partial_match'][keyword_lower]:
+                skill_map['detection_rules']['partial_match'][keyword_lower].append(skill_name)
+    
+    try:
+        skill_map_path.write_text(json.dumps(skill_map, indent=2, ensure_ascii=False), encoding='utf-8')
+        print(f"Updated skill_map.json with '{skill_name}'")
+    except Exception as e:
+        print(f"Warning: Could not update skill_map.json: {e}")
 
 def parse_source(source):
     """
@@ -133,24 +200,32 @@ def install_skill(source, dest_root, run_audit=True, force=False):
         # Determine source path
         source_path = temp_path
         if subdir:
-            source_path = temp_path / subdir
+            # Try skills/ prefix first (common pattern for monorepos)
+            skills_path = temp_path / 'skills' / subdir.split('/')[-1]
+            if skills_path.exists():
+                print(MSG_SUBDIR_FOUND_ALT.format(subdir=subdir, alt_path=f"skills/{subdir.split('/')[-1]}"))
+                source_path = skills_path
+                subdir = f"skills/{subdir.split('/')[-1]}"
+            else:
+                # Try exact path
+                source_path = temp_path / subdir
             
-        if not source_path.exists():
-            # Try to find subdir with common prefixes if not found
-            common_prefixes = ['skills', 'packages', 'apps']
-            found = False
-            for prefix in common_prefixes:
-                alt_path = temp_path / prefix / subdir.split('/')[-1]
-                if alt_path.exists():
-                    print(MSG_SUBDIR_FOUND_ALT.format(subdir=subdir, alt_path=f"{prefix}/{subdir.split('/')[-1]}"))
-                    source_path = alt_path
-                    subdir = f"{prefix}/{subdir.split('/')[-1]}"
-                    found = True
-                    break
-            
-            if not found and not source_path.exists():
-                print(MSG_SUBDIR_NOT_FOUND.format(subdir=subdir))
-                return False
+            if not source_path.exists():
+                # Try other common prefixes if still not found
+                common_prefixes = ['packages', 'apps']
+                found = False
+                for prefix in common_prefixes:
+                    alt_path = temp_path / prefix / subdir.split('/')[-1]
+                    if alt_path.exists():
+                        print(MSG_SUBDIR_FOUND_ALT.format(subdir=subdir, alt_path=f"{prefix}/{subdir.split('/')[-1]}"))
+                        source_path = alt_path
+                        subdir = f"{prefix}/{subdir.split('/')[-1]}"
+                        found = True
+                        break
+                
+                if not found:
+                    print(MSG_SUBDIR_NOT_FOUND.format(subdir=subdir))
+                    return False
             
         # Determine skill name (from subdir name or repo name)
         if subdir:
@@ -181,6 +256,9 @@ def install_skill(source, dest_root, run_audit=True, force=False):
         
         # Update Registry
         update_registry(dest_root, skill_name, repo_url, subdir, commit_hash)
+        
+        # Update Skill Map
+        update_skill_map(dest_root, skill_name, dest_path)
 
         # Run Audit
         if run_audit:

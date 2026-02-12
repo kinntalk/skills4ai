@@ -1,1 +1,7 @@
-PyYAML
+# Dependencies for skill-creator
+# Add your Python dependencies here (one per line)
+# Example:
+# requests>=2.25.0
+# pandas>=1.2.0
+pyyaml>=6.0
+messages

@@ -1,11 +1,49 @@
 ---
 name: skill-auditor
 description: A standard compliance checking tool for Trae skills. Use this skill when you need to verify if a skill follows best practices, specifically checking for dependency completeness, proper file encoding, path consistency, cross-platform compatibility, internationalization support, and correct packaging structure.
+description_zh: Trae skills 标准合规性检查工具。当您需要验证 skill 是否遵循最佳实践时使用此 skill，专门检查依赖完整性、正确的文件编码、路径一致性、跨平台兼容性、国际化支持和正确的打包结构。
 ---
 
-# Skill Auditor
+# Skill Auditor / Skill 审计工具
 
-## Overview
+## Core Standards / 核心规范
+
+### Mandatory Requirements (Must Comply) / 必须遵守的要求
+
+1. **No Emoji in Code Output / 代码输出中严禁使用 Emoji**
+   - Emoji characters are strictly prohibited in skill code output statements
+   - 严禁在 skill 代码输出语句中使用 emoji 字符
+   - Use text labels: `[PASS]`, `[FAIL]`, `[WARN]`, `[INFO]`
+
+2. **No Hardcoded Absolute Paths / 不允许使用硬编码绝对路径**
+   - Never use absolute paths like `C:\`, `/home/`, `/Users/` in code
+   - 永远不要在代码中使用绝对路径如 `C:\`, `/home/`, `/Users/`
+   - Use relative paths and `pathlib.Path()` / 使用相对路径和 `pathlib.Path()`
+
+3. **Proper Encoding for File Operations / 文件操作使用正确的编码**
+   - Use `encoding='utf-8'` for Chinese text files (recommended)
+   - 中文文本文件使用 `encoding='utf-8'`（推荐）
+   - Encoding should match actual file content / 编码应与实际文件内容匹配
+
+4. **Cross-Platform Compatibility / 跨平台兼容性**
+   - Use `pathlib.Path()` instead of `os.path` / 使用 `pathlib.Path()` 而非 `os.path`
+   - Avoid platform-specific commands like `dir`, `ls` / 避免平台特定命令如 `dir`, `ls`
+
+### Recommended Best Practices / 推荐最佳实践
+
+1. **Multi-Language Support / 多语言支持**
+   - Include both English and Chinese in SKILL.md (suggested)
+   - 在 SKILL.md 中包含英文和中文（建议）
+
+2. **Message Dictionary for i18n / 使用消息字典实现国际化**
+   - Use message dictionaries for skills with extensive user-facing output
+   - 对于有大量面向用户输出的 skill，使用消息字典
+
+3. **Reference Documentation / 参考文档**
+   - Provide documentation in `references/` directory
+   - 在 `references/` 目录中提供文档
+
+## Overview / 概述
 
 The `skill-auditor` provides a standardized validation process for Trae skills. It automates detection of common pitfalls that can cause skills to fail in different environments (e.g., Windows encoding issues) or lead to maintenance problems (e.g., incorrect directory structures, absolute paths, lack of i18n support).
 
@@ -37,7 +75,8 @@ This skill enforces a comprehensive 9-point standard check that every production
 
 #### 3.1 Encoding Safety (Cross-Platform)
 - **Check:** Scans Python scripts for file operations (`open`, `read_text`, `write_text`) that do not specify an encoding.
-- **Why:** Python defaults to system locale (e.g., CP1252 or GBK on Windows), which causes crashes when reading UTF-8 files. All file operations must explicitly use `encoding='utf-8'`.
+- **Why:** Python defaults to system locale (e.g., CP1252 or GBK on Windows), which can cause encoding issues. Use `encoding='utf-8'` for Chinese text files (recommended), but encoding should match actual file content.
+- **Note:** `encoding='utf-8'` is recommended for Chinese text but not mandatory. Choose encoding based on actual file content.
 
 #### 3.2 Path Consistency
 - **Check:** Scans for references to deprecated or incorrect paths (e.g., `.codebuddy/skills`).
@@ -83,17 +122,18 @@ This skill enforces a comprehensive 9-point standard check that every production
 
 ### Section 7: Internationalization (i18n)
 
-#### 7.1 Multi-Language Support
-- **Check:** Validates `SKILL.md` contains both English and Chinese keywords.
-- **Why:** Ensures skill can be discovered and used by users in different languages.
+#### 7.1 Emoji Prohibition (REQUIRED)
+- **Check:** Detects emoji characters in skill code output statements.
+- **Why:** Emojis can cause encoding issues in some terminals and are not universally supported. Emoji characters are **strictly prohibited** in skill code output.
+- **Note:** Unicode characters are allowed in code comments, but not in output statements.
 
-#### 7.2 Hardcoded Messages
+#### 7.2 Multi-Language Support
+- **Check:** Suggests including both English and Chinese keywords in `SKILL.md`.
+- **Why:** Improves skill discoverability for users in different languages (suggestion, not requirement).
+
+#### 7.3 Hardcoded Messages
 - **Check:** Detects excessive hardcoded text in output messages.
-- **Why:** Hardcoded messages make internationalization difficult. Use message dictionaries.
-
-#### 7.3 Unicode/Emoji Usage
-- **Check:** Detects Unicode characters and emojis in output.
-- **Why:** Unicode characters may cause encoding issues in some terminals. Consider message dictionaries for i18n.
+- **Why:** Hardcoded messages make internationalization difficult. Consider using message dictionaries for better i18n support when applicable.
 
 ### Section 8: Absolute References
 
