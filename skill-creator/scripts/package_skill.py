@@ -60,12 +60,15 @@ def package_skill(skill_path, output_dir=None):
         output_path = Path.cwd()
     skill_filename = output_path / f"{skill_name}.skill"
 
-    # Create the .skill file (zip format)
+    # Create .skill file (zip format)
     try:
         with zipfile.ZipFile(skill_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
             # Walk through the skill directory and add files directly (flat structure)
             for file_path in skill_path.rglob('*'):
                 if file_path.is_file():
+                    # Skip __pycache__ and .pyc files
+                    if '__pycache__' in str(file_path) or file_path.suffix == '.pyc':
+                        continue
                     # Calculate the relative path within the zip (flat structure)
                     arcname = file_path.name
                     zipf.write(file_path, arcname)

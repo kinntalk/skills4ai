@@ -79,7 +79,7 @@ This skill enforces a comprehensive 9-point standard check that every production
 - **Note:** `encoding='utf-8'` is recommended for Chinese text but not mandatory. Choose encoding based on actual file content.
 
 #### 3.2 Path Consistency
-- **Check:** Scans for references to deprecated or incorrect paths (e.g., `.codebuddy/skills`).
+- **Check:** Scans for references to deprecated or incorrect paths (e.g., `.trae/skills`).
 - **Why:** Ensures all documentation and scripts point to the correct `.trae/skills` directory structure.
 
 ### Section 4: Packaging
