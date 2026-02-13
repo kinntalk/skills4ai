@@ -110,6 +110,48 @@ def print_network_help():
     print("   python install_skill.py https://ghproxy.com/https://github.com/user/repo.git")
     print("="*60 + "\n")
 
+def clone_with_retry(repo_url, temp_path, max_retries=2, phase_name="GitHub"):
+    """
+    Clone repository with retry logic.
+    
+    Args:
+        repo_url: URL to clone
+        temp_path: Path to clone into
+        max_retries: Maximum number of retries (default 2, meaning 1 initial + 1 retry)
+        phase_name: Name of the phase for logging
+        
+    Returns:
+        bool: True if clone succeeded, False otherwise
+    """
+    print(f"\n[{phase_name}] Attempting to clone: {repo_url}")
+    
+    for attempt in range(max_retries):
+        try:
+            result = subprocess.run(
+                ['git', 'clone', '--depth', '1', repo_url, '.'],
+                cwd=temp_path,
+                capture_output=True,
+                text=True,
+                errors='replace',
+                timeout=120
+            )
+            if result.returncode == 0:
+                print(f"[{phase_name}] Clone succeeded on attempt {attempt + 1}")
+                return True
+            else:
+                print(f"[{phase_name}] Clone attempt {attempt + 1} failed: {result.stderr.strip()}")
+        except subprocess.TimeoutExpired:
+            print(f"[{phase_name}] Clone attempt {attempt + 1} timed out (120s)")
+        except Exception as e:
+            print(f"[{phase_name}] Clone attempt {attempt + 1} failed: {e}")
+        
+        if attempt < max_retries - 1:
+            wait_time = 2 ** attempt
+            print(f"[{phase_name}] Retrying in {wait_time}s...")
+            time.sleep(wait_time)
+    
+    return False
+
 def run_command(cmd, cwd=None, capture_output=False):
     """Run a shell command and check for errors"""
     try:
@@ -261,10 +303,10 @@ def parse_source(source):
 def install_skill(source, dest_root, run_audit=True, force=False, mirror=None, proxy=None):
     dest_root = Path(dest_root)
     repo_url, subdir = parse_source(source)
+    original_url = repo_url
     
-    # Apply mirror if specified
+    # Apply mirror if specified via command line
     if mirror:
-        original_url = repo_url
         repo_url = apply_mirror(repo_url, mirror)
         print(f"[INFO] Using mirror '{mirror}': {original_url} -> {repo_url}")
     
@@ -283,23 +325,29 @@ def install_skill(source, dest_root, run_audit=True, force=False, mirror=None, p
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
         
-        # Clone repo
+        # Phase 1: Try GitHub original URL (1 initial + 1 retry = 2 attempts)
         print(MSG_CLONING)
-        max_retries = 3
         clone_success = False
-        for attempt in range(max_retries):
-            try:
-                if run_command(['git', 'clone', '--depth', '1', repo_url, '.'], cwd=temp_path):
-                    clone_success = True
-                    break
-            except Exception as e:
-                print(f"[WARN] Clone attempt {attempt + 1} failed: {e}")
+        
+        if not mirror:
+            # Phase 1: GitHub original URL
+            print("\n=== Phase 1: GitHub Original URL ===")
+            clone_success = clone_with_retry(repo_url, temp_path, max_retries=2, phase_name="GitHub")
             
-            print(MSG_RETRY.format(attempt=attempt + 1, max_retries=max_retries))
-            time.sleep(2 ** attempt)
+            # Phase 2: Auto-switch to mirror if Phase 1 failed
+            if not clone_success:
+                print("\n[INFO] GitHub connection failed, switching to mirror...")
+                mirror_url = apply_mirror(original_url, 'ghproxy')
+                print(f"[INFO] Using ghproxy mirror: {mirror_url}")
+                
+                print("\n=== Phase 2: Mirror (ghproxy) ===")
+                clone_success = clone_with_retry(mirror_url, temp_path, max_retries=2, phase_name="Mirror")
+        else:
+            # Mirror was specified via command line, just use it
+            clone_success = clone_with_retry(repo_url, temp_path, max_retries=3, phase_name="Mirror")
         
         if not clone_success:
-            print(MSG_CLONE_FAILED.format(max_retries=max_retries))
+            print(MSG_CLONE_FAILED.format(max_retries="exhausted"))
             print_network_help()
             return False
             

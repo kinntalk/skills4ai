@@ -157,26 +157,17 @@
     },
     "find-skills": {
       "name": "find-skills",
-      "description": "Search and discover Trae skills from repositories",
+      "description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
       "keywords": [
-        "find",
-        "search",
+        "agent",
+        "install",
         "discover",
-        "explore",
-        "browse",
-        "查找",
-        "搜索",
-        "发现",
-        "探索",
-        "浏览",
-        "查找skill",
-        "搜索skill",
-        "发现skill"
+        "users",
+        "helps",
+        "find skills"
       ],
       "aliases": [
-        "skill-search",
-        "skill-finder",
-        "skill-discover"
+        "find-skills"
       ]
     },
     "behavioral-product-design": {
@@ -511,7 +502,8 @@
       "skill creator": "skill-creator",
       "new": "skill-creator",
       "template": "skill-creator",
-      "init": "skill-creator"
+      "init": "skill-creator",
+      "find skills": "find-skills"
     },
     "partial_match": {
       "png": "image-generation",
@@ -594,7 +586,10 @@
       "done": "verification-before-completion",
       "complete": "verification-before-completion",
       "验证": "verification-before-completion",
-      "agent": "subagent-driven-development",
+      "agent": [
+        "subagent-driven-development",
+        "find-skills"
+      ],
       "parallel": "subagent-driven-development",
       "behavioral": "behavioral-product-design",
       "psychology": "behavioral-product-design",
@@ -609,7 +604,12 @@
       "product": [
         "claude-skills",
         "behavioral-product-design"
-      ]
+      ],
+      "install": "find-skills",
+      "discover": "find-skills",
+      "users": "find-skills",
+      "helps": "find-skills",
+      "find skills": "find-skills"
     }
   }
 }

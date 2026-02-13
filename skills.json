@@ -3,8 +3,8 @@
     "find-skills": {
       "source": "https://github.com/vercel-labs/skills.git",
       "subdir": "skills/find-skills",
-      "version": "556555c2a7cf3ff5312db9b456e08749d6e5dc08",
-      "updated_at": "2026-02-10T17:17:13.811250"
+      "version": "0dd0490b1b795ae707a5596a54958db587a2465b",
+      "updated_at": "2026-02-13T22:55:42.495939"
     },
     "skill-creator": {
       "source": "https://github.com/anthropics/skills.git",
