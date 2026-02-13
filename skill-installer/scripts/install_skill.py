@@ -2,6 +2,11 @@
 """
 Skill Installer - Install skills from remote git repositories.
 Supports GitHub URLs and subdirectories (e.g., vercel-labs/agent-skills/skill-name).
+
+Features:
+- Proxy support (HTTP_PROXY, HTTPS_PROXY, ALL_PROXY environment variables)
+- GitHub mirror support (ghproxy, gitclone)
+- Automatic retry with exponential backoff
 """
 
 import sys
@@ -16,6 +21,22 @@ import datetime
 import re
 import yaml
 from pathlib import Path
+
+# Mirror configurations
+MIRRORS = {
+    'ghproxy': {
+        'name': 'ghproxy.com',
+        'transform': lambda url: url.replace('https://github.com', 'https://ghproxy.com/https://github.com')
+    },
+    'gitclone': {
+        'name': 'gitclone.com',
+        'transform': lambda url: url.replace('https://github.com', 'https://gitclone.com/github.com')
+    },
+    'fastgit': {
+        'name': 'hub.fastgit.xyz',
+        'transform': lambda url: url.replace('https://github.com', 'https://hub.fastgit.xyz')
+    }
+}
 try:
     from messages import *
 except ImportError:
@@ -31,6 +52,63 @@ except ImportError:
         RESET = "\033[0m"
         MSG_COMMAND_FAILED = f"{RED}Command failed: {{error}}{RESET}"
         MSG_STDERR = f"Stderr: {{stderr}}"
+
+def get_proxy():
+    """Detect proxy from environment variables."""
+    proxy = os.environ.get('HTTPS_PROXY') or os.environ.get('https_proxy') or \
+            os.environ.get('HTTP_PROXY') or os.environ.get('http_proxy') or \
+            os.environ.get('ALL_PROXY') or os.environ.get('all_proxy')
+    return proxy
+
+def apply_mirror(url, mirror_name):
+    """Apply a mirror transformation to a GitHub URL."""
+    if mirror_name and mirror_name in MIRRORS:
+        return MIRRORS[mirror_name]['transform'](url)
+    return url
+
+def configure_git_proxy(proxy=None):
+    """Configure git to use proxy."""
+    if not proxy:
+        proxy = get_proxy()
+    if proxy:
+        try:
+            subprocess.run(['git', 'config', '--global', 'http.proxy', proxy], 
+                         capture_output=True, check=False)
+            subprocess.run(['git', 'config', '--global', 'https.proxy', proxy], 
+                         capture_output=True, check=False)
+            print(f"[INFO] Configured git proxy: {proxy}")
+            return True
+        except Exception as e:
+            print(f"[WARN] Failed to configure git proxy: {e}")
+    return False
+
+def clear_git_proxy():
+    """Clear git proxy configuration."""
+    try:
+        subprocess.run(['git', 'config', '--global', '--unset', 'http.proxy'], 
+                     capture_output=True, check=False)
+        subprocess.run(['git', 'config', '--global', '--unset', 'https.proxy'], 
+                     capture_output=True, check=False)
+    except Exception:
+        pass
+
+def print_network_help():
+    """Print help message for network issues."""
+    print("\n" + "="*60)
+    print("[HELP] Network Connection Failed - Possible Solutions:")
+    print("="*60)
+    print("\n1. Configure proxy (v2rayN, Clash, etc.):")
+    print("   git config --global http.proxy http://127.0.0.1:10809")
+    print("   git config --global https.proxy http://127.0.0.1:10809")
+    print("\n   Or set environment variables:")
+    print("   set HTTPS_PROXY=http://127.0.0.1:10809  (Windows)")
+    print("   export HTTPS_PROXY=http://127.0.0.1:10809  (Linux/Mac)")
+    print("\n2. Use GitHub mirror:")
+    print("   python install_skill.py user/repo --mirror ghproxy")
+    print("   python install_skill.py user/repo --mirror gitclone")
+    print("\n3. Use mirror URL directly:")
+    print("   python install_skill.py https://ghproxy.com/https://github.com/user/repo.git")
+    print("="*60 + "\n")
 
 def run_command(cmd, cwd=None, capture_output=False):
     """Run a shell command and check for errors"""
@@ -180,9 +258,22 @@ def parse_source(source):
         
     return source, ""
 
-def install_skill(source, dest_root, run_audit=True, force=False):
+def install_skill(source, dest_root, run_audit=True, force=False, mirror=None, proxy=None):
     dest_root = Path(dest_root)
     repo_url, subdir = parse_source(source)
+    
+    # Apply mirror if specified
+    if mirror:
+        original_url = repo_url
+        repo_url = apply_mirror(repo_url, mirror)
+        print(f"[INFO] Using mirror '{mirror}': {original_url} -> {repo_url}")
+    
+    # Configure proxy if available
+    proxy_configured = False
+    if proxy:
+        proxy_configured = configure_git_proxy(proxy)
+    elif get_proxy():
+        proxy_configured = configure_git_proxy()
     
     print(MSG_INSTALLING.format(url=repo_url))
     if subdir:
@@ -195,13 +286,21 @@ def install_skill(source, dest_root, run_audit=True, force=False):
         # Clone repo
         print(MSG_CLONING)
         max_retries = 3
+        clone_success = False
         for attempt in range(max_retries):
-            if run_command(['git', 'clone', '--depth', '1', repo_url, '.'], cwd=temp_path):
-                break
+            try:
+                if run_command(['git', 'clone', '--depth', '1', repo_url, '.'], cwd=temp_path):
+                    clone_success = True
+                    break
+            except Exception as e:
+                print(f"[WARN] Clone attempt {attempt + 1} failed: {e}")
+            
             print(MSG_RETRY.format(attempt=attempt + 1, max_retries=max_retries))
             time.sleep(2 ** attempt)
-        else:
+        
+        if not clone_success:
             print(MSG_CLONE_FAILED.format(max_retries=max_retries))
+            print_network_help()
             return False
             
         # Get commit hash
@@ -288,13 +387,31 @@ def install_skill(source, dest_root, run_audit=True, force=False):
     return True
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Install Trae skills from git repositories")
+    parser = argparse.ArgumentParser(
+        description="Install Trae skills from git repositories",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  %(prog)s user/repo                           Install from GitHub
+  %(prog)s user/repo/subdir                    Install subdirectory from GitHub
+  %(prog)s user/repo --mirror ghproxy          Install via ghproxy mirror
+  %(prog)s user/repo --proxy http://127.0.0.1:10809  Install with proxy
+
+Available mirrors:
+  ghproxy   - ghproxy.com (recommended for China)
+  gitclone  - gitclone.com
+  fastgit   - hub.fastgit.xyz
+"""
+    )
     parser.add_argument("source", help="Git URL or 'user/repo/subdir' string")
     parser.add_argument("--path", default=".trae/skills", help="Destination directory (default: .trae/skills)")
     parser.add_argument("--no-audit", action="store_true", help="Skip running skill-auditor after install")
     parser.add_argument("--force", action="store_true", help="Force overwrite without prompting")
+    parser.add_argument("--mirror", choices=['ghproxy', 'gitclone', 'fastgit'], 
+                        help="Use GitHub mirror (ghproxy, gitclone, or fastgit)")
+    parser.add_argument("--proxy", help="HTTP/HTTPS proxy URL (e.g., http://127.0.0.1:10809)")
     
     args = parser.parse_args()
     
-    success = install_skill(args.source, args.path, not args.no_audit, args.force)
+    success = install_skill(args.source, args.path, not args.no_audit, args.force, args.mirror, args.proxy)
     sys.exit(0 if success else 1)
