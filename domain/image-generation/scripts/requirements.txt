@@ -1,3 +1,0 @@
-markdown>=3.4.0
-html2image>=2.0.4
-pygments>=2.15.0

@@ -1,5 +1,0 @@
-# Dependencies for evaluation skill
-# Add your Python dependencies here (one per line)
-# Example:
-# requests>=2.25.0
-# pandas>=1.2.0
