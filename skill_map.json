@@ -60,6 +60,36 @@
         "skill-auditor"
       ]
     },
+    "brainstorming": {
+      "name": "brainstorming",
+      "description": "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.",
+      "keywords": [
+        "work",
+        "this",
+        "brainstorming",
+        "before",
+        "must",
+        "creative"
+      ],
+      "aliases": [
+        "brainstorming"
+      ]
+    },
+    "executing-plans": {
+      "name": "executing-plans",
+      "description": "Use when you have a written implementation plan to execute in a separate session with review checkpoints",
+      "keywords": [
+        "plan",
+        "have",
+        "when",
+        "executing plans",
+        "implementation",
+        "written"
+      ],
+      "aliases": [
+        "executing-plans"
+      ]
+    },
     "image-generation": {
       "name": "image-generation",
       "description": "Converts Markdown documents to high-quality images (PNG/JPG) using Python and headless browser rendering. Ideal for creating social media posts, documentation screenshots, and sharing rich text content as images.",
@@ -105,6 +135,36 @@
         "planning-with-files"
       ]
     },
+    "systematic-debugging": {
+      "name": "systematic-debugging",
+      "description": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
+      "keywords": [
+        "encountering",
+        "failure",
+        "test",
+        "systematic debugging",
+        "unexpected",
+        "when"
+      ],
+      "aliases": [
+        "systematic-debugging"
+      ]
+    },
+    "template-skill": {
+      "name": "template-skill",
+      "description": "Replace with description of the skill and when Claude should use it.",
+      "keywords": [
+        "skill",
+        "template skill",
+        "description",
+        "when",
+        "replace",
+        "with"
+      ],
+      "aliases": [
+        "template-skill"
+      ]
+    },
     "ui-ux-pro-max": {
       "name": "ui-ux-pro-max",
       "description": "UI/UX design intelligence. 50 styles, 21 palettes, 50 font pairings, 20 charts, 9 stacks (React, Next.js, Vue, Svelte, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui). Actions: plan, build, create, design, implement, review, fix, improve, optimize, enhance, refactor, check UI/UX code. Projects: website, landing page, dashboard, admin panel, e-commerce, SaaS, portfolio, blog, mobile app, .html, .tsx, .vue, .svelte. Elements: button, modal, navbar, sidebar, card, table, form, chart. Styles: glassmorphism, claymorphism, minimalism, brutalism, neumorphism, bento grid, dark mode, responsive, skeuomorphism, flat design. Topics: color palette, accessibility, animation, layout, typography, font pairing, spacing, hover, shadow, gradient. Integrations: shadcn/ui MCP for component search and examples.",
@@ -119,6 +179,36 @@
       "aliases": [
         "ui-ux-pro-max"
       ]
+    },
+    "using-superpowers": {
+      "name": "using-superpowers",
+      "description": "Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions",
+      "keywords": [
+        "when",
+        "starting",
+        "conversation",
+        "establishes",
+        "find",
+        "using superpowers"
+      ],
+      "aliases": [
+        "using-superpowers"
+      ]
+    },
+    "writing-plans": {
+      "name": "writing-plans",
+      "description": "Use when you have a spec or requirements for a multi-step task, before touching code",
+      "keywords": [
+        "when",
+        "multi",
+        "requirements",
+        "writing plans",
+        "have",
+        "spec"
+      ],
+      "aliases": [
+        "writing-plans"
+      ]
     }
   },
   "detection_rules": {
@@ -130,7 +220,13 @@
       "image-generation",
       "pdf-generation",
       "ui-ux-pro-max",
-      "planning-with-files"
+      "planning-with-files",
+      "template-skill",
+      "using-superpowers",
+      "brainstorming",
+      "writing-plans",
+      "executing-plans",
+      "systematic-debugging"
     ],
     "exact_match": {
       "find skills": "find-skills",

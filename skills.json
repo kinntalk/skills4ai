@@ -24,6 +24,18 @@
       "version": "unknown",
       "updated_at": "2026-02-16T00:23:22.724972"
     },
+    "brainstorming": {
+      "source": "https://github.com/obra/superpowers.git",
+      "subdir": "skills/brainstorming",
+      "version": "e16d611eee14ac4c3253b4bf4c55a98d905c2e64",
+      "updated_at": "2026-02-16T01:44:39.387768"
+    },
+    "executing-plans": {
+      "source": "https://github.com/obra/superpowers.git",
+      "subdir": "skills/executing-plans",
+      "version": "e16d611eee14ac4c3253b4bf4c55a98d905c2e64",
+      "updated_at": "2026-02-16T01:52:46.418481"
+    },
     "image-generation": {
       "source": "local",
       "subdir": "",
@@ -42,11 +54,35 @@
       "version": "4292f000a15ecf07a6d0900ab495b80864de2a15",
       "updated_at": "2026-02-16T00:34:55.763170"
     },
+    "systematic-debugging": {
+      "source": "https://github.com/obra/superpowers.git",
+      "subdir": "skills/systematic-debugging",
+      "version": "e16d611eee14ac4c3253b4bf4c55a98d905c2e64",
+      "updated_at": "2026-02-16T01:54:31.059517"
+    },
+    "template-skill": {
+      "source": "https://github.com/anthropics/skills.git",
+      "subdir": "template",
+      "version": "1ed29a03dc852d30fa6ef2ca53a67dc2c2c2c563",
+      "updated_at": "2026-02-16T01:28:32.288832"
+    },
     "ui-ux-pro-max": {
       "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
       "subdir": "skills/ui-ux-pro-max",
       "version": "6623f12b4058d09618c89cffb2de59a47c45f999",
       "updated_at": "2026-02-16T00:23:22.725465"
+    },
+    "using-superpowers": {
+      "source": "https://github.com/obra/superpowers.git",
+      "subdir": "skills/using-superpowers",
+      "version": "e16d611eee14ac4c3253b4bf4c55a98d905c2e64",
+      "updated_at": "2026-02-16T01:41:52.132323"
+    },
+    "writing-plans": {
+      "source": "https://github.com/obra/superpowers.git",
+      "subdir": "skills/writing-plans",
+      "version": "e16d611eee14ac4c3253b4bf4c55a98d905c2e64",
+      "updated_at": "2026-02-16T01:46:58.483950"
     }
   }
 }
