@@ -39,6 +39,46 @@ except ImportError:
 
 SKILLS_DIR = Path(__file__).parent.parent.parent
 REGISTRY_FILE = SKILLS_DIR / 'skills.json'
+SKILL_MAP_FILE = SKILLS_DIR / 'skill_map.json'
+
+def prune_skill_map(installed_skills):
+    """移除 skill_map.json 中已不存在的 skills"""
+    if not SKILL_MAP_FILE.exists():
+        return
+        
+    try:
+        content = SKILL_MAP_FILE.read_text(encoding='utf-8')
+        skill_map = json.loads(content)
+        
+        if 'skills' not in skill_map:
+            return
+            
+        # Identify skills to remove
+        skills_to_remove = []
+        for name in skill_map['skills']:
+            if name not in installed_skills:
+                skills_to_remove.append(name)
+        
+        if not skills_to_remove:
+            return
+
+        # Remove from 'skills'
+        for name in skills_to_remove:
+            del skill_map['skills'][name]
+            print(f"Pruned '{name}' from skill_map.json")
+            
+        # Remove from 'detection_rules.priority_order'
+        if 'detection_rules' in skill_map and 'priority_order' in skill_map['detection_rules']:
+            original_order = skill_map['detection_rules']['priority_order']
+            new_order = [s for s in original_order if s not in skills_to_remove]
+            skill_map['detection_rules']['priority_order'] = new_order
+            
+        # Write back to file
+        SKILL_MAP_FILE.write_text(json.dumps(skill_map, indent=2, ensure_ascii=False), encoding='utf-8')
+        print(f"Updated skill_map.json (removed {len(skills_to_remove)} entries)")
+            
+    except Exception as e:
+        print(f"{RED}Error pruning skill_map.json: {e}{RESET}")
 
 def scan_skills():
     """扫描所有已安装的 skills"""
@@ -87,6 +127,11 @@ def scan_skills():
             "updated_at": datetime.datetime.now().isoformat()
         }
     
+    # 增加 Prune 逻辑：移除 skills.json 中存在但目录不存在的条目
+    # 实际上，上面的循环只扫描了存在的目录，所以新的 skills 字典自然已经 pruned 了
+    # 但如果 scan_skills 是为了 merge 而不是 overwrite，那就需要额外处理
+    # 目前 sync_registry 直接用 scan_skills 的结果覆盖文件，所以 skills.json 也是自动 pruned 的
+    
     return skills
 
 def sync_registry():
@@ -127,6 +172,9 @@ def sync_registry():
         skill_path = SKILLS_DIR / name
         if skill_path.exists():
             update_skill_map(SKILLS_DIR, name, skill_path)
+
+    # Prune skill_map.json
+    prune_skill_map(set(sorted_skills.keys()))
 
     return True
 

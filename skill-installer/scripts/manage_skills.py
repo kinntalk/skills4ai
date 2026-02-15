@@ -157,6 +157,44 @@ def safe_rmtree(path, retries=5, delay=0.5):
             return False
     return False
 
+def uninstall_skill(name):
+    """Uninstall a skill by removing its directory and updating registries."""
+    skills = load_registry()
+    if name not in skills:
+        # Check if directory exists even if not in registry
+        skill_path = SKILLS_DIR / name
+        if not skill_path.exists():
+            print(MSG_SKILL_NOT_FOUND.format(name=name))
+            return
+        print(f"Skill '{name}' not in registry but directory exists. Proceeding with removal...")
+    
+    skill_path = SKILLS_DIR / name
+    
+    # Confirm uninstallation
+    print(f"Are you sure you want to uninstall '{name}'?")
+    confirm = input("Type 'yes' to confirm: ").lower()
+    if confirm != 'yes':
+        print("Uninstallation aborted.")
+        return
+
+    print(f"Removing skill directory: {skill_path}")
+    if safe_rmtree(skill_path):
+        print(f"Successfully removed directory: {skill_path}")
+        
+        # Run sync to update registries
+        print("Syncing registries...")
+        try:
+            # Import sync_registry from sync_skills.py
+            # Assuming sync_skills.py is in the same directory
+            from sync_skills import sync_registry
+            sync_registry()
+        except ImportError:
+            print("Warning: Could not import sync_registry. Please run 'python sync_skills.py' manually.")
+            
+        print(f"Skill '{name}' uninstalled successfully.")
+    else:
+        print(f"Failed to remove skill directory: {skill_path}")
+
 def update_skill(name, force=False):
     skills = load_registry()
     if name not in skills:
@@ -290,6 +328,9 @@ def main():
     
     subparsers.add_parser('update-all', help='Update all skills')
 
+    uninstall_parser = subparsers.add_parser('uninstall', help='Uninstall a skill')
+    uninstall_parser.add_argument('name', help='Name of the skill to uninstall')
+
     args = parser.parse_args()
 
     if args.command == 'list':
@@ -303,6 +344,8 @@ def main():
         skills = load_registry()
         for name in skills:
             update_skill(name, force=False)
+    elif args.command == 'uninstall':
+        uninstall_skill(args.name)
     else:
         parser.print_help()
 

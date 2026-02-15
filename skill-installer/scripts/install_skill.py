@@ -286,15 +286,60 @@ def install_skill(source, dest_root, run_audit=True, force=False):
                 if not found:
                     print(MSG_SUBDIR_NOT_FOUND.format(subdir=subdir))
                     return False
+
+        # Smart detection of skill name and source path
+        detected_name = None
+        detected_source_path = None
+
+        # 1. Check for .claude/skills/<name> pattern
+        claude_skills_dir = source_path / '.claude' / 'skills'
+        if claude_skills_dir.exists() and claude_skills_dir.is_dir():
+            subdirs = [d for d in claude_skills_dir.iterdir() if d.is_dir()]
+            if len(subdirs) == 1:
+                detected_name = subdirs[0].name
+                detected_source_path = subdirs[0]
+                print(f"Detected nested skill in .claude/skills/{detected_name}")
+
+        # 2. Check for SKILL.md in root or detected path
+        check_path = detected_source_path if detected_source_path else source_path
+        skill_md = check_path / 'SKILL.md'
+        if skill_md.exists():
+            try:
+                content = skill_md.read_text(encoding='utf-8')
+                match = re.search(r'^name:\s*(.+)$', content, re.MULTILINE)
+                if match:
+                    name_in_md = match.group(1).strip()
+                    # Only use if we haven't found a name yet, or if it matches the detected dir name
+                    if not detected_name:
+                         detected_name = name_in_md
+                         print(f"Detected skill name from SKILL.md: {detected_name}")
+            except Exception:
+                pass
+
+        # Apply detection results
+        if detected_name:
+            skill_name = detected_name
+        else:
+            skill_name = None # Clear if not detected
+        
+        if detected_source_path:
+            source_path = detected_source_path
+            # Adjust subdir to reflect the internal path for registry
+            extra_path = detected_source_path.relative_to(temp_path)
+            if subdir:
+                 subdir = f"{subdir}/{extra_path}"
+            else:
+                 subdir = str(extra_path).replace('\\', '/')
             
         # Determine skill name (from subdir name or repo name)
-        if subdir:
-            skill_name = Path(subdir).name
-        else:
-            # Extract from repo URL: https://github.com/user/repo.git -> repo
-            skill_name = repo_url.rstrip('/').split('/')[-1]
-            if skill_name.endswith('.git'):
-                skill_name = skill_name[:-4]
+        if not skill_name:
+            if subdir:
+                skill_name = Path(subdir).name
+            else:
+                # Extract from repo URL: https://github.com/user/repo.git -> repo
+                skill_name = repo_url.rstrip('/').split('/')[-1]
+                if skill_name.endswith('.git'):
+                    skill_name = skill_name[:-4]
 
         dest_path = dest_root / skill_name
         

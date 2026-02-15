@@ -1,40 +1,52 @@
 {
   "skills": {
     "find-skills": {
-      "source": "https://github.com/vercel-labs/skills.git",
+      "source": "https://github.com/vercel-labs/skills",
       "subdir": "skills/find-skills",
-      "version": "556555c2a7cf3ff5312db9b456e08749d6e5dc08",
-      "updated_at": "2026-02-15T21:59:58.858541"
+      "version": "82dd76bda58bedde5ddbf8f86fe63a538db20c19",
+      "updated_at": "2026-02-16T00:23:22.724421"
     },
     "skill-creator": {
-      "source": "https://github.com/anthropics/skills.git",
+      "source": "https://github.com/anthropics/skills",
       "subdir": "skills/skill-creator",
       "version": "1ed29a03dc852d30fa6ef2ca53a67dc2c2c2c563",
-      "updated_at": "2026-02-15T21:59:58.859237"
+      "updated_at": "2026-02-16T00:23:22.725124"
     },
     "skill-installer": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-02-15T21:59:58.859384"
+      "updated_at": "2026-02-16T00:23:22.725276"
     },
     "skill-auditor": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-02-15T21:59:58.859081"
+      "updated_at": "2026-02-16T00:23:22.724972"
     },
     "image-generation": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-02-15T21:59:58.858740"
+      "updated_at": "2026-02-16T00:23:22.724615"
     },
     "pdf-generation": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-02-15T21:59:58.858912"
+      "updated_at": "2026-02-16T00:23:22.724797"
+    },
+    "planning-with-files": {
+      "source": "https://github.com/othmanadi/planning-with-files",
+      "subdir": "skills/planning-with-files",
+      "version": "4292f000a15ecf07a6d0900ab495b80864de2a15",
+      "updated_at": "2026-02-16T00:34:55.763170"
+    },
+    "ui-ux-pro-max": {
+      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+      "subdir": "skills/ui-ux-pro-max",
+      "version": "6623f12b4058d09618c89cffb2de59a47c45f999",
+      "updated_at": "2026-02-16T00:23:22.725465"
     }
   }
 }
