@@ -27,6 +27,16 @@ except ImportError:
         MSG_SKILLS_LIST = f"\nSkills List:"
         MSG_DRY_RUN = f"Dry run: Would sync {{count}} skills"
 
+try:
+    from install_skill import update_skill_map
+except ImportError:
+    try:
+        sys.path.append(str(Path(__file__).parent))
+        from install_skill import update_skill_map
+    except ImportError:
+        def update_skill_map(*args, **kwargs):
+            print(f"{YELLOW}Warning: Could not import update_skill_map. skill_map.json will not be updated.{RESET}")
+
 SKILLS_DIR = Path(__file__).parent.parent.parent
 REGISTRY_FILE = SKILLS_DIR / 'skills.json'
 
@@ -83,10 +93,20 @@ def sync_registry():
     """同步 skills.json"""
     skills = scan_skills()
     
+    # Sort logic: core skills first (in defined order), then alphabetical
+    def sort_key(item):
+        name = item[0]
+        CORE_SKILLS = ['find-skills', 'skill-creator', 'skill-installer', 'skill-auditor']
+        if name in CORE_SKILLS:
+            return (0, CORE_SKILLS.index(name))
+        return (1, name)
+        
+    sorted_skills = dict(sorted(skills.items(), key=sort_key))
+    
     # 写入更新后的 skills.json
     try:
         with open(REGISTRY_FILE, 'w', encoding='utf-8') as f:
-            json.dump({"skills": skills}, f, indent=2, ensure_ascii=False)
+            json.dump({"skills": sorted_skills}, f, indent=2, ensure_ascii=False)
         
         print(MSG_SYNCED_SUCCESS.format(count=len(skills)))
         print(MSG_REGISTRY_FILE.format(path=REGISTRY_FILE))
@@ -98,10 +118,16 @@ def sync_registry():
     print(MSG_SKILLS_LIST)
     print(f"{'Name':<30} {'Source':<40} {'Version':<12}")
     print("-" * 85)
-    for name, info in sorted(skills.items()):
+    for name, info in sorted_skills.items():
         source = info.get('source', 'unknown')
         version = info.get('version', 'unknown')[:7] if info.get('version') != 'unknown' else 'unknown'
         print(f"{name:<30} {source:<40} {version:<12}")
+        
+        # Update skill_map.json for each skill
+        skill_path = SKILLS_DIR / name
+        if skill_path.exists():
+            update_skill_map(SKILLS_DIR, name, skill_path)
+
     return True
 
 def list_skills():

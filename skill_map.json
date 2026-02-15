@@ -1,615 +1,160 @@
 {
   "skills": {
-    "image-generation": {
-      "name": "image-generation",
-      "description": "Converts Markdown documents to high-quality images (PNG/JPG)",
+    "find-skills": {
+      "name": "find-skills",
+      "description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
       "keywords": [
-        "image",
-        "png",
-        "jpg",
-        "picture",
-        "photo",
-        "screenshot",
-        "markdown",
-        "render",
-        "convert",
-        "图片",
-        "转换",
-        "截图",
-        "渲染",
-        "生成图片",
-        "生成png",
-        "生成jpg",
-        "markdown转图片",
-        "md转图片",
-        "文档转图片"
+        "discover",
+        "users",
+        "agent",
+        "find skills",
+        "helps",
+        "install"
       ],
       "aliases": [
-        "img-gen",
-        "image-gen",
-        "render-image",
-        "markdown-to-image"
-      ]
-    },
-    "pdf-generation": {
-      "name": "pdf-generation",
-      "description": "Professional PDF generation from markdown using Pandoc",
-      "keywords": [
-        "pdf",
-        "document",
-        "report",
-        "whitepaper",
-        "pandoc",
-        "latex",
-        "pdf",
-        "文档",
-        "报告",
-        "白皮书",
-        "pdf生成",
-        "生成pdf",
-        "markdown转pdf",
-        "md转pdf",
-        "文档转pdf"
-      ],
-      "aliases": [
-        "pdf-gen",
-        "pdf-creator",
-        "markdown-to-pdf"
+        "find-skills"
       ]
     },
     "skill-creator": {
       "name": "skill-creator",
       "description": "Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabilities with specialized knowledge, workflows, or tool integrations.",
       "keywords": [
-        "create",
-        "new",
-        "skill",
-        "template",
-        "init",
-        "package",
-        "workflow",
         "guide",
-        "documentation",
-        "scaffolding",
-        "boilerplate",
-        "structure",
-        "setup",
-        "initialization",
-        "template-generator",
-        "skill-development",
-        "skill-creation",
-        "skill-management",
-        "skill-packaging",
-        "创建",
-        "新建",
-        "技能",
-        "模板",
-        "初始化",
-        "打包",
-        "工作流",
-        "指南",
-        "文档",
-        "脚手架",
-        "结构",
-        "设置"
+        "skill creator",
+        "skills",
+        "effective",
+        "creating",
+        "this"
       ],
       "aliases": [
-        "skill-creator",
-        "create-skill",
-        "init-skill",
-        "skill-scaffolding",
-        "skill-template",
-        "skill-generator"
+        "skill-creator"
       ]
     },
     "skill-installer": {
       "name": "skill-installer",
-      "description": "Install and manage Trae skills from Git repositories",
+      "description": "A tool to install skills from remote git repositories directly into the .trae/skills directory. Supports subdirectories for monorepo skill collections.",
       "keywords": [
+        "skills",
+        "remote",
+        "from",
+        "tool",
         "install",
-        "update",
-        "uninstall",
-        "manage",
-        "git",
-        "repository",
-        "安装",
-        "更新",
-        "卸载",
-        "管理",
-        "git仓库",
-        "安装skill",
-        "更新skill",
-        "卸载skill"
+        "skill installer"
       ],
       "aliases": [
-        "skill-manager",
-        "skill-updater",
-        "install-skill",
-        "update-skill"
+        "skill-installer"
       ]
     },
     "skill-auditor": {
       "name": "skill-auditor",
-      "description": "Audit Trae skills for compliance and best practices",
+      "description": "A standard compliance checking tool for Trae skills. Use this skill when you need to verify if a skill follows best practices, specifically checking for dependency completeness, proper file encoding, path consistency, cross-platform compatibility, internationalization support, and correct packaging structure.",
       "keywords": [
-        "audit",
-        "check",
-        "validate",
-        "test",
+        "standard",
+        "trae",
         "compliance",
-        "best-practices",
-        "审计",
-        "检查",
-        "验证",
-        "测试",
-        "合规",
-        "最佳实践",
-        "审计skill",
-        "检查skill",
-        "验证skill"
+        "skill auditor",
+        "tool",
+        "checking"
       ],
       "aliases": [
-        "skill-check",
-        "skill-validator",
-        "skill-tester",
-        "skill-linter"
+        "skill-auditor"
       ]
     },
-    "find-skills": {
-      "name": "find-skills",
-      "description": "Search and discover Trae skills from repositories",
+    "image-generation": {
+      "name": "image-generation",
+      "description": "Converts Markdown documents to high-quality images (PNG/JPG) using Python and headless browser rendering. Ideal for creating social media posts, documentation screenshots, and sharing rich text content as images.",
       "keywords": [
-        "find",
-        "search",
-        "discover",
-        "explore",
-        "browse",
-        "查找",
-        "搜索",
-        "发现",
-        "探索",
-        "浏览",
-        "查找skill",
-        "搜索skill",
-        "发现skill"
-      ],
-      "aliases": [
-        "skill-search",
-        "skill-finder",
-        "skill-discover"
-      ]
-    },
-    "behavioral-product-design": {
-      "name": "behavioral-product-design",
-      "description": "Behavioral product design frameworks and psychology insights",
-      "keywords": [
-        "behavioral",
-        "psychology",
-        "product",
-        "design",
-        "framework",
-        "行为",
-        "心理学",
-        "产品设计",
-        "框架"
-      ],
-      "aliases": [
-        "lenny-skills",
-        "behavior-design"
-      ]
-    },
-    "ui-ux-pro-max-skill": {
-      "name": "ui-ux-pro-max-skill",
-      "description": "Comprehensive UI/UX design capabilities and stacks",
-      "keywords": [
-        "ui",
-        "ux",
-        "design",
-        "interface",
-        "experience",
-        "stack",
-        "界面",
-        "交互",
-        "体验",
-        "设计"
-      ],
-      "aliases": [
-        "ui-ux",
-        "pro-max"
-      ]
-    },
-    "claude-skills": {
-      "name": "claude-skills",
-      "description": "Collection of specialized roles including Product Manager and Designer",
-      "keywords": [
-        "product",
-        "manager",
-        "designer",
-        "role",
-        "persona",
-        "pm",
-        "产品经理",
-        "设计师",
-        "角色"
-      ],
-      "aliases": [
-        "product-roles",
-        "claude-collection"
-      ]
-    },
-    "test-driven-development": {
-      "name": "test-driven-development",
-      "description": "Use when implementing any feature or bugfix, before writing implementation code",
-      "keywords": [
-        "tdd",
-        "test",
-        "testing",
-        "unit-test",
-        "red-green",
-        "refactor",
-        "测试驱动开发",
-        "单元测试",
-        "测试",
-        "重构"
-      ],
-      "aliases": [
-        "tdd",
-        "test-driven",
-        "test-first"
-      ]
-    },
-    "brainstorming": {
-      "name": "brainstorming",
-      "description": "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.",
-      "keywords": [
-        "brainstorm",
-        "idea",
-        "design",
-        "creative",
-        "explore",
-        "requirements",
-        "intent",
-        "feature",
-        "component",
-        "functionality",
-        "头脑风暴",
-        "创意",
-        "设计",
-        "探索",
-        "需求",
-        "功能",
-        "组件"
-      ],
-      "aliases": [
-        "brainstorming",
-        "idea-exploration",
-        "design-thinking"
-      ]
-    },
-    "systematic-debugging": {
-      "name": "systematic-debugging",
-      "description": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
-      "keywords": [
-        "debug",
-        "bug",
-        "fix",
-        "error",
-        "failure",
-        "issue",
-        "troubleshoot",
-        "root-cause",
-        "investigate",
-        "调试",
-        "修复",
-        "错误",
-        "问题",
-        "故障排除",
-        "根因分析"
-      ],
-      "aliases": [
-        "systematic-debugging",
-        "debug",
-        "troubleshooting"
-      ]
-    },
-    "writing-plans": {
-      "name": "writing-plans",
-      "description": "Use when you have a spec or requirements for a multi-step task, before touching code",
-      "keywords": [
-        "plan",
-        "planning",
-        "spec",
-        "requirements",
-        "implementation",
-        "design",
-        "architecture",
-        "计划",
-        "规划",
-        "规格",
-        "需求",
-        "实现",
-        "架构"
-      ],
-      "aliases": [
-        "writing-plans",
-        "planning",
-        "implementation-plan"
-      ]
-    },
-    "executing-plans": {
-      "name": "executing-plans",
-      "description": "Use when you have a written implementation plan to execute in a separate session with review checkpoints",
-      "keywords": [
-        "execute",
-        "plan",
-        "implementation",
-        "task",
-        "checkpoint",
-        "review",
-        "执行",
-        "计划",
-        "任务",
-        "检查点",
-        "审查"
-      ],
-      "aliases": [
-        "executing-plans",
-        "execute-plan",
-        "plan-execution"
-      ]
-    },
-    "requesting-code-review": {
-      "name": "requesting-code-review",
-      "description": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements",
-      "keywords": [
-        "review",
-        "code-review",
-        "pr",
-        "pull-request",
-        "merge",
+        "image generation",
+        "markdown",
+        "converts",
         "quality",
-        "verify",
-        "代码审查",
-        "审查",
-        "合并",
-        "质量",
-        "验证"
+        "documents",
+        "high"
       ],
       "aliases": [
-        "requesting-code-review",
-        "code-review",
-        "review"
+        "image-generation"
       ]
     },
-    "using-git-worktrees": {
-      "name": "using-git-worktrees",
-      "description": "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification",
+    "pdf-generation": {
+      "name": "pdf-generation",
+      "description": "Professional PDF generation from markdown using Pandoc with Eisvogel template and EB Garamond fonts. Use when converting markdown to PDF, creating white papers, research documents, marketing materials, or technical documentation. Supports both English and Russian documents with professional typography and color-coded themes. Mobile-optimized layout (6x9) by default for Telegram bot context, desktop/print layout (A4) for other contexts.",
       "keywords": [
-        "git",
-        "worktree",
-        "branch",
-        "isolate",
-        "workspace",
-        "feature",
-        "git分支",
-        "工作树",
-        "隔离",
-        "工作区"
+        "generation",
+        "markdown",
+        "pdf generation",
+        "using",
+        "professional",
+        "from"
       ],
       "aliases": [
-        "using-git-worktrees",
-        "git-worktree",
-        "worktree"
-      ]
-    },
-    "verification-before-completion": {
-      "name": "verification-before-completion",
-      "description": "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always",
-      "keywords": [
-        "verify",
-        "verification",
-        "complete",
-        "done",
-        "test",
-        "check",
-        "evidence",
-        "验证",
-        "完成",
-        "检查",
-        "测试",
-        "证据"
-      ],
-      "aliases": [
-        "verification-before-completion",
-        "verify",
-        "completion-check"
-      ]
-    },
-    "finishing-a-development-branch": {
-      "name": "finishing-a-development-branch",
-      "description": "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup",
-      "keywords": [
-        "finish",
-        "merge",
-        "pr",
-        "pull-request",
-        "branch",
-        "cleanup",
-        "integrate",
-        "完成",
-        "合并",
-        "分支",
-        "清理",
-        "集成"
-      ],
-      "aliases": [
-        "finishing-a-development-branch",
-        "finish-branch",
-        "merge-branch"
-      ]
-    },
-    "subagent-driven-development": {
-      "name": "subagent-driven-development",
-      "description": "Use when executing implementation plans with independent tasks in the current session",
-      "keywords": [
-        "subagent",
-        "agent",
-        "parallel",
-        "task",
-        "execute",
-        "plan",
-        "子代理",
-        "并行",
-        "任务",
-        "执行",
-        "计划"
-      ],
-      "aliases": [
-        "subagent-driven-development",
-        "subagent",
-        "agent-driven"
+        "pdf-generation"
       ]
     }
   },
   "detection_rules": {
     "priority_order": [
-      "image-generation",
-      "pdf-generation",
+      "find-skills",
       "skill-creator",
       "skill-installer",
       "skill-auditor",
-      "find-skills",
-      "brainstorming",
-      "systematic-debugging",
-      "test-driven-development",
-      "writing-plans",
-      "executing-plans",
-      "requesting-code-review",
-      "using-git-worktrees",
-      "verification-before-completion",
-      "finishing-a-development-branch",
-      "subagent-driven-development"
+      "image-generation",
+      "pdf-generation"
     ],
     "exact_match": {
-      "image": "image-generation",
-      "pdf": "pdf-generation",
-      "create": "skill-creator",
-      "install": "skill-installer",
-      "audit": "skill-auditor",
-      "find": "find-skills",
-      "brainstorm": "brainstorming",
-      "debug": "systematic-debugging",
-      "tdd": "test-driven-development",
-      "plan": "writing-plans",
-      "execute": "executing-plans",
-      "review": "requesting-code-review",
-      "worktree": "using-git-worktrees",
-      "verify": "verification-before-completion",
-      "finish": "finishing-a-development-branch",
-      "subagent": "subagent-driven-development",
-      "test driven development": "test-driven-development",
+      "find skills": "find-skills",
+      "image generation": "image-generation",
+      "pdf generation": "pdf-generation",
+      "skill auditor": "skill-auditor",
       "skill creator": "skill-creator",
-      "new": "skill-creator",
-      "template": "skill-creator",
-      "init": "skill-creator"
+      "skill installer": "skill-installer"
     },
     "partial_match": {
-      "png": "image-generation",
-      "jpg": "image-generation",
+      "helps": "find-skills",
+      "agent": "find-skills",
+      "install": [
+        "find-skills",
+        "skill-installer"
+      ],
+      "discover": "find-skills",
+      "users": "find-skills",
+      "find skills": "find-skills",
+      "high": "image-generation",
+      "documents": "image-generation",
+      "converts": "image-generation",
+      "quality": "image-generation",
       "markdown": [
         "image-generation",
         "pdf-generation"
       ],
-      "skill": [
-        "skill-creator",
-        "skill-installer",
-        "skill-auditor"
+      "image generation": "image-generation",
+      "from": [
+        "pdf-generation",
+        "skill-installer"
       ],
-      "create": "skill-creator",
-      "new": "skill-creator",
-      "template": "skill-creator",
-      "init": "skill-creator",
-      "package": "skill-creator",
-      "workflow": "skill-creator",
+      "pdf generation": "pdf-generation",
+      "using": "pdf-generation",
+      "generation": "pdf-generation",
+      "professional": "pdf-generation",
+      "standard": "skill-auditor",
+      "compliance": "skill-auditor",
+      "skill auditor": "skill-auditor",
+      "checking": "skill-auditor",
+      "tool": [
+        "skill-auditor",
+        "skill-installer"
+      ],
+      "trae": "skill-auditor",
+      "skill creator": "skill-creator",
+      "creating": "skill-creator",
       "guide": "skill-creator",
-      "documentation": "skill-creator",
-      "scaffolding": "skill-creator",
-      "boilerplate": "skill-creator",
-      "structure": "skill-creator",
-      "setup": "skill-creator",
-      "initialization": "skill-creator",
-      "generator": "skill-creator",
-      "development": "skill-creator",
-      "creation": "skill-creator",
-      "management": "skill-creator",
-      "packaging": "skill-creator",
-      "创建": "skill-creator",
-      "新建": "skill-creator",
-      "技能": "skill-creator",
-      "模板": "skill-creator",
-      "初始化": "skill-creator",
-      "打包": "skill-creator",
-      "工作流": "skill-creator",
-      "指南": "skill-creator",
-      "文档": "skill-creator",
-      "脚手架": "skill-creator",
-      "结构": "skill-creator",
-      "设置": "skill-creator",
-      "idea": "brainstorming",
-      "design": [
-        "brainstorming",
-        "ui-ux-pro-max-skill",
-        "claude-skills",
-        "behavioral-product-design"
+      "this": "skill-creator",
+      "effective": "skill-creator",
+      "skills": [
+        "skill-creator",
+        "skill-installer"
       ],
-      "creative": "brainstorming",
-      "头脑风暴": "brainstorming",
-      "创意": "brainstorming",
-      "bug": "systematic-debugging",
-      "fix": "systematic-debugging",
-      "error": "systematic-debugging",
-      "调试": "systematic-debugging",
-      "修复": "systematic-debugging",
-      "test": "test-driven-development",
-      "testing": "test-driven-development",
-      "unit-test": "test-driven-development",
-      "测试": "test-driven-development",
-      "planning": "writing-plans",
-      "spec": "writing-plans",
-      "requirements": "writing-plans",
-      "计划": "writing-plans",
-      "规划": "writing-plans",
-      "execution": "executing-plans",
-      "执行": "executing-plans",
-      "code-review": "requesting-code-review",
-      "pr": "requesting-code-review",
-      "pull-request": [
-        "requesting-code-review",
-        "finishing-a-development-branch"
-      ],
-      "merge": "finishing-a-development-branch",
-      "git": "using-git-worktrees",
-      "branch": "using-git-worktrees",
-      "isolate": "using-git-worktrees",
-      "done": "verification-before-completion",
-      "complete": "verification-before-completion",
-      "验证": "verification-before-completion",
-      "agent": "subagent-driven-development",
-      "parallel": "subagent-driven-development",
-      "behavioral": "behavioral-product-design",
-      "psychology": "behavioral-product-design",
-      "ui": [
-        "ui-ux-pro-max-skill",
-        "claude-skills"
-      ],
-      "ux": [
-        "ui-ux-pro-max-skill",
-        "claude-skills"
-      ],
-      "product": [
-        "claude-skills",
-        "behavioral-product-design"
-      ]
+      "remote": "skill-installer",
+      "skill installer": "skill-installer"
     }
   }
 }

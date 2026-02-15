@@ -440,6 +440,9 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
     run_cross_platform_checks = check_level in ["strict", "standard"]
     run_absolute_ref_checks = check_level in ["strict", "standard"]
     run_registry_checks = check_level in ["strict", "standard"]
+    
+    # Emoji usage is now ALWAYS an error (mandatory requirement)
+    # i18n_as_error is for other i18n issues (like hardcoded strings)
     i18n_as_error = (check_level == "strict")
     
     # Section 1: Basic Structure
@@ -544,7 +547,10 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
         if ok:
             print_pass(msg, json_output)
         else:
-            if i18n_as_error:
+            # Check if any issue is an emoji error (which is always FAIL)
+            has_emoji_issue = any("Emoji found" in issue for issue in msg)
+            
+            if has_emoji_issue or i18n_as_error:
                 print_fail("Found i18n issues:", json_output)
                 has_errors = True
             else:
@@ -857,6 +863,7 @@ def check_i18n_support(skill_path):
                                 continue
                         
                         issues.append(f"{py_file.name}:{i}: Emoji found in output statement. Emoji is not allowed in skill code. Use standard text labels [PASS]/[FAIL]/[WARN]/[INFO] instead.")
+                        has_emoji_error = True
             
             # Warn if many hardcoded messages (informational only)
             if message_count > 20:
@@ -866,6 +873,13 @@ def check_i18n_support(skill_path):
             issues.append(f"Could not read {py_file.name}: {e}")
             
     if issues:
+        # Separate emoji errors from other i18n issues
+        emoji_issues = [i for i in issues if "Emoji found" in i]
+        other_issues = [i for i in issues if "Emoji found" not in i]
+        
+        if emoji_issues:
+            return False, issues
+            
         return False, issues
     return True, "Internationalization check completed"
 

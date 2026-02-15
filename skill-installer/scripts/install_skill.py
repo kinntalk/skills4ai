@@ -20,6 +20,23 @@ try:
     from messages import *
 except ImportError:
     # Fallback if messages.py not found in same dir (e.g. running from root)
+    # Add exact matches based on skill name
+    skill_name_lower = skill_name.lower().replace('-', ' ')
+    skill_map['detection_rules']['exact_match'][skill_name_lower] = skill_name
+    
+    # Add partial matches based on keywords
+    for keyword in keywords:
+        keyword_lower = keyword.lower()
+        if keyword_lower not in skill_map['detection_rules']['partial_match']:
+            skill_map['detection_rules']['partial_match'][keyword_lower] = skill_name
+        elif isinstance(skill_map['detection_rules']['partial_match'][keyword_lower], str):
+            # Convert to list if multiple skills match
+            existing = skill_map['detection_rules']['partial_match'][keyword_lower]
+            skill_map['detection_rules']['partial_match'][keyword_lower] = [existing, skill_name]
+        elif isinstance(skill_map['detection_rules']['partial_match'][keyword_lower], list):
+            if skill_name not in skill_map['detection_rules']['partial_match'][keyword_lower]:
+                skill_map['detection_rules']['partial_match'][keyword_lower].append(skill_name)
+    
     try:
         sys.path.append(str(Path(__file__).parent))
         from messages import *
@@ -67,6 +84,19 @@ def update_registry(dest_root, skill_name, repo_url, subdir, commit_hash):
         'updated_at': datetime.datetime.now().isoformat()
     }
     
+    # Sort registry to keep core skills at top
+    CORE_SKILLS = ['find-skills', 'skill-creator', 'skill-installer', 'skill-auditor']
+    
+    # Sort logic: core skills first (in defined order), then alphabetical
+    def sort_key(item):
+        name = item[0]
+        if name in CORE_SKILLS:
+            return (0, CORE_SKILLS.index(name))
+        return (1, name)
+        
+    sorted_skills = dict(sorted(registry['skills'].items(), key=sort_key))
+    registry['skills'] = sorted_skills
+    
     try:
         registry_path.write_text(json.dumps(registry, indent=2), encoding='utf-8')
         print(MSG_REGISTRY_UPDATED.format(path=registry_path))
@@ -84,6 +114,12 @@ def update_skill_map(dest_root, skill_name, skill_path):
             skill_map = json.loads(content)
         except Exception as e:
             print(f"Warning: Could not read skill_map.json: {e}")
+    
+    # Ensure structure exists
+    if 'skills' not in skill_map:
+        skill_map['skills'] = {}
+    if 'detection_rules' not in skill_map:
+        skill_map['detection_rules'] = {'priority_order': [], 'exact_match': {}, 'partial_match': {}}
     
     # Extract metadata from SKILL.md
     skill_md = skill_path / 'SKILL.md'
@@ -128,22 +164,33 @@ def update_skill_map(dest_root, skill_name, skill_path):
     if skill_name not in skill_map['detection_rules']['priority_order']:
         skill_map['detection_rules']['priority_order'].append(skill_name)
     
-    # Add exact matches based on skill name
-    skill_name_lower = skill_name.lower().replace('-', ' ')
-    skill_map['detection_rules']['exact_match'][skill_name_lower] = skill_name
+    # Ensure CORE_SKILLS are always at the top of priority_order
+    CORE_SKILLS = ['find-skills', 'skill-creator', 'skill-installer', 'skill-auditor']
+    current_order = skill_map['detection_rules']['priority_order']
     
-    # Add partial matches based on keywords
-    for keyword in keywords:
-        keyword_lower = keyword.lower()
-        if keyword_lower not in skill_map['detection_rules']['partial_match']:
-            skill_map['detection_rules']['partial_match'][keyword_lower] = skill_name
-        elif isinstance(skill_map['detection_rules']['partial_match'][keyword_lower], str):
-            # Convert to list if multiple skills match
-            existing = skill_map['detection_rules']['partial_match'][keyword_lower]
-            skill_map['detection_rules']['partial_match'][keyword_lower] = [existing, skill_name]
-        elif isinstance(skill_map['detection_rules']['partial_match'][keyword_lower], list):
-            if skill_name not in skill_map['detection_rules']['partial_match'][keyword_lower]:
-                skill_map['detection_rules']['partial_match'][keyword_lower].append(skill_name)
+    # Remove core skills from current list
+    non_core = [s for s in current_order if s not in CORE_SKILLS]
+    
+    # Reconstruct list: core skills + others
+    new_order = []
+    for core in CORE_SKILLS:
+        # Only add if it was in the list or is the one being added
+        if core in current_order or core == skill_name:
+            new_order.append(core)
+            
+    # Add remaining non-core skills
+    new_order.extend(non_core)
+    
+    skill_map['detection_rules']['priority_order'] = new_order
+    
+    # Sort skills dictionary in skill_map.json as well
+    def sort_key(item):
+        name = item[0]
+        if name in CORE_SKILLS:
+            return (0, CORE_SKILLS.index(name))
+        return (1, name)
+        
+    skill_map['skills'] = dict(sorted(skill_map['skills'].items(), key=sort_key))
     
     try:
         skill_map_path.write_text(json.dumps(skill_map, indent=2, ensure_ascii=False), encoding='utf-8')
@@ -284,6 +331,14 @@ def install_skill(source, dest_root, run_audit=True, force=False):
                     print(MSG_AUDIT_FAILED.format(error=e))
             else:
                 print(MSG_AUDIT_SKIPPED)
+        
+        # Trigger Post-Operation Analysis
+        try:
+            analysis_script = Path(__file__).parent / 'post_op_analysis.py'
+            if analysis_script.exists():
+                subprocess.run([sys.executable, str(analysis_script), 'install', skill_name, str(dest_path)], check=False)
+        except Exception as e:
+            print(f"Warning: Post-operation analysis failed: {e}")
                 
     return True
 

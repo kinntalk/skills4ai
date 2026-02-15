@@ -256,6 +256,15 @@ def update_skill(name, force=False):
         if backup_path.exists():
             safe_rmtree(backup_path)
             print(MSG_BACKUP_REMOVED)
+            
+        # Trigger Post-Operation Analysis
+        try:
+            analysis_script = Path(__file__).parent / 'post_op_analysis.py'
+            if analysis_script.exists():
+                subprocess.run([sys.executable, str(analysis_script), 'update', name, str(skill_path)], check=False)
+        except Exception as e:
+            print(f"Warning: Post-operation analysis failed: {e}")
+            
     else:
         print(MSG_UPDATE_FAILED.format(name=name))
         if backup_path.exists():
