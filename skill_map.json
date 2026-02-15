@@ -1,76 +1,27 @@
 {
   "skills": {
-    "image-generation": {
-      "name": "image-generation",
-      "description": "Converts Markdown documents to high-quality images (PNG/JPG)",
+    "find-skills": {
+      "name": "find-skills",
+      "path": "management/find-skills",
+      "description": "Helps users discover and install agent skills when they ask questions like 'how do I do X', 'find a skill for X', 'is there a skill that can...', or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
       "context": {
-        "trigger_phase": "generation",
+        "trigger_phase": "management",
         "required_for": [
-          "markdown-to-image",
-          "document-rendering"
+          "skill-discovery",
+          "capability-search"
         ],
-        "priority": 7
+        "priority": 5
       },
       "keywords": [
-        "image",
-        "png",
-        "jpg",
-        "picture",
-        "photo",
-        "screenshot",
-        "markdown",
-        "render",
-        "convert",
-        "图片",
-        "转换",
-        "截图",
-        "渲染",
-        "生成图片",
-        "生成png",
-        "生成jpg",
-        "markdown转图片",
-        "md转图片",
-        "文档转图片"
+        "agent",
+        "install",
+        "discover",
+        "users",
+        "helps",
+        "find skills"
       ],
       "aliases": [
-        "img-gen",
-        "image-gen",
-        "render-image",
-        "markdown-to-image"
-      ]
-    },
-    "pdf-generation": {
-      "name": "pdf-generation",
-      "description": "Professional PDF generation from markdown using Pandoc",
-      "context": {
-        "trigger_phase": "generation",
-        "required_for": [
-          "markdown-to-pdf",
-          "document-generation"
-        ],
-        "priority": 7
-      },
-      "keywords": [
-        "pdf",
-        "document",
-        "report",
-        "whitepaper",
-        "pandoc",
-        "latex",
-        "pdf",
-        "文档",
-        "报告",
-        "白皮书",
-        "pdf生成",
-        "生成pdf",
-        "markdown转pdf",
-        "md转pdf",
-        "文档转pdf"
-      ],
-      "aliases": [
-        "pdf-gen",
-        "pdf-creator",
-        "markdown-to-pdf"
+        "find-skills"
       ]
     },
     "skill-creator": {
@@ -198,28 +149,79 @@
         "priority": 5
       }
     },
-    "find-skills": {
-      "name": "find-skills",
-      "path": "management/find-skills",
-      "description": "Helps users discover and install agent skills when they ask questions like 'how do I do X', 'find a skill for X', 'is there a skill that can...', or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
+    "pdf-generation": {
+      "name": "pdf-generation",
+      "path": "domain/pdf-generation",
+      "description": "Professional PDF generation from markdown using Pandoc",
       "context": {
-        "trigger_phase": "management",
+        "trigger_phase": "generation",
         "required_for": [
-          "skill-discovery",
-          "capability-search"
+          "markdown-to-pdf",
+          "document-generation"
         ],
-        "priority": 5
+        "priority": 7
       },
       "keywords": [
-        "agent",
-        "install",
-        "discover",
-        "users",
-        "helps",
-        "find skills"
+        "pdf",
+        "document",
+        "report",
+        "whitepaper",
+        "pandoc",
+        "latex",
+        "pdf",
+        "文档",
+        "报告",
+        "白皮书",
+        "pdf生成",
+        "生成pdf",
+        "markdown转pdf",
+        "md转pdf",
+        "文档转pdf"
       ],
       "aliases": [
-        "find-skills"
+        "pdf-gen",
+        "pdf-creator",
+        "markdown-to-pdf"
+      ]
+    },
+    "image-generation": {
+      "name": "image-generation",
+      "path": "domain/image-generation",
+      "description": "Converts Markdown documents to high-quality images (PNG/JPG)",
+      "context": {
+        "trigger_phase": "generation",
+        "required_for": [
+          "markdown-to-image",
+          "document-rendering"
+        ],
+        "priority": 7
+      },
+      "keywords": [
+        "image",
+        "png",
+        "jpg",
+        "picture",
+        "photo",
+        "screenshot",
+        "markdown",
+        "render",
+        "convert",
+        "图片",
+        "转换",
+        "截图",
+        "渲染",
+        "生成图片",
+        "生成png",
+        "生成jpg",
+        "markdown转图片",
+        "md转图片",
+        "文档转图片"
+      ],
+      "aliases": [
+        "img-gen",
+        "image-gen",
+        "render-image",
+        "markdown-to-image"
       ]
     },
     "behavioral-product-design": {
@@ -474,6 +476,7 @@
     },
     "requesting-code-review": {
       "name": "requesting-code-review",
+      "path": "workflow/requesting-code-review",
       "description": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements",
       "keywords": [
         "review",
@@ -505,6 +508,7 @@
     },
     "using-git-worktrees": {
       "name": "using-git-worktrees",
+      "path": "workflow/using-git-worktrees",
       "description": "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification",
       "keywords": [
         "git",
@@ -863,5 +867,6 @@
         "global_cli": "npx skills",
         "priority": "local_skills"
       }
+    }
   }
 }
