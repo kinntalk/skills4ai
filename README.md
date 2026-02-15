@@ -1,4 +1,5 @@
 # skills4ai
-skills for ai/agents/ide
 
-run in the Trae IDE,  this is a collection of skills
+this is a collection of skills for ai / agents / ide
+
+run in the Trae IDE
