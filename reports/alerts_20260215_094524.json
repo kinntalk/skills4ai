@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-02-15T09:45:24.488529",
+  "alerts": [
+    {
+      "level": "critical",
+      "type": "quality_score",
+      "message": "Overall quality score (50.0) below threshold (70.0)",
+      "value": 50.0,
+      "threshold": 70.0
+    },
+    {
+      "level": "warning",
+      "type": "success_rate",
+      "message": "Overall success rate (76.47%) approaching threshold",
+      "value": 76.47,
+      "threshold": 85.0
+    },
+    {
+      "level": "error",
+      "type": "keywords",
+      "message": "Too many keyword overlaps (162)",
+      "value": 162,
+      "threshold": 10
+    }
+  ]
+}

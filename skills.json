@@ -113,6 +113,12 @@
       "subdir": "skills/finishing-a-development-branch",
       "version": "a98c5dfc9de0df5318f4980d91d24780a566ee60",
       "updated_at": "2026-02-12T12:44:27.678687"
+    },
+    "evaluation": {
+      "source": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering.git",
+      "subdir": "skills/evaluation",
+      "version": "7942df36cfcac4f224d310b6be552e99715df5de",
+      "updated_at": "2026-02-14T23:20:20.817749"
     }
   }
 }

@@ -3,6 +3,14 @@
     "image-generation": {
       "name": "image-generation",
       "description": "Converts Markdown documents to high-quality images (PNG/JPG)",
+      "context": {
+        "trigger_phase": "generation",
+        "required_for": [
+          "markdown-to-image",
+          "document-rendering"
+        ],
+        "priority": 7
+      },
       "keywords": [
         "image",
         "png",
@@ -34,6 +42,14 @@
     "pdf-generation": {
       "name": "pdf-generation",
       "description": "Professional PDF generation from markdown using Pandoc",
+      "context": {
+        "trigger_phase": "generation",
+        "required_for": [
+          "markdown-to-pdf",
+          "document-generation"
+        ],
+        "priority": 7
+      },
       "keywords": [
         "pdf",
         "document",
@@ -59,7 +75,16 @@
     },
     "skill-creator": {
       "name": "skill-creator",
+      "path": "management/skill-creator",
       "description": "Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabilities with specialized knowledge, workflows, or tool integrations.",
+      "context": {
+        "trigger_phase": "management",
+        "required_for": [
+          "skill-development",
+          "skill-packaging"
+        ],
+        "priority": 5
+      },
       "keywords": [
         "create",
         "new",
@@ -104,6 +129,7 @@
     },
     "skill-installer": {
       "name": "skill-installer",
+      "path": "management/skill-installer",
       "description": "Install and manage Trae skills from Git repositories",
       "keywords": [
         "install",
@@ -126,10 +152,19 @@
         "skill-updater",
         "install-skill",
         "update-skill"
-      ]
+      ],
+      "context": {
+        "trigger_phase": "management",
+        "required_for": [
+          "skill-installation",
+          "skill-updates"
+        ],
+        "priority": 5
+      }
     },
     "skill-auditor": {
       "name": "skill-auditor",
+      "path": "management/skill-auditor",
       "description": "Audit Trae skills for compliance and best practices",
       "keywords": [
         "audit",
@@ -153,11 +188,28 @@
         "skill-validator",
         "skill-tester",
         "skill-linter"
-      ]
+      ],
+      "context": {
+        "trigger_phase": "management",
+        "required_for": [
+          "skill-validation",
+          "compliance-check"
+        ],
+        "priority": 5
+      }
     },
     "find-skills": {
       "name": "find-skills",
-      "description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
+      "path": "management/find-skills",
+      "description": "Helps users discover and install agent skills when they ask questions like 'how do I do X', 'find a skill for X', 'is there a skill that can...', or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
+      "context": {
+        "trigger_phase": "management",
+        "required_for": [
+          "skill-discovery",
+          "capability-search"
+        ],
+        "priority": 5
+      },
       "keywords": [
         "agent",
         "install",
@@ -171,8 +223,6 @@
       ]
     },
     "behavioral-product-design": {
-      "name": "behavioral-product-design",
-      "description": "Behavioral product design frameworks and psychology insights",
       "keywords": [
         "behavioral",
         "psychology",
@@ -187,10 +237,20 @@
       "aliases": [
         "lenny-skills",
         "behavior-design"
-      ]
+      ],
+      "path": "domain/behavioral-product-design",
+      "context": {
+        "trigger_phase": "domain",
+        "required_for": [
+          "product-design",
+          "behavioral-optimization"
+        ],
+        "priority": 6
+      }
     },
     "ui-ux-pro-max-skill": {
       "name": "ui-ux-pro-max-skill",
+      "path": "domain/ui-ux-pro-max-skill",
       "description": "Comprehensive UI/UX design capabilities and stacks",
       "keywords": [
         "ui",
@@ -207,7 +267,15 @@
       "aliases": [
         "ui-ux",
         "pro-max"
-      ]
+      ],
+      "context": {
+        "trigger_phase": "domain",
+        "required_for": [
+          "ui-design",
+          "ux-design"
+        ],
+        "priority": 6
+      }
     },
     "claude-skills": {
       "name": "claude-skills",
@@ -226,10 +294,20 @@
       "aliases": [
         "product-roles",
         "claude-collection"
-      ]
+      ],
+      "path": "domain/claude-skills",
+      "context": {
+        "trigger_phase": "domain",
+        "required_for": [
+          "specialized-roles",
+          "domain-expertise"
+        ],
+        "priority": 6
+      }
     },
     "test-driven-development": {
       "name": "test-driven-development",
+      "path": "workflow/test-driven-development",
       "description": "Use when implementing any feature or bugfix, before writing implementation code",
       "keywords": [
         "tdd",
@@ -247,7 +325,15 @@
         "tdd",
         "test-driven",
         "test-first"
-      ]
+      ],
+      "context": {
+        "trigger_phase": "implementation",
+        "required_for": [
+          "feature-implementation",
+          "bugfix"
+        ],
+        "priority": 2
+      }
     },
     "brainstorming": {
       "name": "brainstorming",
@@ -275,10 +361,21 @@
         "brainstorming",
         "idea-exploration",
         "design-thinking"
-      ]
+      ],
+      "path": "workflow/brainstorming",
+      "context": {
+        "trigger_phase": "ideation",
+        "required_for": [
+          "feature-creation",
+          "component-building",
+          "behavior-modification"
+        ],
+        "priority": 1
+      }
     },
     "systematic-debugging": {
       "name": "systematic-debugging",
+      "path": "workflow/systematic-debugging",
       "description": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
       "keywords": [
         "debug",
@@ -301,10 +398,19 @@
         "systematic-debugging",
         "debug",
         "troubleshooting"
-      ]
+      ],
+      "context": {
+        "trigger_phase": "debugging",
+        "required_for": [
+          "bug-fixing",
+          "error-investigation"
+        ],
+        "priority": 4
+      }
     },
     "writing-plans": {
       "name": "writing-plans",
+      "path": "workflow/writing-plans",
       "description": "Use when you have a spec or requirements for a multi-step task, before touching code",
       "keywords": [
         "plan",
@@ -325,10 +431,19 @@
         "writing-plans",
         "planning",
         "implementation-plan"
-      ]
+      ],
+      "context": {
+        "trigger_phase": "planning",
+        "required_for": [
+          "multi-step-task",
+          "spec-based-work"
+        ],
+        "priority": 2
+      }
     },
     "executing-plans": {
       "name": "executing-plans",
+      "path": "workflow/executing-plans",
       "description": "Use when you have a written implementation plan to execute in a separate session with review checkpoints",
       "keywords": [
         "execute",
@@ -347,7 +462,15 @@
         "executing-plans",
         "execute-plan",
         "plan-execution"
-      ]
+      ],
+      "context": {
+        "trigger_phase": "implementation",
+        "required_for": [
+          "plan-execution",
+          "parallel-tasks"
+        ],
+        "priority": 3
+      }
     },
     "requesting-code-review": {
       "name": "requesting-code-review",
@@ -370,7 +493,15 @@
         "requesting-code-review",
         "code-review",
         "review"
-      ]
+      ],
+      "context": {
+        "trigger_phase": "verification",
+        "required_for": [
+          "code-quality",
+          "merge-preparation"
+        ],
+        "priority": 4
+      }
     },
     "using-git-worktrees": {
       "name": "using-git-worktrees",
@@ -391,10 +522,19 @@
         "using-git-worktrees",
         "git-worktree",
         "worktree"
-      ]
+      ],
+      "context": {
+        "trigger_phase": "planning",
+        "required_for": [
+          "workspace-isolation",
+          "feature-work"
+        ],
+        "priority": 3
+      }
     },
     "verification-before-completion": {
       "name": "verification-before-completion",
+      "path": "workflow/verification-before-completion",
       "description": "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always",
       "keywords": [
         "verify",
@@ -414,10 +554,19 @@
         "verification-before-completion",
         "verify",
         "completion-check"
-      ]
+      ],
+      "context": {
+        "trigger_phase": "verification",
+        "required_for": [
+          "task-completion",
+          "quality-verification"
+        ],
+        "priority": 4
+      }
     },
     "finishing-a-development-branch": {
       "name": "finishing-a-development-branch",
+      "path": "workflow/finishing-a-development-branch",
       "description": "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup",
       "keywords": [
         "finish",
@@ -437,10 +586,19 @@
         "finishing-a-development-branch",
         "finish-branch",
         "merge-branch"
-      ]
+      ],
+      "context": {
+        "trigger_phase": "verification",
+        "required_for": [
+          "branch-integration",
+          "merge-decision"
+        ],
+        "priority": 4
+      }
     },
     "subagent-driven-development": {
       "name": "subagent-driven-development",
+      "path": "workflow/subagent-driven-development",
       "description": "Use when executing implementation plans with independent tasks in the current session",
       "keywords": [
         "subagent",
@@ -459,27 +617,70 @@
         "subagent-driven-development",
         "subagent",
         "agent-driven"
-      ]
+      ],
+      "context": {
+        "trigger_phase": "implementation",
+        "required_for": [
+          "independent-tasks",
+          "parallel-execution"
+        ],
+        "priority": 3
+      }
+    },
+    "evaluation": {
+      "name": "evaluation",
+      "path": "domain/evaluation",
+      "description": "This skill should be used when the user asks to \"evaluate agent performance\", \"build test framework\", \"measure agent quality\", \"create evaluation rubrics\", or mentions LLM-as-judge, multi-dimensional evaluation, agent testing, or quality gates for agent pipelines.",
+      "keywords": [
+        "evaluate",
+        "evaluation",
+        "test framework",
+        "measure quality",
+        "agent performance",
+        "quality gates",
+        "rubrics",
+        "llm-as-judge",
+        "multi-dimensional",
+        "agent testing",
+        "评估",
+        "测试框架",
+        "质量测量",
+        "代理性能",
+        "质量门",
+        "评分标准"
+      ],
+      "aliases": [
+        "evaluation"
+      ],
+      "context": {
+        "trigger_phase": "domain",
+        "required_for": [
+          "agent-evaluation",
+          "quality-measurement"
+        ],
+        "priority": 6
+      }
     }
   },
   "detection_rules": {
     "priority_order": [
-      "image-generation",
-      "pdf-generation",
-      "skill-creator",
+      "find-skills",
       "skill-installer",
       "skill-auditor",
-      "find-skills",
+      "skill-creator",
       "brainstorming",
-      "systematic-debugging",
       "test-driven-development",
       "writing-plans",
       "executing-plans",
+      "systematic-debugging",
       "requesting-code-review",
       "using-git-worktrees",
       "verification-before-completion",
       "finishing-a-development-branch",
-      "subagent-driven-development"
+      "subagent-driven-development",
+      "evaluation",
+      "image-generation",
+      "pdf-generation"
     ],
     "exact_match": {
       "image": "image-generation",
@@ -503,7 +704,8 @@
       "new": "skill-creator",
       "template": "skill-creator",
       "init": "skill-creator",
-      "find skills": "find-skills"
+      "find skills": "find-skills",
+      "evaluation": "evaluation"
     },
     "partial_match": {
       "png": "image-generation",
@@ -609,7 +811,57 @@
       "discover": "find-skills",
       "users": "find-skills",
       "helps": "find-skills",
-      "find skills": "find-skills"
-    }
+      "find skills": "find-skills",
+      "evaluation": "evaluation",
+      "when": "evaluation",
+      "used": "evaluation",
+      "this": "evaluation",
+      "should": "evaluation"
+    },
+    "context_aware": {
+      "ideation": [
+        "brainstorming"
+      ],
+      "planning": [
+        "writing-plans",
+        "using-git-worktrees"
+      ],
+      "implementation": [
+        "executing-plans",
+        "test-driven-development",
+        "subagent-driven-development"
+      ],
+      "debugging": [
+        "systematic-debugging"
+      ],
+      "verification": [
+        "verification-before-completion",
+        "requesting-code-review",
+        "finishing-a-development-branch"
+      ],
+      "management": [
+        "skill-creator",
+        "skill-installer",
+        "skill-auditor",
+        "find-skills"
+      ],
+      "domain": [
+        "behavioral-product-design",
+        "ui-ux-pro-max-skill",
+        "claude-skills",
+        "evaluation"
+      ],
+      "generation": [
+        "image-generation",
+        "pdf-generation"
+      ],
+      "local_vs_global": {
+        "local_skills": [
+          "find-skills",
+          "skill-installer"
+        ],
+        "global_cli": "npx skills",
+        "priority": "local_skills"
+      }
   }
 }

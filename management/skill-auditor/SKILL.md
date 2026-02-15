@@ -1,10 +1,106 @@
 ---
 name: skill-auditor
-description: A standard compliance checking tool for Trae skills. Use this skill when you need to verify if a skill follows best practices, specifically checking for dependency completeness, proper file encoding, path consistency, cross-platform compatibility, internationalization support, and correct packaging structure.
-description_zh: Trae skills 标准合规性检查工具。当您需要验证 skill 是否遵循最佳实践时使用此 skill，专门检查依赖完整性、正确的文件编码、路径一致性、跨平台兼容性、国际化支持和正确的打包结构。
+description: A standard compliance checking tool for Trae skills. Use this skill when you need to verify if a skill follows best practices, specifically checking for dependency completeness, proper file encoding, path consistency, cross-platform compatibility, internationalization support, and correct packaging structure. Part of the quality monitoring ecosystem with context-aware routing support.
+description_zh: Trae skills 标准合规性检查工具。当您需要验证 skill 是否遵循最佳实践时使用此 skill，专门检查依赖完整性、正确的文件编码、路径一致性、跨平台兼容性、国际化支持和正确的打包结构。作为质量监控生态系统的一部分，支持上下文感知路由。
+keywords:
+  - audit
+  - check
+  - validate
+  - test
+  - compliance
+  - best-practices
+  - quality
+  - verify
+  - 审计
+  - 检查
+  - 验证
+  - 测试
+  - 合规
+  - 最佳实践
+  - 质量
+aliases:
+  - skill-check
+  - skill-validator
+  - skill-tester
+  - skill-linter
+  - skill-audit
 ---
 
 # Skill Auditor / Skill 审计工具
+
+## Overview / 概述
+
+The `skill-auditor` provides a standardized validation process for Trae skills. It automates detection of common pitfalls that can cause skills to fail in different environments (e.g., Windows encoding issues) or lead to maintenance problems (e.g., incorrect directory structures, absolute paths, lack of i18n support).
+
+## When to Use This Skill / 何时使用此技能
+
+Use this skill when:
+- You need to validate a newly created skill
+- You need to verify a skill meets quality standards
+- You need to check if a skill follows best practices
+- You need to audit a skill before installation
+- You need to ensure a skill is compatible with the intelligent routing system
+
+## Skill Context and Routing / 技能上下文和路由
+
+This skill is part of the **management** skills category and is automatically routed by the intelligent routing system based on:
+
+- **Trigger Phase**: `management`
+- **Required For**: `skill-validation`, `compliance-check`
+- **Priority**: 5
+
+The routing system uses the `skill_map.json` context field to automatically detect when this skill should be invoked based on keywords like "audit", "check", "validate", "test", "compliance", "best-practices", "quality", "verify".
+
+## Skills Directory Structure / 技能目录结构
+
+Skills are organized in the `.trae/skills/` directory with the following structure:
+
+```
+.trae/skills/
+├── workflow/           # Workflow-based skills (brainstorming, planning, etc.)
+│   ├── AGENTS.md       # Workflow skills persona and boundaries
+│   ├── brainstorming/
+│   ├── writing-plans/
+│   ├── executing-plans/
+│   └── ...
+├── management/         # Management skills (find-skills, skill-creator, etc.)
+│   ├── AGENTS.md       # Management skills persona and boundaries
+│   ├── find-skills/
+│   ├── skill-creator/
+│   ├── skill-installer/
+│   ├── skill-auditor/
+│   └── ...
+├── domain/            # Domain-specific skills (ui-ux, claude-skills, etc.)
+│   ├── AGENTS.md       # Domain skills persona and boundaries
+│   ├── behavioral-product-design/
+│   ├── ui-ux-pro-max-skill/
+│   ├── claude-skills/
+│   └── ...
+├── [other skills]     # Other standalone skills
+├── SKILL_ROUTING.md   # Intelligent routing system documentation
+├── SKILL_QUALITY_MONITOR.md  # Quality monitoring system
+├── skill_map.json     # Skill mapping and routing configuration
+└── skills.json        # Skills registry and version tracking
+```
+
+Each skill category has its own AGENTS.md file that defines:
+- **Persona**: Role and purpose of skills in that category
+- **Workflow**: How skills interact with each other
+- **Boundaries**: Rules and constraints for skill usage
+
+## Integration with Management Workflow / 与管理工作流集成
+
+This skill is part of the management skills workflow defined in [AGENTS.md](AGENTS.md):
+
+1. **find-skills**: Discover available skills
+2. **skill-installer**: Install from Git repositories
+3. **skill-auditor**: Validate skill compliance (this skill)
+4. **skill-creator**: Create new skills
+
+**Management Boundaries:**
+- **ALWAYS** audit skills after installation
+- **NEVER** install skills without updating `skills.json`
+- **USE** skill-creator for new skill scaffolding
 
 ## Core Standards / 核心规范
 
@@ -162,7 +258,7 @@ This skill enforces a comprehensive 9-point standard check that every production
 To audit a skill, run the `audit_skill.py` script against the target skill directory:
 
 ```bash
-python scripts/audit_skill.py <path-to-target-skill> [path-to-skills-dir]
+python .trae/skills/management/skill-auditor/scripts/audit_skill.py <path-to-target-skill> [path-to-skills-dir]
 ```
 
 **Arguments:**
@@ -173,13 +269,13 @@ python scripts/audit_skill.py <path-to-target-skill> [path-to-skills-dir]
 
 ```powershell
 # Audit the skill-creator skill
-python scripts/audit_skill.py ../skill-creator
+python .trae/skills/management/skill-auditor/scripts/audit_skill.py ../skill-creator
 
 # Audit with registry checks
-python scripts/audit_skill.py ../skill-creator .trae/skills
+python .trae/skills/management/skill-auditor/scripts/audit_skill.py ../skill-creator .trae/skills
 
 # Audit from different directory
-python .trae/skills/skill-auditor/scripts/audit_skill.py .trae/skills/skill-installer .trae/skills
+python .trae/skills/management/skill-auditor/scripts/audit_skill.py .trae/skills/management/skill-installer .trae/skills
 ```
 
 ### Interpreting Output
@@ -202,6 +298,50 @@ The auditor performs checks in 9 sections:
 7. **Internationalization (i18n)** - Multi-language support and message handling
 8. **Absolute References** - Hardcoded absolute paths detection
 9. **Registry & Map Consistency** - skills.json and skill_map.json validation
+
+## Integration with Intelligent Routing System / 与智能路由系统集成
+
+The intelligent routing system (see [SKILL_ROUTING.md](../../SKILL_ROUTING.md)) automatically detects when users need to audit skills and routes to this skill based on:
+
+- **Keyword matching**: "audit", "check", "validate", "test", "compliance", "best-practices", "quality", "verify"
+- **Context awareness**: Management phase triggers
+- **Priority**: 5 (medium priority)
+
+After using this skill, the routing system may recommend:
+- **skill-creator**: If the skill needs to be fixed or recreated
+- **skill-installer**: If the skill needs to be reinstalled
+- **find-skills**: If the user wants to find alternative skills
+
+## Quality Monitoring / 质量监控
+
+This skill is monitored by the quality monitoring system (see [SKILL_QUALITY_MONITOR.md](../../SKILL_QUALITY_MONITOR.md)):
+
+- **Target Success Rate**: > 90%
+- **Target Usage Frequency**: Low (< 5/day)
+- **Priority**: High
+
+Usage statistics are tracked in `skill_usage_stats.json` to optimize routing and identify improvement opportunities.
+
+### Quality Metrics / 质量指标
+
+The auditor tracks the following quality metrics:
+
+| Metric | Description | Target |
+|---------|-------------|---------|
+| Pass Rate | Percentage of skills that pass all checks | > 95% |
+| Critical Issues | Number of critical issues found | 0 |
+| Warning Issues | Number of warning issues found | < 5% of total checks |
+| Audit Time | Average time to complete audit | < 30 seconds |
+
+### Continuous Improvement / 持续改进
+
+The quality monitoring system implements:
+
+1. **Weekly Reviews**: Review audit results and identify common issues
+2. **Monthly Audits**: Comprehensive audit of all skills
+3. **Error Pattern Tracking**: Track and analyze recurring issues
+4. **Best Practices Updates**: Update standards based on audit findings
+5. **Routing Optimization**: Use audit results to improve skill routing accuracy
 
 ## Resources
 

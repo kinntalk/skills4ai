@@ -1,0 +1,22 @@
+================================================================================
+SCHEDULED QUALITY CHECK REPORT
+================================================================================
+Timestamp: 2026-02-15T09:46:05.490874
+
+--- QUALITY METRICS ---
+Overall Score: 50.0/100
+Total Skills: 20
+Consistency Issues: 0
+Keyword Issues: 162
+
+--- USAGE METRICS ---
+Total Invocations: 34
+Overall Success Rate: 76.47%
+Average Execution Time: 0.02s
+
+--- ALERTS ---
+[CRITICAL] quality_score: Overall quality score (50.0) below threshold (70.0)
+[WARNING] success_rate: Overall success rate (76.47%) approaching threshold
+[ERROR] keywords: Too many keyword overlaps (162)
+
+================================================================================

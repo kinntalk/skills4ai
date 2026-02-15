@@ -1,0 +1,1250 @@
+{
+  "timestamp": "2026-02-15T09:45:23.907028",
+  "overall_score": 50.0,
+  "consistency": {
+    "missing_skills": [],
+    "missing_skill_md": [],
+    "path_errors": [],
+    "orphaned_directories": []
+  },
+  "keyword_overlap": {
+    "exact_matches": [
+      {
+        "keyword": "文档",
+        "skills": [
+          "pdf-generation",
+          "skill-creator"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "install",
+        "skills": [
+          "skill-installer",
+          "find-skills"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "git",
+        "skills": [
+          "skill-installer",
+          "using-git-worktrees"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "检查",
+        "skills": [
+          "skill-auditor",
+          "verification-before-completion"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "test",
+        "skills": [
+          "skill-auditor",
+          "test-driven-development",
+          "verification-before-completion"
+        ],
+        "count": 3
+      },
+      {
+        "keyword": "测试",
+        "skills": [
+          "skill-auditor",
+          "test-driven-development",
+          "verification-before-completion"
+        ],
+        "count": 3
+      },
+      {
+        "keyword": "check",
+        "skills": [
+          "skill-auditor",
+          "verification-before-completion"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "验证",
+        "skills": [
+          "skill-auditor",
+          "requesting-code-review",
+          "verification-before-completion"
+        ],
+        "count": 3
+      },
+      {
+        "keyword": "agent",
+        "skills": [
+          "find-skills",
+          "subagent-driven-development"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "design",
+        "skills": [
+          "behavioral-product-design",
+          "ui-ux-pro-max-skill",
+          "brainstorming",
+          "writing-plans"
+        ],
+        "count": 4
+      },
+      {
+        "keyword": "product",
+        "skills": [
+          "behavioral-product-design",
+          "claude-skills"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "设计",
+        "skills": [
+          "ui-ux-pro-max-skill",
+          "brainstorming"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "requirements",
+        "skills": [
+          "brainstorming",
+          "writing-plans"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "feature",
+        "skills": [
+          "brainstorming",
+          "using-git-worktrees"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "需求",
+        "skills": [
+          "brainstorming",
+          "writing-plans"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "plan",
+        "skills": [
+          "writing-plans",
+          "executing-plans",
+          "subagent-driven-development"
+        ],
+        "count": 3
+      },
+      {
+        "keyword": "implementation",
+        "skills": [
+          "writing-plans",
+          "executing-plans"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "计划",
+        "skills": [
+          "writing-plans",
+          "executing-plans",
+          "subagent-driven-development"
+        ],
+        "count": 3
+      },
+      {
+        "keyword": "task",
+        "skills": [
+          "executing-plans",
+          "subagent-driven-development"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "review",
+        "skills": [
+          "executing-plans",
+          "requesting-code-review"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "任务",
+        "skills": [
+          "executing-plans",
+          "subagent-driven-development"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "审查",
+        "skills": [
+          "executing-plans",
+          "requesting-code-review"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "execute",
+        "skills": [
+          "executing-plans",
+          "subagent-driven-development"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "执行",
+        "skills": [
+          "executing-plans",
+          "subagent-driven-development"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "pull-request",
+        "skills": [
+          "requesting-code-review",
+          "finishing-a-development-branch"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "verify",
+        "skills": [
+          "requesting-code-review",
+          "verification-before-completion"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "合并",
+        "skills": [
+          "requesting-code-review",
+          "finishing-a-development-branch"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "merge",
+        "skills": [
+          "requesting-code-review",
+          "finishing-a-development-branch"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "pr",
+        "skills": [
+          "requesting-code-review",
+          "finishing-a-development-branch"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "branch",
+        "skills": [
+          "using-git-worktrees",
+          "finishing-a-development-branch"
+        ],
+        "count": 2
+      },
+      {
+        "keyword": "完成",
+        "skills": [
+          "verification-before-completion",
+          "finishing-a-development-branch"
+        ],
+        "count": 2
+      }
+    ],
+    "partial_matches": [
+      {
+        "skill1": "image-generation",
+        "skill2": "pdf-generation",
+        "keyword1": "文档转图片",
+        "keyword2": "文档",
+        "overlap_degree": 0.4
+      },
+      {
+        "skill1": "image-generation",
+        "skill2": "pdf-generation",
+        "keyword1": "markdown",
+        "keyword2": "markdown-to-pdf",
+        "overlap_degree": 0.53
+      },
+      {
+        "skill1": "image-generation",
+        "skill2": "pdf-generation",
+        "keyword1": "markdown",
+        "keyword2": "markdown转pdf",
+        "overlap_degree": 0.67
+      },
+      {
+        "skill1": "image-generation",
+        "skill2": "skill-creator",
+        "keyword1": "文档转图片",
+        "keyword2": "文档",
+        "overlap_degree": 0.4
+      },
+      {
+        "skill1": "pdf-generation",
+        "skill2": "skill-creator",
+        "keyword1": "文档转pdf",
+        "keyword2": "文档",
+        "overlap_degree": 0.33
+      },
+      {
+        "skill1": "pdf-generation",
+        "skill2": "skill-creator",
+        "keyword1": "document",
+        "keyword2": "documentation",
+        "overlap_degree": 0.62
+      },
+      {
+        "skill1": "skill-creator",
+        "skill2": "skill-installer",
+        "keyword1": "skill-management",
+        "keyword2": "manage",
+        "overlap_degree": 0.38
+      },
+      {
+        "skill1": "skill-creator",
+        "skill2": "skill-installer",
+        "keyword1": "skill",
+        "keyword2": "update-skill",
+        "overlap_degree": 0.42
+      },
+      {
+        "skill1": "skill-creator",
+        "skill2": "skill-installer",
+        "keyword1": "skill",
+        "keyword2": "skill-updater",
+        "overlap_degree": 0.38
+      },
+      {
+        "skill1": "skill-creator",
+        "skill2": "skill-installer",
+        "keyword1": "skill",
+        "keyword2": "卸载skill",
+        "overlap_degree": 0.71
+      },
+      {
+        "skill1": "skill-creator",
+        "skill2": "skill-installer",
+        "keyword1": "skill",
+        "keyword2": "skill-manager",
+        "overlap_degree": 0.38
+      },
+      {
+        "skill1": "skill-creator",
+        "skill2": "skill-installer",
+        "keyword1": "skill",
+        "keyword2": "更新skill",
+        "overlap_degree": 0.71
+      },
+      {
+        "skill1": "skill-creator",
+        "skill2": "skill-installer",
+        "keyword1": "skill",
+        "keyword2": "安装skill",
+        "overlap_degree": 0.71
+      },
+      {
+        "skill1": "skill-creator",
+        "skill2": "skill-installer",
+        "keyword1": "skill",
+        "keyword2": "install-skill",
+        "overlap_degree": 0.38
+      },
+      {
+        "skill1": "skill-creator",
+        "skill2": "ui-ux-pro-max-skill",
+        "keyword1": "guide",
+        "keyword2": "ui",
+        "overlap_degree": 0.4
+      },
+      {
+        "skill1": "skill-installer",
+        "skill2": "using-git-worktrees",
+        "keyword1": "git仓库",
+        "keyword2": "git",
+        "overlap_degree": 0.6
+      },
+      {
+        "skill1": "skill-installer",
+        "skill2": "using-git-worktrees",
+        "keyword1": "git",
+        "keyword2": "git-worktree",
+        "overlap_degree": 0.25
+      },
+      {
+        "skill1": "skill-installer",
+        "skill2": "using-git-worktrees",
+        "keyword1": "git",
+        "keyword2": "using-git-worktrees",
+        "overlap_degree": 0.16
+      },
+      {
+        "skill1": "skill-installer",
+        "skill2": "using-git-worktrees",
+        "keyword1": "git",
+        "keyword2": "git分支",
+        "overlap_degree": 0.6
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "skill-creator",
+        "keyword1": "skill-validator",
+        "keyword2": "skill",
+        "overlap_degree": 0.33
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "skill-creator",
+        "keyword1": "skill-check",
+        "keyword2": "skill",
+        "overlap_degree": 0.45
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "skill-creator",
+        "keyword1": "审计skill",
+        "keyword2": "skill",
+        "overlap_degree": 0.71
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "skill-creator",
+        "keyword1": "skill-linter",
+        "keyword2": "skill",
+        "overlap_degree": 0.42
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "skill-creator",
+        "keyword1": "验证skill",
+        "keyword2": "skill",
+        "overlap_degree": 0.71
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "skill-creator",
+        "keyword1": "skill-tester",
+        "keyword2": "skill",
+        "overlap_degree": 0.42
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "skill-creator",
+        "keyword1": "检查skill",
+        "keyword2": "skill",
+        "overlap_degree": 0.71
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "test-driven-development",
+        "keyword1": "test",
+        "keyword2": "test-driven",
+        "overlap_degree": 0.36
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "test-driven-development",
+        "keyword1": "test",
+        "keyword2": "test-first",
+        "overlap_degree": 0.4
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "test-driven-development",
+        "keyword1": "test",
+        "keyword2": "testing",
+        "overlap_degree": 0.57
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "test-driven-development",
+        "keyword1": "test",
+        "keyword2": "unit-test",
+        "overlap_degree": 0.44
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "test-driven-development",
+        "keyword1": "测试",
+        "keyword2": "单元测试",
+        "overlap_degree": 0.5
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "test-driven-development",
+        "keyword1": "测试",
+        "keyword2": "测试驱动开发",
+        "overlap_degree": 0.33
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "test-driven-development",
+        "keyword1": "skill-tester",
+        "keyword2": "test",
+        "overlap_degree": 0.33
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "verification-before-completion",
+        "keyword1": "skill-check",
+        "keyword2": "check",
+        "overlap_degree": 0.45
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "verification-before-completion",
+        "keyword1": "验证skill",
+        "keyword2": "验证",
+        "overlap_degree": 0.29
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "verification-before-completion",
+        "keyword1": "check",
+        "keyword2": "completion-check",
+        "overlap_degree": 0.31
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "verification-before-completion",
+        "keyword1": "skill-tester",
+        "keyword2": "test",
+        "overlap_degree": 0.33
+      },
+      {
+        "skill1": "skill-auditor",
+        "skill2": "verification-before-completion",
+        "keyword1": "检查skill",
+        "keyword2": "检查",
+        "overlap_degree": 0.29
+      },
+      {
+        "skill1": "find-skills",
+        "skill2": "skill-creator",
+        "keyword1": "find-skills",
+        "keyword2": "skill",
+        "overlap_degree": 0.45
+      },
+      {
+        "skill1": "find-skills",
+        "skill2": "skill-creator",
+        "keyword1": "find skills",
+        "keyword2": "skill",
+        "overlap_degree": 0.45
+      },
+      {
+        "skill1": "find-skills",
+        "skill2": "skill-installer",
+        "keyword1": "install",
+        "keyword2": "uninstall",
+        "overlap_degree": 0.78
+      },
+      {
+        "skill1": "find-skills",
+        "skill2": "skill-installer",
+        "keyword1": "install",
+        "keyword2": "install-skill",
+        "overlap_degree": 0.54
+      },
+      {
+        "skill1": "find-skills",
+        "skill2": "subagent-driven-development",
+        "keyword1": "agent",
+        "keyword2": "subagent",
+        "overlap_degree": 0.62
+      },
+      {
+        "skill1": "find-skills",
+        "skill2": "subagent-driven-development",
+        "keyword1": "agent",
+        "keyword2": "agent-driven",
+        "overlap_degree": 0.42
+      },
+      {
+        "skill1": "find-skills",
+        "skill2": "subagent-driven-development",
+        "keyword1": "agent",
+        "keyword2": "subagent-driven-development",
+        "overlap_degree": 0.19
+      },
+      {
+        "skill1": "behavioral-product-design",
+        "skill2": "skill-creator",
+        "keyword1": "lenny-skills",
+        "keyword2": "skill",
+        "overlap_degree": 0.42
+      },
+      {
+        "skill1": "behavioral-product-design",
+        "skill2": "ui-ux-pro-max-skill",
+        "keyword1": "产品设计",
+        "keyword2": "设计",
+        "overlap_degree": 0.5
+      },
+      {
+        "skill1": "behavioral-product-design",
+        "skill2": "ui-ux-pro-max-skill",
+        "keyword1": "behavior-design",
+        "keyword2": "design",
+        "overlap_degree": 0.4
+      },
+      {
+        "skill1": "behavioral-product-design",
+        "skill2": "claude-skills",
+        "keyword1": "design",
+        "keyword2": "designer",
+        "overlap_degree": 0.75
+      },
+      {
+        "skill1": "behavioral-product-design",
+        "skill2": "claude-skills",
+        "keyword1": "product",
+        "keyword2": "product-roles",
+        "overlap_degree": 0.54
+      },
+      {
+        "skill1": "behavioral-product-design",
+        "skill2": "brainstorming",
+        "keyword1": "design",
+        "keyword2": "design-thinking",
+        "overlap_degree": 0.4
+      },
+      {
+        "skill1": "behavioral-product-design",
+        "skill2": "brainstorming",
+        "keyword1": "产品设计",
+        "keyword2": "设计",
+        "overlap_degree": 0.5
+      },
+      {
+        "skill1": "behavioral-product-design",
+        "skill2": "brainstorming",
+        "keyword1": "behavior-design",
+        "keyword2": "design",
+        "overlap_degree": 0.4
+      },
+      {
+        "skill1": "behavioral-product-design",
+        "skill2": "writing-plans",
+        "keyword1": "behavior-design",
+        "keyword2": "design",
+        "overlap_degree": 0.4
+      },
+      {
+        "skill1": "behavioral-product-design",
+        "skill2": "requesting-code-review",
+        "keyword1": "product",
+        "keyword2": "pr",
+        "overlap_degree": 0.29
+      },
+      {
+        "skill1": "behavioral-product-design",
+        "skill2": "finishing-a-development-branch",
+        "keyword1": "product",
+        "keyword2": "pr",
+        "overlap_degree": 0.29
+      },
+      {
+        "skill1": "behavioral-product-design",
+        "skill2": "evaluation",
+        "keyword1": "框架",
+        "keyword2": "测试框架",
+        "overlap_degree": 0.5
+      },
+      {
+        "skill1": "behavioral-product-design",
+        "skill2": "evaluation",
+        "keyword1": "framework",
+        "keyword2": "test framework",
+        "overlap_degree": 0.64
+      },
+      {
+        "skill1": "ui-ux-pro-max-skill",
+        "skill2": "writing-plans",
+        "keyword1": "ui",
+        "keyword2": "requirements",
+        "overlap_degree": 0.17
+      },
+      {
+        "skill1": "claude-skills",
+        "skill2": "skill-creator",
+        "keyword1": "pm",
+        "keyword2": "skill-development",
+        "overlap_degree": 0.12
+      },
+      {
+        "skill1": "claude-skills",
+        "skill2": "skill-installer",
+        "keyword1": "manager",
+        "keyword2": "skill-manager",
+        "overlap_degree": 0.54
+      },
+      {
+        "skill1": "claude-skills",
+        "skill2": "skill-installer",
+        "keyword1": "manager",
+        "keyword2": "manage",
+        "overlap_degree": 0.86
+      },
+      {
+        "skill1": "claude-skills",
+        "skill2": "ui-ux-pro-max-skill",
+        "keyword1": "designer",
+        "keyword2": "design",
+        "overlap_degree": 0.75
+      },
+      {
+        "skill1": "claude-skills",
+        "skill2": "ui-ux-pro-max-skill",
+        "keyword1": "设计师",
+        "keyword2": "设计",
+        "overlap_degree": 0.67
+      },
+      {
+        "skill1": "claude-skills",
+        "skill2": "writing-plans",
+        "keyword1": "designer",
+        "keyword2": "design",
+        "overlap_degree": 0.75
+      },
+      {
+        "skill1": "claude-skills",
+        "skill2": "requesting-code-review",
+        "keyword1": "product",
+        "keyword2": "pr",
+        "overlap_degree": 0.29
+      },
+      {
+        "skill1": "claude-skills",
+        "skill2": "requesting-code-review",
+        "keyword1": "product-roles",
+        "keyword2": "pr",
+        "overlap_degree": 0.15
+      },
+      {
+        "skill1": "claude-skills",
+        "skill2": "finishing-a-development-branch",
+        "keyword1": "pm",
+        "keyword2": "finishing-a-development-branch",
+        "overlap_degree": 0.07
+      },
+      {
+        "skill1": "claude-skills",
+        "skill2": "finishing-a-development-branch",
+        "keyword1": "product",
+        "keyword2": "pr",
+        "overlap_degree": 0.29
+      },
+      {
+        "skill1": "claude-skills",
+        "skill2": "finishing-a-development-branch",
+        "keyword1": "product-roles",
+        "keyword2": "pr",
+        "overlap_degree": 0.15
+      },
+      {
+        "skill1": "claude-skills",
+        "skill2": "subagent-driven-development",
+        "keyword1": "pm",
+        "keyword2": "subagent-driven-development",
+        "overlap_degree": 0.07
+      },
+      {
+        "skill1": "test-driven-development",
+        "skill2": "verification-before-completion",
+        "keyword1": "test-driven",
+        "keyword2": "test",
+        "overlap_degree": 0.36
+      },
+      {
+        "skill1": "test-driven-development",
+        "skill2": "verification-before-completion",
+        "keyword1": "单元测试",
+        "keyword2": "测试",
+        "overlap_degree": 0.5
+      },
+      {
+        "skill1": "test-driven-development",
+        "skill2": "verification-before-completion",
+        "keyword1": "test-first",
+        "keyword2": "test",
+        "overlap_degree": 0.4
+      },
+      {
+        "skill1": "test-driven-development",
+        "skill2": "verification-before-completion",
+        "keyword1": "testing",
+        "keyword2": "test",
+        "overlap_degree": 0.57
+      },
+      {
+        "skill1": "test-driven-development",
+        "skill2": "verification-before-completion",
+        "keyword1": "unit-test",
+        "keyword2": "test",
+        "overlap_degree": 0.44
+      },
+      {
+        "skill1": "test-driven-development",
+        "skill2": "verification-before-completion",
+        "keyword1": "测试驱动开发",
+        "keyword2": "测试",
+        "overlap_degree": 0.33
+      },
+      {
+        "skill1": "brainstorming",
+        "skill2": "ui-ux-pro-max-skill",
+        "keyword1": "requirements",
+        "keyword2": "ui",
+        "overlap_degree": 0.17
+      },
+      {
+        "skill1": "brainstorming",
+        "skill2": "ui-ux-pro-max-skill",
+        "keyword1": "design-thinking",
+        "keyword2": "design",
+        "overlap_degree": 0.4
+      },
+      {
+        "skill1": "brainstorming",
+        "skill2": "claude-skills",
+        "keyword1": "design",
+        "keyword2": "designer",
+        "overlap_degree": 0.75
+      },
+      {
+        "skill1": "brainstorming",
+        "skill2": "claude-skills",
+        "keyword1": "设计",
+        "keyword2": "设计师",
+        "overlap_degree": 0.67
+      },
+      {
+        "skill1": "brainstorming",
+        "skill2": "writing-plans",
+        "keyword1": "design-thinking",
+        "keyword2": "design",
+        "overlap_degree": 0.4
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "skill-auditor",
+        "keyword1": "checkpoint",
+        "keyword2": "check",
+        "overlap_degree": 0.5
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "skill-auditor",
+        "keyword1": "检查点",
+        "keyword2": "检查",
+        "overlap_degree": 0.67
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "writing-plans",
+        "keyword1": "executing-plans",
+        "keyword2": "plan",
+        "overlap_degree": 0.27
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "writing-plans",
+        "keyword1": "plan",
+        "keyword2": "implementation-plan",
+        "overlap_degree": 0.21
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "writing-plans",
+        "keyword1": "plan",
+        "keyword2": "planning",
+        "overlap_degree": 0.5
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "writing-plans",
+        "keyword1": "plan",
+        "keyword2": "writing-plans",
+        "overlap_degree": 0.31
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "writing-plans",
+        "keyword1": "implementation",
+        "keyword2": "implementation-plan",
+        "overlap_degree": 0.74
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "writing-plans",
+        "keyword1": "plan-execution",
+        "keyword2": "plan",
+        "overlap_degree": 0.29
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "writing-plans",
+        "keyword1": "execute-plan",
+        "keyword2": "plan",
+        "overlap_degree": 0.33
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "requesting-code-review",
+        "keyword1": "review",
+        "keyword2": "requesting-code-review",
+        "overlap_degree": 0.27
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "requesting-code-review",
+        "keyword1": "review",
+        "keyword2": "code-review",
+        "overlap_degree": 0.55
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "requesting-code-review",
+        "keyword1": "审查",
+        "keyword2": "代码审查",
+        "overlap_degree": 0.5
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "verification-before-completion",
+        "keyword1": "checkpoint",
+        "keyword2": "check",
+        "overlap_degree": 0.5
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "verification-before-completion",
+        "keyword1": "检查点",
+        "keyword2": "检查",
+        "overlap_degree": 0.67
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "subagent-driven-development",
+        "keyword1": "executing-plans",
+        "keyword2": "plan",
+        "overlap_degree": 0.27
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "subagent-driven-development",
+        "keyword1": "plan-execution",
+        "keyword2": "plan",
+        "overlap_degree": 0.29
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "subagent-driven-development",
+        "keyword1": "execute-plan",
+        "keyword2": "plan",
+        "overlap_degree": 0.33
+      },
+      {
+        "skill1": "executing-plans",
+        "skill2": "subagent-driven-development",
+        "keyword1": "execute-plan",
+        "keyword2": "execute",
+        "overlap_degree": 0.58
+      },
+      {
+        "skill1": "requesting-code-review",
+        "skill2": "skill-auditor",
+        "keyword1": "验证",
+        "keyword2": "验证skill",
+        "overlap_degree": 0.29
+      },
+      {
+        "skill1": "requesting-code-review",
+        "skill2": "skill-auditor",
+        "keyword1": "pr",
+        "keyword2": "best-practices",
+        "overlap_degree": 0.14
+      },
+      {
+        "skill1": "requesting-code-review",
+        "skill2": "ui-ux-pro-max-skill",
+        "keyword1": "pr",
+        "keyword2": "pro-max",
+        "overlap_degree": 0.29
+      },
+      {
+        "skill1": "finishing-a-development-branch",
+        "skill2": "skill-auditor",
+        "keyword1": "pr",
+        "keyword2": "best-practices",
+        "overlap_degree": 0.14
+      },
+      {
+        "skill1": "finishing-a-development-branch",
+        "skill2": "ui-ux-pro-max-skill",
+        "keyword1": "pr",
+        "keyword2": "pro-max",
+        "overlap_degree": 0.29
+      },
+      {
+        "skill1": "finishing-a-development-branch",
+        "skill2": "requesting-code-review",
+        "keyword1": "merge-branch",
+        "keyword2": "merge",
+        "overlap_degree": 0.42
+      },
+      {
+        "skill1": "finishing-a-development-branch",
+        "skill2": "using-git-worktrees",
+        "keyword1": "分支",
+        "keyword2": "git分支",
+        "overlap_degree": 0.4
+      },
+      {
+        "skill1": "finishing-a-development-branch",
+        "skill2": "using-git-worktrees",
+        "keyword1": "merge-branch",
+        "keyword2": "branch",
+        "overlap_degree": 0.5
+      },
+      {
+        "skill1": "finishing-a-development-branch",
+        "skill2": "using-git-worktrees",
+        "keyword1": "finish-branch",
+        "keyword2": "branch",
+        "overlap_degree": 0.46
+      },
+      {
+        "skill1": "finishing-a-development-branch",
+        "skill2": "using-git-worktrees",
+        "keyword1": "finishing-a-development-branch",
+        "keyword2": "branch",
+        "overlap_degree": 0.2
+      },
+      {
+        "skill1": "subagent-driven-development",
+        "skill2": "writing-plans",
+        "keyword1": "plan",
+        "keyword2": "implementation-plan",
+        "overlap_degree": 0.21
+      },
+      {
+        "skill1": "subagent-driven-development",
+        "skill2": "writing-plans",
+        "keyword1": "plan",
+        "keyword2": "planning",
+        "overlap_degree": 0.5
+      },
+      {
+        "skill1": "subagent-driven-development",
+        "skill2": "writing-plans",
+        "keyword1": "plan",
+        "keyword2": "writing-plans",
+        "overlap_degree": 0.31
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "skill-auditor",
+        "keyword1": "test framework",
+        "keyword2": "test",
+        "overlap_degree": 0.29
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "skill-auditor",
+        "keyword1": "agent testing",
+        "keyword2": "test",
+        "overlap_degree": 0.31
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "skill-auditor",
+        "keyword1": "测试框架",
+        "keyword2": "测试",
+        "overlap_degree": 0.5
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "find-skills",
+        "keyword1": "agent performance",
+        "keyword2": "agent",
+        "overlap_degree": 0.29
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "find-skills",
+        "keyword1": "agent testing",
+        "keyword2": "agent",
+        "overlap_degree": 0.38
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "test-driven-development",
+        "keyword1": "test framework",
+        "keyword2": "test",
+        "overlap_degree": 0.29
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "test-driven-development",
+        "keyword1": "agent testing",
+        "keyword2": "testing",
+        "overlap_degree": 0.54
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "test-driven-development",
+        "keyword1": "agent testing",
+        "keyword2": "test",
+        "overlap_degree": 0.31
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "test-driven-development",
+        "keyword1": "测试框架",
+        "keyword2": "测试",
+        "overlap_degree": 0.5
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "requesting-code-review",
+        "keyword1": "质量门",
+        "keyword2": "质量",
+        "overlap_degree": 0.67
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "requesting-code-review",
+        "keyword1": "质量测量",
+        "keyword2": "质量",
+        "overlap_degree": 0.5
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "requesting-code-review",
+        "keyword1": "measure quality",
+        "keyword2": "quality",
+        "overlap_degree": 0.47
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "requesting-code-review",
+        "keyword1": "quality gates",
+        "keyword2": "quality",
+        "overlap_degree": 0.54
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "verification-before-completion",
+        "keyword1": "test framework",
+        "keyword2": "test",
+        "overlap_degree": 0.29
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "verification-before-completion",
+        "keyword1": "agent testing",
+        "keyword2": "test",
+        "overlap_degree": 0.31
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "verification-before-completion",
+        "keyword1": "测试框架",
+        "keyword2": "测试",
+        "overlap_degree": 0.5
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "subagent-driven-development",
+        "keyword1": "agent performance",
+        "keyword2": "agent",
+        "overlap_degree": 0.29
+      },
+      {
+        "skill1": "evaluation",
+        "skill2": "subagent-driven-development",
+        "keyword1": "agent testing",
+        "keyword2": "agent",
+        "overlap_degree": 0.38
+      }
+    ],
+    "statistics": {
+      "total_skills": 20,
+      "total_keywords": 316,
+      "unique_keywords": 278,
+      "overlap_count": 31,
+      "partial_overlap_count": 131
+    }
+  },
+  "summary": {
+    "total_skills": 20,
+    "consistency_issues": 0,
+    "keyword_issues": 162,
+    "overall_score": 50.0,
+    "status": "fair"
+  },
+  "recommendations": [
+    {
+      "priority": "medium",
+      "category": "keywords",
+      "issue": "Exact keyword matches found",
+      "suggestion": "Resolve 31 exact keyword conflicts",
+      "details": [
+        "文档",
+        "install",
+        "git",
+        "检查",
+        "test",
+        "测试",
+        "check",
+        "验证",
+        "agent",
+        "design",
+        "product",
+        "设计",
+        "requirements",
+        "feature",
+        "需求",
+        "plan",
+        "implementation",
+        "计划",
+        "task",
+        "review",
+        "任务",
+        "审查",
+        "execute",
+        "执行",
+        "pull-request",
+        "verify",
+        "合并",
+        "merge",
+        "pr",
+        "branch",
+        "完成"
+      ]
+    },
+    {
+      "priority": "low",
+      "category": "keywords",
+      "issue": "Partial keyword overlaps detected",
+      "suggestion": "Review 131 partial overlaps",
+      "details": "Found overlaps with degree > 0.5"
+    }
+  ]
+}

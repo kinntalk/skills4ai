@@ -1,0 +1,155 @@
+name: Quality Check
+
+on:
+  pull_request:
+    branches: [ main, master, develop ]
+    paths:
+      - '.trae/skills/**'
+      - '.trae/skills/skill_map.json'
+      - '.trae/skills/skills.json'
+  push:
+    branches: [ main, master, develop ]
+    paths:
+      - '.trae/skills/**'
+      - '.trae/skills/skill_map.json'
+      - '.trae/skills/skills.json'
+  workflow_dispatch:
+    inputs:
+      check_type:
+        description: 'Type of check to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - consistency
+          - keywords
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('.trae/skills/scripts/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f .trae/skills/scripts/requirements.txt ]; then
+            pip install -r .trae/skills/scripts/requirements.txt
+          fi
+      
+      - name: Run consistency check
+        if: github.event.inputs.check_type == 'consistency' || github.event.inputs.check_type == 'all' || github.event.inputs.check_type == ''
+        run: |
+          echo "Running consistency check..."
+          python .trae/skills/scripts/quality_check.py --check consistency --verbose
+        continue-on-error: false
+      
+      - name: Run keyword overlap check
+        if: github.event.inputs.check_type == 'keywords' || github.event.inputs.check_type == 'all' || github.event.inputs.check_type == ''
+        run: |
+          echo "Running keyword overlap check..."
+          python .trae/skills/scripts/quality_check.py --check keywords --verbose
+        continue-on-error: false
+      
+      - name: Run full quality check
+        if: github.event.inputs.check_type == 'all' || github.event.inputs.check_type == ''
+        run: |
+          echo "Running full quality check..."
+          python .trae/skills/scripts/quality_check.py --check all --verbose --output quality_report.json
+      
+      - name: Generate usage report
+        run: |
+          echo "Generating usage report..."
+          python -c "from .trae.skills.scripts.usage_tracker import UsageTracker; tracker = UsageTracker(); print(tracker.generate_usage_report())" || echo "No usage data available yet"
+      
+      - name: Check quality thresholds
+        run: |
+          echo "Checking quality thresholds..."
+          if [ -f quality_report.json ]; then
+            OVERALL_SCORE=$(python -c "import json; print(json.load(open('quality_report.json'))['summary']['overall_score'])")
+            echo "Overall Quality Score: $OVERALL_SCORE"
+            
+            if (( $(echo "$OVERALL_SCORE < 70" | bc -l) )); then
+              echo "::error::Quality score $OVERALL_SCORE is below threshold 70"
+              exit 1
+            fi
+          fi
+      
+      - name: Upload quality report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: quality-report-${{ github.sha }}
+          path: |
+            quality_report.json
+            .trae/skills/reports/
+          retention-days: 30
+      
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            let comment = '## Quality Check Results\n\n';
+            
+            if (fs.existsSync('quality_report.json')) {
+              const report = JSON.parse(fs.readFileSync('quality_report.json', 'utf8'));
+              const score = report.summary.overall_score;
+              const status = report.summary.status;
+              const issues = report.summary.consistency_issues + report.summary.keyword_issues;
+              
+              comment += `**Overall Score:** ${score}/100 (${status})\n`;
+              comment += `**Total Issues:** ${issues}\n`;
+              comment += `**Consistency Issues:** ${report.summary.consistency_issues}\n`;
+              comment += `**Keyword Issues:** ${report.summary.keyword_issues}\n\n`;
+              
+              if (report.recommendations.length > 0) {
+                comment += '### Recommendations\n';
+                report.recommendations.forEach(rec => {
+                  const icon = rec.priority === 'high' ? '🔴' : rec.priority === 'medium' ? '🟡' : '🟢';
+                  comment += `${icon} **[${rec.priority.toUpperCase()}]** ${rec.issue}\n`;
+                  comment += `> ${rec.suggestion}\n\n`;
+                });
+              }
+            } else {
+              comment += 'No quality report generated.\n';
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+      
+      - name: Set status check
+        if: always()
+        run: |
+          if [ -f quality_report.json ]; then
+            OVERALL_SCORE=$(python -c "import json; print(json.load(open('quality_report.json'))['summary']['overall_score'])")
+            if (( $(echo "$OVERALL_SCORE >= 70" | bc -l) )); then
+              echo "✅ Quality check passed with score $OVERALL_SCORE"
+            else
+              echo "❌ Quality check failed with score $OVERALL_SCORE"
+              exit 1
+            fi
+          fi
