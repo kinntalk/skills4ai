@@ -3,14 +3,20 @@
     "find-skills": {
       "source": "https://github.com/vercel-labs/skills.git",
       "subdir": "skills/find-skills",
-      "version": "0dd0490b1b795ae707a5596a54958db587a2465b",
-      "updated_at": "2026-02-13T22:55:42.495939"
+      "version": "556555c2a7cf3ff5312db9b456e08749d6e5dc08",
+      "updated_at": "2026-02-10T17:17:13.811250"
     },
     "skill-creator": {
       "source": "https://github.com/anthropics/skills.git",
       "subdir": "skills/skill-creator",
       "version": "1ed29a03dc852d30fa6ef2ca53a67dc2c2c2c563",
       "updated_at": "2026-02-12T13:06:20.045028"
+    },
+    "pdf-generation": {
+      "source": "https://github.com/glebis/claude-skills.git",
+      "subdir": "pdf-generation",
+      "version": "89e7be87f2a2b6be3694dee8b5491c28db098b94",
+      "updated_at": "2026-02-10T16:35:30.922297"
     },
     "skill-installer": {
       "source": "local",
@@ -22,12 +28,6 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-02-10T16:35:30.922297"
-    },
-    "pdf-generation": {
-      "source": "https://github.com/glebis/claude-skills.git",
-      "subdir": "pdf-generation",
-      "version": "89e7be87f2a2b6be3694dee8b5491c28db098b94",
       "updated_at": "2026-02-10T16:35:30.922297"
     },
     "image-generation": {
@@ -113,12 +113,6 @@
       "subdir": "skills/finishing-a-development-branch",
       "version": "a98c5dfc9de0df5318f4980d91d24780a566ee60",
       "updated_at": "2026-02-12T12:44:27.678687"
-    },
-    "evaluation": {
-      "source": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering.git",
-      "subdir": "skills/evaluation",
-      "version": "7942df36cfcac4f224d310b6be552e99715df5de",
-      "updated_at": "2026-02-14T23:20:20.817749"
     }
   }
 }

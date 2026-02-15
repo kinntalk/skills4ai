@@ -1,0 +1,3 @@
+# Requirements for pdf-generation
+# No external python packages required
+# Pandoc (CLI) is required
