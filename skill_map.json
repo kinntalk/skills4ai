@@ -135,6 +135,21 @@
         "planning-with-files"
       ]
     },
+    "powershell-windows": {
+      "name": "powershell-windows",
+      "description": "PowerShell Windows patterns. Critical pitfalls, operator syntax, error handling.",
+      "keywords": [
+        "powershell windows",
+        "critical",
+        "powershell",
+        "pitfalls",
+        "windows",
+        "patterns"
+      ],
+      "aliases": [
+        "powershell-windows"
+      ]
+    },
     "systematic-debugging": {
       "name": "systematic-debugging",
       "description": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
@@ -226,7 +241,8 @@
       "brainstorming",
       "writing-plans",
       "executing-plans",
-      "systematic-debugging"
+      "systematic-debugging",
+      "powershell-windows"
     ],
     "exact_match": {
       "find skills": "find-skills",

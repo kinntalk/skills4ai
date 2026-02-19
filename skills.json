@@ -54,6 +54,12 @@
       "version": "4292f000a15ecf07a6d0900ab495b80864de2a15",
       "updated_at": "2026-02-16T00:34:55.763170"
     },
+    "powershell-windows": {
+      "source": "https://github.com/davila7/claude-code-templates.git",
+      "subdir": "cli-tool/components/skills/development/powershell-windows",
+      "version": "030af25d55426ac66a52c233be4f8b150786fb22",
+      "updated_at": "2026-02-19T22:58:16.706870"
+    },
     "systematic-debugging": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/systematic-debugging",
