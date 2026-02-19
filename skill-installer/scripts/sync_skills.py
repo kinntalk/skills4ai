@@ -8,6 +8,7 @@ import sys
 import os
 import json
 import datetime
+import re
 from pathlib import Path
 
 try:
@@ -21,11 +22,27 @@ except ImportError:
         RED = "\033[91m"
         YELLOW = "\033[93m"
         BLUE = "\033[94m"
+        COLOR_YELLOW = "\033[93m"
+        COLOR_RESET = "\033[0m"
         RESET = "\033[0m"
         MSG_SYNCED_SUCCESS = f"{GREEN}Synced {{count}} skills to registry{RESET}"
         MSG_REGISTRY_FILE = f"   Registry file: {{path}}"
         MSG_SKILLS_LIST = f"\nSkills List:"
         MSG_DRY_RUN = f"Dry run: Would sync {{count}} skills"
+        MSG_VALIDATING_SKILLS = f"\nValidating skills..."
+        MSG_SKILL_VALID = f"   [PASS] {{name}}: Valid"
+        MSG_SKILL_INVALID = f"   [FAIL] {{name}}: Invalid - {{error}}"
+        MSG_DEPENDENCY_MISSING = f"   [WARN] {{name}}: Missing dependencies: {{deps}}"
+        MSG_HEALTH_SUMMARY = f"\n{'='*60}"
+        MSG_HEALTH_SUMMARY_TITLE = f"Health Summary"
+        MSG_HEALTH_TOTAL = f"   Total skills checked: {{count}}"
+        MSG_HEALTH_HEALTHY = f"   Healthy: {{count}}"
+        MSG_HEALTH_WARNINGS = f"   Warnings: {{count}}"
+        MSG_HEALTH_ERRORS = f"   Errors: {{count}}"
+        MSG_HEALTH_ISSUES_HEADER = f"\nSkills with issues:"
+        MSG_HEALTH_RECOMMENDATIONS = f"\nRecommendations:"
+        MSG_HEALTH_RECOMMENDATION_FIX_MD = f"   - Fix SKILL.md files for skills with validation errors"
+        MSG_HEALTH_RECOMMENDATION_INSTALL_DEPS = f"   - Install missing dependencies to resolve dependency warnings"
 
 try:
     from install_skill import update_skill_map
@@ -40,6 +57,111 @@ except ImportError:
 SKILLS_DIR = Path(__file__).parent.parent.parent
 REGISTRY_FILE = SKILLS_DIR / 'skills.json'
 SKILL_MAP_FILE = SKILLS_DIR / 'skill_map.json'
+
+def validate_skill_md(skill_path):
+    """验证 SKILL.md 文件
+    
+    Args:
+        skill_path: skill 目录的 Path 对象
+        
+    Returns:
+        tuple: (is_valid, error_message)
+    """
+    skill_md_path = skill_path / 'SKILL.md'
+    
+    if not skill_md_path.exists():
+        return False, "SKILL.md file not found"
+    
+    try:
+        content = skill_md_path.read_text(encoding='utf-8')
+    except Exception as e:
+        return False, f"Failed to read SKILL.md: {e}"
+    
+    if not content.strip():
+        return False, "SKILL.md is empty"
+    
+    yaml_pattern = r'^---\s*\n(.*?)\n---'
+    match = re.match(yaml_pattern, content, re.DOTALL)
+    
+    if not match:
+        return False, "Invalid YAML frontmatter format"
+    
+    yaml_content = match.group(1)
+    
+    try:
+        import yaml
+        frontmatter = yaml.safe_load(yaml_content)
+    except ImportError:
+        return False, "PyYAML not installed, cannot validate YAML"
+    except Exception as e:
+        return False, f"Failed to parse YAML: {e}"
+    
+    if not isinstance(frontmatter, dict):
+        return False, "YAML frontmatter is not a dictionary"
+    
+    if 'name' not in frontmatter:
+        return False, "Missing required field: 'name'"
+    
+    if 'description' not in frontmatter:
+        return False, "Missing required field: 'description'"
+    
+    return True, None
+
+def check_skill_dependencies(skill_path, installed_skills):
+    """检查 skill 的依赖项
+    
+    Args:
+        skill_path: skill 目录的 Path 对象
+        installed_skills: 已安装的 skill 名称集合
+        
+    Returns:
+        tuple: (missing_deps, satisfied_deps)
+    """
+    skill_md_path = skill_path / 'SKILL.md'
+    
+    if not skill_md_path.exists():
+        return [], []
+    
+    try:
+        content = skill_md_path.read_text(encoding='utf-8')
+    except Exception:
+        return [], []
+    
+    yaml_pattern = r'^---\s*\n(.*?)\n---'
+    match = re.match(yaml_pattern, content, re.DOTALL)
+    
+    if not match:
+        return [], []
+    
+    yaml_content = match.group(1)
+    
+    try:
+        import yaml
+        frontmatter = yaml.safe_load(yaml_content)
+    except Exception:
+        return [], []
+    
+    if not isinstance(frontmatter, dict):
+        return [], []
+    
+    dependencies = frontmatter.get('dependencies', [])
+    
+    if not dependencies:
+        return [], []
+    
+    if isinstance(dependencies, str):
+        dependencies = [dependencies]
+    
+    missing_deps = []
+    satisfied_deps = []
+    
+    for dep in dependencies:
+        if dep in installed_skills:
+            satisfied_deps.append(dep)
+        else:
+            missing_deps.append(dep)
+    
+    return missing_deps, satisfied_deps
 
 def prune_skill_map(installed_skills):
     """移除 skill_map.json 中已不存在的 skills"""
@@ -120,12 +242,29 @@ def scan_skills():
         except:
             pass
         
+        # Validate SKILL.md
+        is_valid, validation_error = validate_skill_md(skill_dir)
+        
         skills[skill_name] = {
             "source": source,
             "subdir": subdir,
             "version": version,
-            "updated_at": datetime.datetime.now().isoformat()
+            "updated_at": datetime.datetime.now().isoformat(),
+            "health": {
+                "is_valid": is_valid,
+                "validation_error": validation_error,
+                "missing_deps": [],
+                "satisfied_deps": []
+            }
         }
+    
+    # Check dependencies after collecting all skill names
+    installed_skills = set(skills.keys())
+    for skill_name in skills:
+        skill_path = SKILLS_DIR / skill_name
+        missing_deps, satisfied_deps = check_skill_dependencies(skill_path, installed_skills)
+        skills[skill_name]["health"]["missing_deps"] = missing_deps
+        skills[skill_name]["health"]["satisfied_deps"] = satisfied_deps
     
     # 增加 Prune 逻辑：移除 skills.json 中存在但目录不存在的条目
     # 实际上，上面的循环只扫描了存在的目录，所以新的 skills 字典自然已经 pruned 了
@@ -175,7 +314,60 @@ def sync_registry():
 
     # Prune skill_map.json
     prune_skill_map(set(sorted_skills.keys()))
-
+    
+    # Health validation
+    print(MSG_VALIDATING_SKILLS)
+    healthy_count = 0
+    warning_count = 0
+    error_count = 0
+    skills_with_issues = []
+    
+    for name, info in sorted_skills.items():
+        health = info.get('health', {})
+        is_valid = health.get('is_valid', True)
+        validation_error = health.get('validation_error', None)
+        missing_deps = health.get('missing_deps', [])
+        
+        if not is_valid:
+            print(MSG_SKILL_INVALID.format(name=name, error=validation_error))
+            error_count += 1
+            skills_with_issues.append((name, 'validation_error', validation_error))
+        elif missing_deps:
+            deps_str = ', '.join(missing_deps)
+            print(MSG_DEPENDENCY_MISSING.format(name=name, deps=deps_str))
+            warning_count += 1
+            skills_with_issues.append((name, 'missing_deps', missing_deps))
+        else:
+            print(MSG_SKILL_VALID.format(name=name))
+            healthy_count += 1
+    
+    # Health summary
+    print(MSG_HEALTH_SUMMARY)
+    print(MSG_HEALTH_SUMMARY_TITLE)
+    print(MSG_HEALTH_TOTAL.format(count=len(skills)))
+    print(MSG_HEALTH_HEALTHY.format(count=healthy_count))
+    if warning_count > 0:
+        print(MSG_HEALTH_WARNINGS.format(count=warning_count))
+    if error_count > 0:
+        print(MSG_HEALTH_ERRORS.format(count=error_count))
+    
+    # Display skills with issues
+    if skills_with_issues:
+        print(MSG_HEALTH_ISSUES_HEADER)
+        for name, issue_type, issue_detail in skills_with_issues:
+            if issue_type == 'validation_error':
+                print(f"   {COLOR_YELLOW}{name}{COLOR_RESET}: {issue_detail}")
+            elif issue_type == 'missing_deps':
+                deps_str = ', '.join(issue_detail)
+                print(f"   {COLOR_YELLOW}{name}{COLOR_RESET}: Missing dependencies: {deps_str}")
+        
+        # Recommendations
+        print(MSG_HEALTH_RECOMMENDATIONS)
+        if error_count > 0:
+            print(MSG_HEALTH_RECOMMENDATION_FIX_MD)
+        if warning_count > 0:
+            print(MSG_HEALTH_RECOMMENDATION_INSTALL_DEPS)
+    
     return True
 
 def list_skills():

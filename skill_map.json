@@ -60,6 +60,26 @@
         "skill-auditor"
       ]
     },
+    "agent-skills": {
+      "name": "agent-skills",
+      "description": "",
+      "keywords": [
+        "agent skills"
+      ],
+      "aliases": [
+        "agent-skills"
+      ]
+    },
+    "anthropic-quickstarts": {
+      "name": "anthropic-quickstarts",
+      "description": "",
+      "keywords": [
+        "anthropic quickstarts"
+      ],
+      "aliases": [
+        "anthropic-quickstarts"
+      ]
+    },
     "brainstorming": {
       "name": "brainstorming",
       "description": "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.",
@@ -242,7 +262,9 @@
       "writing-plans",
       "executing-plans",
       "systematic-debugging",
-      "powershell-windows"
+      "powershell-windows",
+      "anthropic-quickstarts",
+      "agent-skills"
     ],
     "exact_match": {
       "find skills": "find-skills",

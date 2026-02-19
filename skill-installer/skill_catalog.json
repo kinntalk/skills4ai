@@ -1,0 +1,134 @@
+{
+  "version": "1.0",
+  "categories": {
+    "curated": {
+      "description": "Curated skills maintained by the core team",
+      "skills": [
+        {
+          "name": "brainstorming",
+          "description": "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.",
+          "source": "local",
+          "license": "MIT",
+          "aliases": [],
+          "dependencies": []
+        },
+        {
+          "name": "executing-plans",
+          "description": "Helps execute implementation plans and track progress through multi-step development tasks.",
+          "source": "local",
+          "license": "MIT",
+          "aliases": [],
+          "dependencies": []
+        },
+        {
+          "name": "find-skills",
+          "description": "Helps users discover and install agent skills when they ask questions like 'how do I do X', 'find a skill for X', 'is there a skill that can...', or express interest in extending capabilities.",
+          "source": "local",
+          "license": "MIT",
+          "aliases": [],
+          "dependencies": []
+        },
+        {
+          "name": "image-generation",
+          "description": "Provides tools and workflows for generating images using various AI image generation APIs.",
+          "source": "local",
+          "license": "MIT",
+          "aliases": [],
+          "dependencies": []
+        },
+        {
+          "name": "pdf-generation",
+          "description": "Comprehensive PDF generation capabilities including document creation, formatting, and conversion from markdown.",
+          "source": "local",
+          "license": "MIT",
+          "aliases": [],
+          "dependencies": []
+        },
+        {
+          "name": "planning-with-files",
+          "description": "Enables systematic planning with file-based session management, progress tracking, and task coordination.",
+          "source": "local",
+          "license": "MIT",
+          "aliases": [],
+          "dependencies": []
+        },
+        {
+          "name": "powershell-windows",
+          "description": "Provides Windows-specific PowerShell commands and workflows for system administration and automation tasks.",
+          "source": "local",
+          "license": "MIT",
+          "aliases": [],
+          "dependencies": []
+        },
+        {
+          "name": "skill-auditor",
+          "description": "Validates and audits skills to ensure they meet quality standards, proper structure, and best practices.",
+          "source": "local",
+          "license": "MIT",
+          "aliases": [],
+          "dependencies": []
+        },
+        {
+          "name": "skill-creator",
+          "description": "Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabilities with specialized knowledge, workflows, or tool integrations.",
+          "source": "local",
+          "license": "MIT",
+          "aliases": [],
+          "dependencies": []
+        },
+        {
+          "name": "skill-installer",
+          "description": "A tool to install skills from remote git repositories directly into the .trae/skills directory. Supports subdirectories for monorepo skill collections.",
+          "source": "local",
+          "license": "MIT",
+          "aliases": [],
+          "dependencies": []
+        },
+        {
+          "name": "systematic-debugging",
+          "description": "Provides systematic approaches to debugging complex issues, including root cause analysis, condition-based waiting, and defense-in-depth strategies.",
+          "source": "local",
+          "license": "MIT",
+          "aliases": [],
+          "dependencies": []
+        },
+        {
+          "name": "template-skill",
+          "description": "A template skill that demonstrates the proper structure and format for creating new skills.",
+          "source": "local",
+          "license": "MIT",
+          "aliases": [],
+          "dependencies": []
+        },
+        {
+          "name": "ui-ux-pro-max",
+          "description": "Advanced UI/UX design capabilities including design systems, accessibility, and user experience optimization.",
+          "source": "local",
+          "license": "MIT",
+          "aliases": [],
+          "dependencies": []
+        },
+        {
+          "name": "using-superpowers",
+          "description": "Helps users leverage advanced AI capabilities and superpowers for enhanced productivity and problem-solving.",
+          "source": "local",
+          "license": "MIT",
+          "aliases": [],
+          "dependencies": []
+        },
+        {
+          "name": "writing-plans",
+          "description": "Guides the creation of detailed implementation plans, breaking down complex projects into actionable steps.",
+          "source": "local",
+          "license": "MIT",
+          "aliases": [],
+          "dependencies": []
+        }
+      ]
+    },
+    "experimental": {
+      "description": "Experimental skills under development",
+      "skills": []
+    }
+  }
+}

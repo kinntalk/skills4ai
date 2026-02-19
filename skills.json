@@ -24,6 +24,18 @@
       "version": "unknown",
       "updated_at": "2026-02-16T00:23:22.724972"
     },
+    "agent-skills": {
+      "source": "https://github.com/vercel-labs/agent-skills.git",
+      "subdir": "",
+      "version": "e23951b8cad2f4b1e7e176c5731127c1263fe86f",
+      "updated_at": "2026-02-20T00:15:14.020911"
+    },
+    "anthropic-quickstarts": {
+      "source": "https://github.com/anthropics/anthropic-quickstarts",
+      "subdir": "",
+      "version": "4b2549e8093a6dee1c394bdd8fcf83cb914a271a",
+      "updated_at": "2026-02-20T00:14:17.206046"
+    },
     "brainstorming": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/brainstorming",

@@ -39,6 +39,45 @@ except ImportError:
         RESET = "\033[0m"
         MSG_COMMAND_FAILED = f"{RED}Command failed: {{error}}{RESET}"
         MSG_NO_SKILLS_REGISTRY = "No skills found in registry."
+        MSG_VERBOSE_ENABLED = f"{CYAN}[INFO] Verbose mode enabled{RESET}"
+        MSG_VERBOSE_GIT_COMMAND = f"{CYAN}[GIT] Running: {{cmd}}{RESET}"
+        MSG_VERBOSE_FILE_OP = f"{CYAN}[FILE] {{op}}: {{path}}{RESET}"
+
+# Global verbose flag
+verbose_mode = False
+
+def set_verbose(enabled):
+    """Set verbose mode globally"""
+    global verbose_mode
+    verbose_mode = enabled
+    if enabled:
+        print(MSG_VERBOSE_ENABLED)
+
+def verbose_print(msg_type, **kwargs):
+    """Print verbose messages if verbose mode is enabled"""
+    if verbose_mode:
+        if msg_type == 'git':
+            cmd = kwargs.get('cmd', '')
+            output = kwargs.get('output', '')
+            print(MSG_VERBOSE_GIT_COMMAND.format(cmd=cmd))
+            if output:
+                print(MSG_VERBOSE_GIT_OUTPUT.format(output=output))
+        elif msg_type == 'file':
+            operation = kwargs.get('operation', '')
+            path = kwargs.get('path', '')
+            print(MSG_VERBOSE_FILE_OP.format(operation=operation, path=path))
+        elif msg_type == 'state':
+            description = kwargs.get('description', '')
+            print(MSG_VERBOSE_STATE_CHANGE.format(description=description))
+        elif msg_type == 'dep':
+            dep = kwargs.get('dep', '')
+            print(MSG_VERBOSE_DEPENDENCY_CHECK.format(dep=dep))
+
+try:
+    from skill_catalog import load_catalog, search_skills, list_categories, get_skill
+except ImportError:
+    print("Error: Could not import skill_catalog.py. Make sure it is in the same directory.")
+    sys.exit(1)
 
 SKILLS_DIR = Path(__file__).parent.parent.parent
 REGISTRY_FILE = SKILLS_DIR / 'skills.json'
@@ -46,11 +85,15 @@ REGISTRY_FILE = SKILLS_DIR / 'skills.json'
 def run_command(cmd, cwd=None, capture_output=False):
     """Run a shell command and check for errors"""
     try:
+        cmd_str = ' '.join(cmd) if isinstance(cmd, list) else cmd
+        verbose_print('git', cmd=cmd_str)
+        
         if capture_output:
             # Removed errors='replace' to avoid TypeError in older python versions if check is strict, 
             # but usually run_command in manage_skills was copy-pasted. 
             # Assuming standard subprocess usage.
             result = subprocess.run(cmd, check=True, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors='replace')
+            verbose_print('git', output=result.stdout.strip())
             return result.stdout.strip()
         else:
             subprocess.run(cmd, check=True, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -58,6 +101,22 @@ def run_command(cmd, cwd=None, capture_output=False):
     except subprocess.CalledProcessError as e:
         if not capture_output:
             print(MSG_COMMAND_FAILED.format(error=e))
+            
+            # Provide more specific error messages based on error type
+            if 'Could not resolve' in str(e) or 'Could not connect' in str(e):
+                url = cmd[2] if len(cmd) > 2 else 'unknown'
+                print(MSG_ERROR_NETWORK.format(url=url))
+                print(MSG_ERROR_NETWORK_SUGGESTION)
+            elif 'Permission denied' in str(e):
+                print(MSG_ERROR_PERMISSION_DENIED.format(path=cwd or 'unknown'))
+                print(MSG_ERROR_PERMISSION_SUGGESTION)
+            elif 'not found' in str(e).lower() and 'git' in str(e).lower():
+                print(MSG_ERROR_GIT_NOT_INSTALLED)
+                print(MSG_ERROR_GIT_NOT_INSTALLED_SUGGESTION)
+        return False
+    except FileNotFoundError:
+        print(MSG_ERROR_GIT_NOT_INSTALLED)
+        print(MSG_ERROR_GIT_NOT_INSTALLED_SUGGESTION)
         return False
 
 def load_registry():
@@ -93,8 +152,13 @@ def check_updates():
 
     print(MSG_CHECKING_UPDATES)
     updates_available = []
+    total = len(skills)
     
-    for name, info in skills.items():
+    for idx, (name, info) in enumerate(skills.items(), 1):
+        # Progress indicator
+        print(MSG_PROGRESS_CHECKING.format(current=idx, total=total))
+        verbose_print('state', description=f"Checking updates for {name} ({idx}/{total})")
+        
         repo_url = info.get('source')
         current_version = info.get('version')
         
@@ -195,7 +259,522 @@ def uninstall_skill(name):
     else:
         print(f"Failed to remove skill directory: {skill_path}")
 
-def update_skill(name, force=False):
+def search_skills_command(query):
+    """
+    Search for skills in the catalog by name, description, or aliases.
+    
+    Args:
+        query: Search query string
+    """
+    print(MSG_SEARCHING.format(query=query))
+    
+    try:
+        results = search_skills(query)
+        
+        if not results:
+            print(MSG_NO_SEARCH_RESULTS.format(query=query))
+            
+            # Provide suggestions
+            try:
+                catalog = load_catalog()
+                categories = list_categories()
+                
+                if categories:
+                    print(MSG_SEARCH_SUGGESTIONS)
+                    print(MSG_SEARCH_SUGGESTION.format(suggestion="Try a more general search term"))
+                    print(MSG_SEARCH_SUGGESTION.format(suggestion="Check available categories:"))
+                    for cat in categories[:5]:
+                        print(f"      - {cat['name']}")
+                    
+                    # Show some example skill names
+                    all_skills = []
+                    for category_name, category_data in catalog['categories'].items():
+                        for skill in category_data['skills']:
+                            all_skills.append(skill['name'])
+                    
+                    if all_skills:
+                        print(MSG_SEARCH_SUGGESTION.format(suggestion="Example skills:"))
+                        for skill_name in all_skills[:5]:
+                            print(f"      - {skill_name}")
+            except Exception:
+                pass
+            
+            return
+        
+        print(MSG_SEARCH_RESULTS_HEADER.format(query=query))
+        
+        # Load catalog to get category information
+        catalog = load_catalog()
+        category_map = {}
+        for category_name, category_data in catalog['categories'].items():
+            for skill in category_data['skills']:
+                category_map[skill['name']] = category_name
+        
+        for skill in results:
+            # Get category for this skill
+            category = category_map.get(skill['name'], 'unknown')
+            
+            # Format skill name with category prefix
+            display_name = skill['name']
+            if category != 'unknown':
+                display_name = f"{category}/{skill['name']}"
+            
+            print(MSG_SEARCH_RESULT_ITEM.format(name=display_name))
+            
+            # Truncate description if too long
+            description = skill.get('description', '')
+            if len(description) > 80:
+                description = description[:77] + "..."
+            print(MSG_SEARCH_RESULT_DESC.format(description=description))
+            
+            print(MSG_SEARCH_RESULT_CATEGORY.format(category=category))
+            
+            # Show aliases if any
+            aliases = skill.get('aliases', [])
+            if aliases:
+                aliases_str = ', '.join(aliases)
+                print(MSG_SEARCH_RESULT_ALIASES.format(aliases=aliases_str))
+            
+            # Show source type (local/remote)
+            source = skill.get('source', 'unknown')
+            source_type = 'local' if source == 'local' else 'remote'
+            print(MSG_SEARCH_RESULT_SOURCE.format(source=source_type))
+            
+            print()
+        
+        print(f"Found {len(results)} result(s) matching '{query}'")
+        
+    except Exception as e:
+        print(f"{RED}Error searching skills: {e}{RESET}")
+
+def info_command(skill_name):
+    """
+    Show detailed information about a skill.
+    
+    Args:
+        skill_name: Name of the skill to show info for
+    """
+    try:
+        catalog = load_catalog()
+        skill = get_skill(skill_name)
+        
+        if not skill:
+            print(MSG_SKILL_NOT_FOUND.format(name=skill_name))
+            return
+        
+        print(MSG_INFO_HEADER)
+        print(MSG_INFO_TITLE)
+        
+        name = skill['name']
+        description = skill['description']
+        source = skill['source']
+        license_type = skill['license']
+        aliases = skill.get('aliases', [])
+        dependencies = skill.get('dependencies', [])
+        
+        category = 'unknown'
+        for cat_name, cat_data in catalog['categories'].items():
+            for s in cat_data['skills']:
+                if s['name'] == name:
+                    category = cat_name
+                    break
+        
+        print(MSG_INFO_NAME.format(name=name))
+        print(MSG_INFO_CATEGORY.format(category=category))
+        print(MSG_INFO_DESCRIPTION.format(description=description))
+        print(MSG_INFO_SOURCE.format(source=source))
+        print(MSG_INFO_LICENSE.format(license=license_type))
+        
+        if aliases:
+            aliases_str = ', '.join(aliases)
+            print(MSG_INFO_ALIASES.format(aliases=aliases_str))
+        
+        if dependencies:
+            print(MSG_INFO_DEPENDENCIES)
+            skills = load_registry()
+            for dep in dependencies:
+                if dep in skills:
+                    print(MSG_INFO_DEPENDENCY_INSTALLED.format(dep=dep))
+                else:
+                    print(MSG_INFO_DEPENDENCY_MISSING.format(dep=dep))
+        
+        skills = load_registry()
+        if name in skills:
+            print(MSG_INFO_STATUS_INSTALLED)
+            installed_info = skills[name]
+            version = installed_info.get('version', 'unknown')
+            if version != 'unknown':
+                version = version[:7]
+            print(MSG_INFO_VERSION.format(version=version))
+            
+            updated = installed_info.get('updated')
+            if updated:
+                print(MSG_INFO_UPDATED.format(updated=updated))
+        else:
+            print(MSG_INFO_STATUS_NOT_INSTALLED)
+        
+        print(MSG_INFO_FOOTER)
+        
+    except Exception as e:
+        print(f"{RED}Error getting skill info: {e}{RESET}")
+
+def catalog_command(category=None):
+    """
+    Browse skill catalog, optionally filtered by category.
+    
+    Args:
+        category: Optional category name to filter skills
+    """
+    try:
+        catalog = load_catalog()
+        
+        if category:
+            if category not in catalog['categories']:
+                print(MSG_CATEGORY_NOT_FOUND.format(category=category))
+                
+                categories = list_categories()
+                if categories:
+                    print(MSG_CATEGORIES_LIST)
+                    for cat in categories:
+                        print(f"  - {cat['name']}")
+                
+                return
+            
+            category_data = catalog['categories'][category]
+            skills = category_data['skills']
+            
+            if not skills:
+                print(MSG_NO_SKILLS_IN_CATEGORY.format(category=category))
+                return
+            
+            print(MSG_CATALOG_HEADER)
+            print(MSG_CATALOG_TITLE)
+            print(MSG_CATEGORY_HEADER.format(category=category))
+            print(MSG_CATEGORY_DESCRIPTION.format(description=category_data['description']))
+            print()
+            
+            for skill in skills:
+                print(MSG_SKILL_IN_CATALOG.format(name=skill['name']))
+                
+                if skill.get('aliases'):
+                    aliases_str = ', '.join(skill['aliases'])
+                    print(MSG_SKILL_ALIASES_IN_CATALOG.format(aliases=aliases_str))
+                
+                description = skill.get('description', '')
+                if len(description) > 80:
+                    description = description[:77] + "..."
+                print(MSG_SKILL_DESC_IN_CATALOG.format(description=description))
+                print()
+            
+            print(MSG_CATALOG_FOOTER)
+            print(f"\nTotal: {len(skills)} skill(s) in category '{category}'")
+        
+        else:
+            print(MSG_CATALOG_HEADER)
+            print(MSG_CATALOG_TITLE)
+            
+            for category_name, category_data in catalog['categories'].items():
+                skills = category_data['skills']
+                
+                print(MSG_CATEGORY_HEADER.format(category=category_name))
+                print(MSG_CATEGORY_DESCRIPTION.format(description=category_data['description']))
+                
+                if skills:
+                    for skill in skills:
+                        skill_name = skill['name']
+                        if skill.get('aliases'):
+                            aliases_str = ', '.join(skill['aliases'])
+                            skill_name = f"{skill_name} ({aliases_str})"
+                        print(MSG_SKILL_IN_CATALOG.format(name=skill_name))
+                else:
+                    print(f"  (no skills)")
+                
+                print()
+            
+            print(MSG_CATALOG_FOOTER)
+            
+            total_categories = len(catalog['categories'])
+            total_skills = sum(len(cat_data['skills']) for cat_data in catalog['categories'].values())
+            print(f"\nTotal: {total_categories} categor(ies), {total_skills} skill(s)")
+    
+    except Exception as e:
+        print(f"{RED}Error browsing catalog: {e}{RESET}")
+
+def health_check_command(skill_name=None):
+    """
+    Perform health check on skills.
+    
+    Args:
+        skill_name: Optional name of a specific skill to check. If None, checks all installed skills.
+    """
+    import re
+    import yaml
+    
+    print(MSG_HEALTH_CHECK_START)
+    
+    skills = load_registry()
+    
+    if skill_name:
+        if skill_name not in skills:
+            print(MSG_SKILL_NOT_FOUND.format(name=skill_name))
+            return
+        skills_to_check = {skill_name: skills[skill_name]}
+    else:
+        skills_to_check = skills
+    
+    if not skills_to_check:
+        print(MSG_NO_SKILLS_REGISTRY)
+        return
+    
+    overall_issues = []
+    overall_recommendations = []
+    
+    for name, info in skills_to_check.items():
+        print(MSG_HEALTH_CHECK_SKILL.format(skill_name=name))
+        
+        skill_path = SKILLS_DIR / name
+        issues = []
+        recommendations = []
+        
+        if not skill_path.exists():
+            issues.append(f"Skill directory not found at {skill_path}")
+            recommendations.append(f"Reinstall skill '{name}'")
+            print(MSG_HEALTH_STATUS_ERROR)
+            issues_str = '\n      - '.join(issues)
+            print(MSG_HEALTH_ISSUES_FOUND.format(issues='\n      - ' + issues_str))
+            recommendations_str = '\n      - '.join(recommendations)
+            print(MSG_HEALTH_RECOMMENDATIONS.format(recommendations='\n      - ' + recommendations_str))
+            overall_issues.extend([f"{name}: {issue}" for issue in issues])
+            overall_recommendations.extend([f"{name}: {rec}" for rec in recommendations])
+            continue
+        
+        skill_md_path = skill_path / 'SKILL.md'
+        
+        if not skill_md_path.exists():
+            issues.append("SKILL.md file not found")
+            recommendations.append("Create SKILL.md with proper YAML frontmatter")
+            print(MSG_HEALTH_CHECK_SKILL_MD_MISSING)
+            print(MSG_HEALTH_STATUS_ERROR)
+            issues_str = '\n      - '.join(issues)
+            print(MSG_HEALTH_ISSUES_FOUND.format(issues='\n      - ' + issues_str))
+            recommendations_str = '\n      - '.join(recommendations)
+            print(MSG_HEALTH_RECOMMENDATIONS.format(recommendations='\n      - ' + recommendations_str))
+            overall_issues.extend([f"{name}: {issue}" for issue in issues])
+            overall_recommendations.extend([f"{name}: {rec}" for rec in recommendations])
+            continue
+        
+        try:
+            content = skill_md_path.read_text(encoding='utf-8')
+            
+            if not content.startswith('---'):
+                issues.append("SKILL.md missing YAML frontmatter")
+                recommendations.append("Add YAML frontmatter with '---' delimiters")
+                print(MSG_HEALTH_CHECK_SKILL_MD_INVALID.format(error="Missing YAML frontmatter"))
+            else:
+                frontmatter_match = re.match(r'^---\s*\n(.*?)\n---', content, re.DOTALL)
+                if not frontmatter_match:
+                    issues.append("SKILL.md has invalid YAML frontmatter format")
+                    recommendations.append("Fix YAML frontmatter format (must start and end with '---')")
+                    print(MSG_HEALTH_CHECK_SKILL_MD_INVALID.format(error="Invalid frontmatter format"))
+                else:
+                    frontmatter_str = frontmatter_match.group(1)
+                    try:
+                        frontmatter = yaml.safe_load(frontmatter_str)
+                        
+                        if not isinstance(frontmatter, dict):
+                            issues.append("YAML frontmatter is not a dictionary")
+                            recommendations.append("Fix YAML frontmatter to be a valid dictionary")
+                        else:
+                            if 'name' not in frontmatter:
+                                issues.append("Missing required field 'name' in YAML frontmatter")
+                                recommendations.append("Add 'name' field to YAML frontmatter")
+                            
+                            if 'description' not in frontmatter:
+                                issues.append("Missing required field 'description' in YAML frontmatter")
+                                recommendations.append("Add 'description' field to YAML frontmatter")
+                            
+                            if 'name' in frontmatter and frontmatter['name'] != name:
+                                issues.append(f"Skill name mismatch: directory name '{name}' vs frontmatter name '{frontmatter['name']}'")
+                                recommendations.append("Ensure directory name matches frontmatter name")
+                            
+                            if 'description' in frontmatter and len(frontmatter['description']) < 10:
+                                issues.append("Description is too short (should be at least 10 characters)")
+                                recommendations.append("Provide a more detailed description")
+                    except yaml.YAMLError as e:
+                        issues.append(f"YAML parsing error: {e}")
+                        recommendations.append("Fix YAML syntax in frontmatter")
+                        print(MSG_HEALTH_CHECK_SKILL_MD_INVALID.format(error=f"YAML error: {e}"))
+        except Exception as e:
+            issues.append(f"Error reading SKILL.md: {e}")
+            recommendations.append("Ensure SKILL.md is readable and properly formatted")
+            print(MSG_HEALTH_CHECK_SKILL_MD_INVALID.format(error=str(e)))
+        
+        try:
+            from skill_catalog import load_catalog, get_skill
+            catalog = load_catalog()
+            skill_info = get_skill(name)
+            
+            if skill_info:
+                dependencies = skill_info.get('dependencies', [])
+                if dependencies:
+                    missing_deps = []
+                    for dep in dependencies:
+                        if dep not in skills:
+                            missing_deps.append(dep)
+                            print(MSG_HEALTH_CHECK_DEPENDENCY_MISSING.format(dep=dep))
+                    
+                    if missing_deps:
+                        issues.append(f"Missing dependencies: {', '.join(missing_deps)}")
+                        recommendations.append(f"Install missing dependencies: {', '.join(missing_deps)}")
+        except Exception:
+            pass
+        
+        if issues:
+            print(MSG_HEALTH_STATUS_ERROR)
+            issues_str = '\n      - '.join(issues)
+            print(MSG_HEALTH_ISSUES_FOUND.format(issues='\n      - ' + issues_str))
+            recommendations_str = '\n      - '.join(recommendations)
+            print(MSG_HEALTH_RECOMMENDATIONS.format(recommendations='\n      - ' + recommendations_str))
+            overall_issues.extend([f"{name}: {issue}" for issue in issues])
+            overall_recommendations.extend([f"{name}: {rec}" for rec in recommendations])
+        else:
+            print(MSG_HEALTH_STATUS_HEALTHY)
+            print(MSG_HEALTH_NO_ISSUES)
+        
+        print()
+    
+    if skill_name:
+        print(f"Health check complete for skill: {skill_name}")
+    else:
+        print(f"Health check complete for {len(skills_to_check)} skill(s)")
+    
+    if overall_issues:
+        print(f"\n{COLOR_YELLOW}Overall Status: Issues Found{COLOR_RESET}")
+        print(f"Total issues: {len(overall_issues)}")
+    else:
+        print(f"\n{COLOR_GREEN}Overall Status: All Skills Healthy{COLOR_RESET}")
+
+def get_version_history(skill_path):
+    """
+    Get version history for a skill using git log.
+
+    Args:
+        skill_path: Path to the skill directory
+
+    Returns:
+        List of (commit_hash, date, message) tuples, or empty list if not a git repo
+    """
+    git_dir = skill_path / '.git'
+    if not git_dir.exists():
+        return []
+
+    try:
+        result = run_command(['git', 'log', '--oneline', '--date=short', '--format=%H|%ad|%s'], cwd=skill_path, capture_output=True)
+        if not result:
+            return []
+
+        history = []
+        for line in result.split('\n'):
+            if line:
+                parts = line.split('|', 2)
+                if len(parts) == 3:
+                    commit_hash, date, message = parts
+                    history.append((commit_hash, date, message))
+
+        return history
+    except Exception:
+        return []
+
+def rollback_skill(skill_name, version=None):
+    """
+    Rollback a skill to a previous version.
+
+    Args:
+        skill_name: Name of the skill to rollback
+        version: Optional specific commit hash to rollback to
+    """
+    skills = load_registry()
+    if skill_name not in skills:
+        print(MSG_SKILL_NOT_FOUND.format(name=skill_name))
+        return
+
+    skill_path = SKILLS_DIR / skill_name
+
+    print(MSG_ROLLBACK_START.format(name=skill_name))
+
+    version_history = get_version_history(skill_path)
+    if not version_history:
+        print(MSG_ROLLBACK_NOT_GIT_REPO.format(name=skill_name))
+        return
+
+    if not version:
+        print(MSG_ROLLBACK_VERSION_HISTORY)
+        for idx, (commit_hash, date, message) in enumerate(version_history, 1):
+            short_hash = commit_hash[:7]
+            print(f"  {idx}. {short_hash}  {date}  {message}")
+
+        print(MSG_ROLLBACK_SELECT_VERSION, end='')
+        user_input = input().strip()
+
+        if user_input.lower() == 'q':
+            print("Rollback cancelled.")
+            return
+
+        try:
+            idx = int(user_input) - 1
+            if idx < 0 or idx >= len(version_history):
+                print(f"{COLOR_RED}Invalid selection. Rollback cancelled.{COLOR_RESET}")
+                return
+            version = version_history[idx][0]
+        except ValueError:
+            print(f"{COLOR_RED}Invalid input. Rollback cancelled.{COLOR_RESET}")
+            return
+
+    short_version = version[:7]
+    print(MSG_ROLLBACK_TO_VERSION.format(version=short_version))
+
+    backup_path = SKILLS_DIR / f"{skill_name}-rollback-backup"
+    if skill_path.exists():
+        if backup_path.exists():
+            safe_rmtree(backup_path)
+
+        try:
+            skill_path.rename(backup_path)
+            print(MSG_ROLLBACK_BACKUP_CREATED.format(path=backup_path))
+        except Exception as e:
+            print(MSG_BACKUP_ERROR.format(error=e))
+            return
+
+    try:
+        result = run_command(['git', 'checkout', version], cwd=backup_path, capture_output=False)
+        if result:
+            backup_path.rename(skill_path)
+            print(MSG_ROLLBACK_SUCCESS.format(name=skill_name, version=short_version))
+
+            skills[skill_name]['version'] = version
+            skills[skill_name]['updated'] = time.strftime('%Y-%m-%d %H:%M:%S')
+
+            try:
+                REGISTRY_FILE.write_text(json.dumps({'skills': skills}, indent=2), encoding='utf-8')
+            except Exception as e:
+                print(f"{COLOR_YELLOW}Warning: Could not update skills.json: {e}{COLOR_RESET}")
+        else:
+            raise Exception("Git checkout failed")
+    except Exception as e:
+        print(MSG_ROLLBACK_FAILED.format(name=skill_name))
+        print(f"{COLOR_RED}Error: {e}{COLOR_RESET}")
+
+        if backup_path.exists():
+            if skill_path.exists():
+                safe_rmtree(skill_path)
+
+            try:
+                backup_path.rename(skill_path)
+                print(MSG_ROLLBACK_BACKUP_RESTORED)
+            except Exception as restore_error:
+                print(f"{COLOR_RED}Failed to restore backup: {restore_error}{COLOR_RESET}")
+
+def update_skill(name, force=False, auto_confirm=False):
     skills = load_registry()
     if name not in skills:
         print(MSG_SKILL_NOT_FOUND.format(name=name))
@@ -204,6 +783,8 @@ def update_skill(name, force=False):
     info = skills[name]
     repo_url = info.get('source')
     subdir = info.get('subdir', '')
+    
+    verbose_print('state', description=f"Updating skill '{name}'")
     
     if not repo_url or repo_url == 'local':
         print(MSG_SKILL_LOCAL.format(name=name))
@@ -273,6 +854,8 @@ def update_skill(name, force=False):
     backup_path = SKILLS_DIR / f"{name}-backup"
     skill_path = SKILLS_DIR / name
     
+    verbose_print('file', operation='Creating backup', path=str(backup_path))
+    
     if skill_path.exists():
         if backup_path.exists():
             safe_rmtree(backup_path)
@@ -285,13 +868,15 @@ def update_skill(name, force=False):
             return
     
     # Install the updated skill
-    # Pass force parameter to avoid interactive prompts
-    success = install_skill(install_source, SKILLS_DIR, run_audit=True, force=force)
+    # Pass force and auto_confirm parameters to avoid interactive prompts
+    verbose_print('state', description=f"Installing updated version of '{name}'")
+    success = install_skill(install_source, SKILLS_DIR, run_audit=True, force=force, auto_install_deps=auto_confirm)
     
     if success:
         print(MSG_UPDATE_SUCCESS.format(name=name))
         # Clean up backup
         if backup_path.exists():
+            verbose_print('file', operation='Removing backup', path=str(backup_path))
             safe_rmtree(backup_path)
             print(MSG_BACKUP_REMOVED)
             
@@ -299,6 +884,7 @@ def update_skill(name, force=False):
         try:
             analysis_script = Path(__file__).parent / 'post_op_analysis.py'
             if analysis_script.exists():
+                verbose_print('file', operation='Running post-operation analysis', path=str(analysis_script))
                 subprocess.run([sys.executable, str(analysis_script), 'update', name, str(skill_path)], check=False)
         except Exception as e:
             print(f"Warning: Post-operation analysis failed: {e}")
@@ -317,6 +903,7 @@ def update_skill(name, force=False):
 
 def main():
     parser = argparse.ArgumentParser(description="Manage Trae skills")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose mode for detailed debug output")
     subparsers = parser.add_subparsers(dest='command', help='Command to run')
 
     subparsers.add_parser('list', help='List installed skills')
@@ -325,13 +912,41 @@ def main():
     update_parser = subparsers.add_parser('update', help='Update a skill')
     update_parser.add_argument('name', help='Name of the skill to update')
     update_parser.add_argument('--force', '-f', action='store_true', help='Force update without confirmation')
+    update_parser.add_argument('--yes', '-y', action='store_true', help='Auto-confirm all prompts')
     
-    subparsers.add_parser('update-all', help='Update all skills')
+    update_all_parser = subparsers.add_parser('update-all', help='Update all skills')
+    update_all_parser.add_argument('--yes', '-y', action='store_true', help='Auto-confirm all prompts')
 
     uninstall_parser = subparsers.add_parser('uninstall', help='Uninstall a skill')
     uninstall_parser.add_argument('name', help='Name of the skill to uninstall')
+    uninstall_parser.add_argument('--yes', '-y', action='store_true', help='Auto-confirm uninstallation')
+
+    search_parser = subparsers.add_parser('search', help='Search for skills in the catalog')
+    search_parser.add_argument('query', help='Search query (matches name, description, or aliases)')
+    search_parser.description = 'Search for skills in the catalog by name, description, or aliases. ' \
+                                'Supports fuzzy matching across all available skills.'
+
+    info_parser = subparsers.add_parser('info', help='Show detailed information about a skill')
+    info_parser.add_argument('name', help='Name of the skill to show info for')
+
+    catalog_parser = subparsers.add_parser('catalog', help='Browse skill catalog by categories', aliases=['browse'])
+    catalog_parser.add_argument('--category', '-c', help='Filter by category name')
+    catalog_parser.description = 'Browse the skill catalog. Shows all categories and their skills. ' \
+                                  'Use --category/-c to filter skills by a specific category.'
+
+    health_parser = subparsers.add_parser('health', help='Check health of installed skills', aliases=['check-health'])
+    health_parser.add_argument('name', nargs='?', help='Optional skill name to check (if not provided, checks all skills)')
+    health_parser.description = 'Perform health check on skills. Validates SKILL.md format, directory structure, and dependencies.'
+
+    rollback_parser = subparsers.add_parser('rollback', help='Rollback a skill to a previous version')
+    rollback_parser.add_argument('name', help='Name of the skill to rollback')
+    rollback_parser.add_argument('--version', '-v', help='Specific commit hash to rollback to (if not provided, shows version history)')
+    rollback_parser.description = 'Rollback a skill to a previous version using git history. Shows available versions if no specific version is provided.'
 
     args = parser.parse_args()
+    
+    # Set verbose mode
+    set_verbose(args.verbose)
 
     if args.command == 'list':
         list_skills()
@@ -339,13 +954,27 @@ def main():
         check_updates()
     elif args.command == 'update':
         force = getattr(args, 'force', False)
-        update_skill(args.name, force=force)
+        yes = getattr(args, 'yes', False)
+        update_skill(args.name, force=force, auto_confirm=yes)
     elif args.command == 'update-all':
         skills = load_registry()
         for name in skills:
-            update_skill(name, force=False)
+            update_skill(name, force=False, auto_confirm=False)
     elif args.command == 'uninstall':
         uninstall_skill(args.name)
+    elif args.command == 'search':
+        search_skills_command(args.query)
+    elif args.command == 'info':
+        info_command(args.name)
+    elif args.command == 'catalog' or args.command == 'browse':
+        category = getattr(args, 'category', None)
+        catalog_command(category)
+    elif args.command == 'health' or args.command == 'check-health':
+        skill_name = getattr(args, 'name', None)
+        health_check_command(skill_name)
+    elif args.command == 'rollback':
+        version = getattr(args, 'version', None)
+        rollback_skill(args.name, version)
     else:
         parser.print_help()
 
