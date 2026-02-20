@@ -10,7 +10,7 @@
       "source": "https://github.com/anthropics/skills",
       "subdir": "skills/skill-creator",
       "version": "1ed29a03dc852d30fa6ef2ca53a67dc2c2c2c563",
-      "updated_at": "2026-02-16T00:23:22.725124"
+      "updated_at": "2026-02-20T01:51:42.009612"
     },
     "skill-installer": {
       "source": "local",

@@ -11,6 +11,7 @@ import yaml
 import json
 import argparse
 import datetime
+import ast
 from pathlib import Path
 
 # Initialize ANSI color support
@@ -667,6 +668,7 @@ def check_subprocess_robustness(skill_path):
     
     This function scans Python files for subprocess.run() and subprocess.check_output()
     calls that capture text output but lack proper error handling for encoding issues.
+    Also checks for shell=True usage which is a security risk.
     
     Args:
         skill_path: Path to the skill directory to scan.
@@ -682,26 +684,94 @@ def check_subprocess_robustness(skill_path):
     if skill_path.name == 'skill-auditor':
         return True, "Subprocess calls appear robust or binary"
     
-    # Check for subprocess.run without errors='replace' or similar safety mechanisms
-    # This is a heuristic check
+    # AST-based check for subprocess calls
+    class SubprocessChecker(ast.NodeVisitor):
+        def __init__(self, filename):
+            self.filename = filename
+            self.issues = []
+            
+        def visit_Call(self, node):
+            # Check for subprocess.run() or subprocess.check_output() calls
+            if isinstance(node.func, ast.Attribute):
+                # Check if it's subprocess.run or subprocess.check_output
+                if isinstance(node.func.value, ast.Name) and node.func.value.id == 'subprocess':
+                    if node.func.attr in ['run', 'check_output', 'call', 'Popen']:
+                        # Check for shell=True parameter
+                        has_shell_true = False
+                        has_errors_param = False
+                        has_text_mode = False
+                        captures_output = False
+                        
+                        # Check keyword arguments
+                        for kw in node.keywords:
+                            if kw.arg == 'shell':
+                                # Check if shell=True
+                                if isinstance(kw.value, ast.Constant) and kw.value.value is True:
+                                    has_shell_true = True
+                            elif kw.arg == 'errors':
+                                has_errors_param = True
+                            elif kw.arg in ['text', 'universal_newlines']:
+                                if isinstance(kw.value, ast.Constant) and kw.value.value is True:
+                                    has_text_mode = True
+                            elif kw.arg == 'capture_output':
+                                if isinstance(kw.value, ast.Constant) and kw.value.value is True:
+                                    captures_output = True
+                            elif kw.arg == 'stdout':
+                                # Check if stdout=subprocess.PIPE
+                                if isinstance(kw.value, ast.Attribute):
+                                    if isinstance(kw.value.value, ast.Name) and kw.value.value.id == 'subprocess':
+                                        if kw.value.attr == 'PIPE':
+                                            captures_output = True
+                        
+                        # Report shell=True as security risk
+                        if has_shell_true:
+                            self.issues.append(
+                                f"{self.filename}:{node.lineno}: subprocess.{node.func.attr}() uses shell=True. "
+                                "This is a security risk. Avoid shell=True unless absolutely necessary. "
+                                "Use list arguments instead for better security."
+                            )
+                        
+                        # Check for encoding safety
+                        if has_text_mode and captures_output and not has_errors_param:
+                            self.issues.append(
+                                f"{self.filename}:{node.lineno}: subprocess.{node.func.attr}() might crash on non-UTF8 output "
+                                "(missing errors='replace' or similar error handling)"
+                            )
+            
+            self.generic_visit(node)
+    
+    # Check Python files using AST
     for py_file in skill_path.glob('**/*.py'):
         if py_file.name == 'audit_skill.py':
             continue
         try:
             content = py_file.read_text(encoding='utf-8')
-            lines = content.splitlines()
             
-            for i, line in enumerate(lines, 1):
-                if 'subprocess.run(' in line or 'subprocess.check_output(' in line:
-                    # Skip if it's binary mode (no encoding/text arg) - usually safe from decoding errors
-                    if 'text=True' not in line and 'encoding=' not in line:
-                        continue
-                        
-                    # Only warn if capturing text output
-                    if 'capture_output=True' in line or 'stdout=subprocess.PIPE' in line:
-                        if 'text=True' in line or 'encoding=' in line:
-                            if 'errors=' not in line:
-                                issues.append(f"{py_file.name}:{i}: Subprocess call might crash on non-UTF8 output (missing errors='replace' or similar)")
+            # Parse the file as AST
+            try:
+                tree = ast.parse(content, filename=str(py_file))
+                checker = SubprocessChecker(py_file.name)
+                checker.visit(tree)
+                issues.extend(checker.issues)
+                    
+            except SyntaxError as e:
+                # If AST parsing fails, fall back to simple line-based check
+                lines = content.splitlines()
+                for i, line in enumerate(lines, 1):
+                    if 'subprocess.run(' in line or 'subprocess.check_output(' in line:
+                        # Check for shell=True
+                        if 'shell=True' in line:
+                            issues.append(f"{py_file.name}:{i}: subprocess call uses shell=True. This is a security risk.")
+                        # Skip if it's binary mode (no encoding/text arg) - usually safe from decoding errors
+                        if 'text=True' not in line and 'encoding=' not in line:
+                            continue
+                            
+                        # Only warn if capturing text output
+                        if 'capture_output=True' in line or 'stdout=subprocess.PIPE' in line:
+                            if 'text=True' in line or 'encoding=' in line:
+                                if 'errors=' not in line:
+                                    issues.append(f"{py_file.name}:{i}: Subprocess call might crash on non-UTF8 output (missing errors='replace' or similar)")
+                    
         except Exception as e:
             issues.append(f"Could not read {py_file.name}: {e}")
             
@@ -821,65 +891,105 @@ def check_i18n_support(skill_path):
         except Exception as e:
             issues.append(f"Could not read SKILL.md: {e}")
     
-    # Check Python files for hardcoded output messages
+    # AST-based check for emoji in print statements
+    class EmojiChecker(ast.NodeVisitor):
+        def __init__(self, filename, source_lines):
+            self.filename = filename
+            self.source_lines = source_lines
+            self.emoji_issues = []
+            self.print_count = 0
+            
+        def _contains_emoji(self, text):
+            """Check if text contains emoji characters."""
+            for c in text:
+                # Check common emoji ranges
+                if (0x2600 <= ord(c) <= 0x27BF) or (0x1F300 <= ord(c) <= 0x1F9FF):
+                    return True
+            return False
+        
+        def visit_Call(self, node):
+            # Check for print() calls
+            if isinstance(node.func, ast.Name) and node.func.id == 'print':
+                self.print_count += 1
+                
+                # Check each argument in print()
+                for arg in node.args:
+                    if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+                        # Check for emoji in string literals
+                        if self._contains_emoji(arg.value):
+                            line = self.source_lines[node.lineno - 1]
+                            # Skip if it's a comment
+                            if '#' in line:
+                                comment_part = line.split('#', 1)[1]
+                                if not self._contains_emoji(comment_part):
+                                    self.emoji_issues.append(
+                                        f"{self.filename}:{node.lineno}: Emoji found in print statement. "
+                                        "Emoji is not allowed in skill code. Use standard text labels [PASS]/[FAIL]/[WARN]/[INFO] instead."
+                                    )
+                            else:
+                                self.emoji_issues.append(
+                                    f"{self.filename}:{node.lineno}: Emoji found in print statement. "
+                                    "Emoji is not allowed in skill code. Use standard text labels [PASS]/[FAIL]/[WARN]/[INFO] instead."
+                                )
+            
+            self.generic_visit(node)
+    
+    # Check Python files using AST
     for py_file in skill_path.glob('**/*.py'):
         try:
             content = py_file.read_text(encoding='utf-8')
-            lines = content.splitlines()
+            source_lines = content.splitlines()
             
-            message_count = 0
-            for i, line in enumerate(lines, 1):
-                stripped = line.strip()
+            # Parse the file as AST
+            try:
+                tree = ast.parse(content, filename=str(py_file))
+                checker = EmojiChecker(py_file.name, source_lines)
+                checker.visit(tree)
                 
-                # Skip comment lines
-                if stripped.startswith('#'):
-                    continue
+                # Add emoji issues
+                issues.extend(checker.emoji_issues)
                 
-                # Count print statements with hardcoded strings
-                if 'print("' in line or "print('" in line:
-                    message_count += 1
-                
-                # Check for emoji usage in print statements (STRICT: no emoji allowed in skill code)
-                if 'print(' in line:
-                    # Check for emoji characters (Unicode ranges for emojis)
-                    # Emojis are in various ranges: U+2600-27BF, U+1F300-1F9FF, etc.
-                    has_emoji = False
-                    for c in line:
-                        # Check common emoji ranges
-                        if (0x2600 <= ord(c) <= 0x27BF) or (0x1F300 <= ord(c) <= 0x1F9FF):
-                            has_emoji = True
-                            break
+                # Warn if many hardcoded messages (informational only)
+                if checker.print_count > 20:
+                    issues.append(f"Suggestion: {py_file.name} has {checker.print_count} print statements. Consider using a message dictionary for better i18n support when applicable.")
                     
-                    if has_emoji:
-                        # Allow Unicode in comments
-                        if '#' in line:
-                            comment_part = line.split('#', 1)[1]
-                            emoji_in_comment = False
-                            for c in comment_part:
-                                if (0x2600 <= ord(c) <= 0x27BF) or (0x1F300 <= ord(c) <= 0x1F9FF):
-                                    emoji_in_comment = True
-                                    break
-                            if emoji_in_comment:
-                                continue
+            except SyntaxError as e:
+                # If AST parsing fails, fall back to simple line-based check
+                for i, line in enumerate(source_lines, 1):
+                    stripped = line.strip()
+                    if stripped.startswith('#'):
+                        continue
+                    
+                    if 'print(' in line:
+                        has_emoji = False
+                        for c in line:
+                            if (0x2600 <= ord(c) <= 0x27BF) or (0x1F300 <= ord(c) <= 0x1F9FF):
+                                has_emoji = True
+                                break
                         
-                        issues.append(f"{py_file.name}:{i}: Emoji found in output statement. Emoji is not allowed in skill code. Use standard text labels [PASS]/[FAIL]/[WARN]/[INFO] instead.")
-                        has_emoji_error = True
-            
-            # Warn if many hardcoded messages (informational only)
-            if message_count > 20:
-                issues.append(f"Suggestion: {py_file.name} has {message_count} print statements. Consider using a message dictionary for better i18n support when applicable.")
+                        if has_emoji:
+                            if '#' in line:
+                                comment_part = line.split('#', 1)[1]
+                                emoji_in_comment = False
+                                for c in comment_part:
+                                    if (0x2600 <= ord(c) <= 0x27BF) or (0x1F300 <= ord(c) <= 0x1F9FF):
+                                        emoji_in_comment = True
+                                        break
+                                if emoji_in_comment:
+                                    continue
+                            
+                            issues.append(f"{py_file.name}:{i}: Emoji found in output statement. Emoji is not allowed in skill code. Use standard text labels [PASS]/[FAIL]/[WARN]/[INFO] instead.")
+                    
+                    if 'print("' in line or "print('" in line:
+                        message_count += 1
+                
+                if message_count > 20:
+                    issues.append(f"Suggestion: {py_file.name} has {message_count} print statements. Consider using a message dictionary for better i18n support when applicable.")
                     
         except Exception as e:
             issues.append(f"Could not read {py_file.name}: {e}")
             
     if issues:
-        # Separate emoji errors from other i18n issues
-        emoji_issues = [i for i in issues if "Emoji found" in i]
-        other_issues = [i for i in issues if "Emoji found" not in i]
-        
-        if emoji_issues:
-            return False, issues
-            
         return False, issues
     return True, "Internationalization check completed"
 
@@ -891,6 +1001,7 @@ def check_absolute_references(skill_path):
     1. Hardcoded absolute file paths
     2. Absolute imports instead of relative imports
     3. Configuration files with absolute paths
+    4. Parent directory references (../) which can cause path traversal issues
     
     Args:
         skill_path: Path to the skill directory to scan.
@@ -900,34 +1011,133 @@ def check_absolute_references(skill_path):
     """
     issues = []
     
+    # AST-based check for path references
+    class PathReferenceChecker(ast.NodeVisitor):
+        def __init__(self, filename, source_lines):
+            self.filename = filename
+            self.source_lines = source_lines
+            self.issues = []
+            self.docstring_lines = set()
+            self.reported_issues = set()  # Track reported issues to avoid duplicates
+            
+        def _collect_docstring_lines(self, tree):
+            """Collect all line numbers that are part of docstrings."""
+            for node in ast.walk(tree):
+                if isinstance(node, (ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef)):
+                    if node.body and isinstance(node.body[0], ast.Expr):
+                        if isinstance(node.body[0].value, ast.Constant):
+                            if isinstance(node.body[0].value.value, str):
+                                # This is a docstring
+                                start_line = node.body[0].lineno
+                                # Multi-line docstrings span multiple lines
+                                end_line = node.body[0].end_lineno if hasattr(node.body[0], 'end_lineno') else start_line
+                                for line_num in range(start_line, end_line + 1):
+                                    self.docstring_lines.add(line_num)
+                elif isinstance(node, ast.Module):
+                    if node.body and isinstance(node.body[0], ast.Expr):
+                        if isinstance(node.body[0].value, ast.Constant):
+                            if isinstance(node.body[0].value.value, str):
+                                # Module docstring
+                                start_line = node.body[0].lineno
+                                end_line = node.body[0].end_lineno if hasattr(node.body[0], 'end_lineno') else start_line
+                                for line_num in range(start_line, end_line + 1):
+                                    self.docstring_lines.add(line_num)
+            
+        def _is_in_docstring(self, lineno):
+            """Check if a line number is in a docstring."""
+            return lineno in self.docstring_lines
+            
+        def _check_string_for_issues(self, value, lineno):
+            """Check a string value for path issues."""
+            # Skip single-character strings like '/'
+            if len(value) == 1 and value == '/':
+                return
+            
+            # Skip if in docstring
+            if self._is_in_docstring(lineno):
+                return
+            
+            # Check for absolute paths
+            if value.startswith('/') or (len(value) >= 2 and value[1] == ':' and value[0].isalpha()):
+                issue_key = f"{lineno}:abs"
+                if issue_key not in self.reported_issues:
+                    self.issues.append(
+                        f"{self.filename}:{lineno}: Absolute path detected: '{value}'. Use relative paths."
+                    )
+                    self.reported_issues.add(issue_key)
+            
+            # Check for parent directory references
+            if '../' in value or '..\\' in value:
+                issue_key = f"{lineno}:parent"
+                if issue_key not in self.reported_issues:
+                    self.issues.append(
+                        f"{self.filename}:{lineno}: Parent directory reference detected: '{value}'. "
+                        "This can cause path traversal issues. Use pathlib.Path.resolve() or proper relative paths."
+                    )
+                    self.reported_issues.add(issue_key)
+            
+        def visit_Call(self, node):
+            # Note: We don't check string values here, they will be checked in visit_Constant
+            # This avoids duplicate checking of the same string
+            self.generic_visit(node)
+        
+        def visit_Constant(self, node):
+            # Check for string constants that look like absolute paths
+            if isinstance(node.value, str):
+                # Skip if it's clearly a URL
+                if node.value.startswith('http://') or node.value.startswith('https://'):
+                    return
+                # Skip single-character strings
+                if len(node.value) == 1:
+                    return
+                # Check for absolute paths in assignments
+                self._check_string_for_issues(node.value, node.lineno)
+            
+            self.generic_visit(node)
+    
+    # Check Python files using AST
     for py_file in skill_path.glob('**/*.py'):
         try:
             content = py_file.read_text(encoding='utf-8')
-            lines = content.splitlines()
+            source_lines = content.splitlines()
             
-            for i, line in enumerate(lines, 1):
-                stripped = line.strip()
-                
-                # Skip comment lines
-                if stripped.startswith('#'):
-                    continue
-                
-                # Skip import lines
-                if stripped.startswith('import') or stripped.startswith('from'):
-                    continue
-                
-                # Check for absolute path patterns in file operations
-                # Look for patterns like open('/path/to/file') or Path('/path/to/file')
-                if re.search(r'open\s*\(\s*["\'][/A-Za-z]', line):
-                    issues.append(f"{py_file.name}:{i}: Absolute path in open() call. Use relative paths.")
-                if re.search(r'Path\s*\(\s*["\'][/A-Za-z]', line):
-                    issues.append(f"{py_file.name}:{i}: Absolute path in Path() constructor. Use relative paths.")
-                
-                # Check for hardcoded absolute paths in string assignments
-                if re.search(r'=\s*["\'][A-Z]:\\\\', line):
-                    issues.append(f"{py_file.name}:{i}: Hardcoded Windows absolute path detected.")
-                if re.search(r'=\s*["\']/[a-z]+/', line):
-                    issues.append(f"{py_file.name}:{i}: Hardcoded Unix absolute path detected.")
+            # Parse the file as AST
+            try:
+                tree = ast.parse(content, filename=str(py_file))
+                checker = PathReferenceChecker(py_file.name, source_lines)
+                checker._collect_docstring_lines(tree)
+                checker.visit(tree)
+                issues.extend(checker.issues)
+                    
+            except SyntaxError as e:
+                # If AST parsing fails, fall back to simple line-based check
+                for i, line in enumerate(source_lines, 1):
+                    stripped = line.strip()
+                    
+                    # Skip comment lines
+                    if stripped.startswith('#'):
+                        continue
+                    
+                    # Skip import lines
+                    if stripped.startswith('import') or stripped.startswith('from'):
+                        continue
+                    
+                    # Check for absolute path patterns in file operations
+                    # Look for patterns like open('/path/to/file') or Path('/path/to/file')
+                    if re.search(r'open\s*\(\s*["\'][/A-Za-z]', line):
+                        issues.append(f"{py_file.name}:{i}: Absolute path in open() call. Use relative paths.")
+                    if re.search(r'Path\s*\(\s*["\'][/A-Za-z]', line):
+                        issues.append(f"{py_file.name}:{i}: Absolute path in Path() constructor. Use relative paths.")
+                    
+                    # Check for parent directory references
+                    if re.search(r'["\']\.\.\/', line) or re.search(r'["\']\.\.\\', line):
+                        issues.append(f"{py_file.name}:{i}: Parent directory reference detected. This can cause path traversal issues.")
+                    
+                    # Check for hardcoded absolute paths in string assignments
+                    if re.search(r'=\s*["\'][A-Z]:\\\\', line):
+                        issues.append(f"{py_file.name}:{i}: Hardcoded Windows absolute path detected.")
+                    if re.search(r'=\s*["\']/[a-z]+/', line):
+                        issues.append(f"{py_file.name}:{i}: Hardcoded Unix absolute path detected.")
                     
         except Exception as e:
             issues.append(f"Could not read {py_file.name}: {e}")
@@ -940,6 +1150,9 @@ def check_absolute_references(skill_path):
                 issues.append(f"{config_file.relative_to(skill_path)}: Contains Windows absolute path.")
             if re.search(r'["\']/[a-z]+/home/', content):
                 issues.append(f"{config_file.relative_to(skill_path)}: Contains Unix absolute path.")
+            # Check for parent directory references in JSON
+            if '../' in content or '..\\' in content:
+                issues.append(f"{config_file.relative_to(skill_path)}: Contains parent directory reference. This can cause path traversal issues.")
         except Exception as e:
             issues.append(f"Could not read {config_file.name}: {e}")
             
