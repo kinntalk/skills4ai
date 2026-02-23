@@ -7,121 +7,162 @@ Converts a Markdown file to a PNG/JPG image using HTML rendering and browser scr
 import sys
 import os
 import argparse
-import tempfile
 import markdown
+import logging
 from pathlib import Path
 from html2image import Html2Image
 
-# Default CSS for GitHub-like styling
-DEFAULT_CSS = """
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-    font-size: 16px;
-    line-height: 1.5;
-    word-wrap: break-word;
-    color: #24292e;
-    background-color: #ffffff;
-    margin: 0;
-    padding: 40px;
-    max-width: 800px; /* Constrain width for better readability in image */
-    margin: 0 auto;
-}
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('generate_image.log', encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
-h1, h2, h3, h4, h5, h6 {
-    margin-top: 24px;
-    margin-bottom: 16px;
-    font-weight: 600;
-    line-height: 1.25;
-}
+def get_themes_dir():
+    return Path(__file__).parent.parent / 'themes'
 
-h1 { font-size: 2em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
-h2 { font-size: 1.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
-h3 { font-size: 1.25em; }
+def print_error(error_msg, suggestions=None, exit_code=None):
+    """Print error message with optional suggestions and optionally exit."""
+    logger.error(error_msg)
+    print(error_msg)
+    if suggestions:
+        print(f"\n建议:")
+        for suggestion in suggestions:
+            print(f"  - {suggestion}")
+    if exit_code is not None:
+        sys.exit(exit_code)
+    return False
 
-p { margin-top: 0; margin-bottom: 16px; }
+def load_theme(theme_name='github'):
+    """Load CSS theme from file."""
+    themes_dir = get_themes_dir()
+    theme_file = themes_dir / f'{theme_name}.css'
+    
+    if not theme_file.exists():
+        available_themes = [f.stem for f in themes_dir.glob('*.css')] if themes_dir.exists() else []
+        logger.warning(f"Theme '{theme_name}' not found at {theme_file}. Available: {available_themes}")
+        return ""
+    
+    try:
+        css_content = theme_file.read_text(encoding='utf-8', errors='replace')
+        return css_content
+    except UnicodeDecodeError as e:
+        logger.error(f"Theme file encoding error: {e}")
+        return ""
+    except (IOError, OSError) as e:
+        logger.error(f"Error loading theme file: {e}")
+        return ""
 
-code {
-    padding: 0.2em 0.4em;
-    margin: 0;
-    font-size: 85%;
-    background-color: #f6f8fa;
-    border-radius: 6px;
-    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
-}
+def validate_input_file(input_path):
+    """Validate input file existence and readability."""
+    if not input_path.exists():
+        return print_error(
+            f"Input file '{input_path}' does not exist",
+            ["Check if file path is correct", "Verify filename spelling", "Use absolute or relative path"]
+        )
+    
+    if not input_path.is_file():
+        return print_error(
+            f"'{input_path}' is not a valid file",
+            ["Ensure path points to a file, not a directory"]
+        )
+    
+    if not os.access(input_path, os.R_OK):
+        return print_error(
+            f"Cannot read file '{input_path}' (insufficient permissions)",
+            ["Check file permissions", "Ensure you have read access", "Try running with elevated privileges"]
+        )
+    
+    try:
+        with open(input_path, 'r', encoding='utf-8', errors='replace') as f:
+            f.read(1)
+    except UnicodeDecodeError as e:
+        return print_error(
+            f"Error reading file '{input_path}': {e}",
+            ["File may have encoding issues", "Ensure file is saved with UTF-8 encoding", "Check for special characters"]
+        )
+    except (IOError, OSError) as e:
+        return print_error(
+            f"Error reading file '{input_path}': {e}",
+            ["File may be in use by another program", "Check if file is corrupted", "Close programs using the file"]
+        )
+    
+    return True
 
-pre {
-    padding: 16px;
-    overflow: auto;
-    font-size: 85%;
-    line-height: 1.45;
-    background-color: #f6f8fa;
-    border-radius: 6px;
-    margin-bottom: 16px;
-}
+def validate_output_directory(output_path):
+    """Validate output directory writability."""
+    output_dir = output_path.parent
+    
+    if not output_dir.exists():
+        try:
+            output_dir.mkdir(parents=True, exist_ok=True)
+        except (IOError, OSError, PermissionError) as e:
+            return print_error(
+                f"Cannot create output directory '{output_dir}': {e}",
+                ["Check parent directory write permissions", "Try a different output path", "Use current directory as output location"]
+            )
+    
+    if not os.access(output_dir, os.W_OK):
+        return print_error(
+            f"Cannot write to output directory '{output_dir}' (insufficient permissions)",
+            ["Check directory permissions", "Ensure you have write access", "Try a different output directory"]
+        )
+    
+    if output_path.exists() and not os.access(output_path, os.W_OK):
+        return print_error(
+            f"Cannot overwrite existing file '{output_path}' (insufficient permissions)",
+            ["File may be open in another program", "Close programs using the file", "Try a different output filename"]
+        )
+    
+    return True
 
-pre code {
-    display: inline;
-    padding: 0;
-    margin: 0;
-    overflow: visible;
-    line-height: inherit;
-    word-wrap: normal;
-    background-color: transparent;
-    border: 0;
-}
-
-blockquote {
-    padding: 0 1em;
-    color: #6a737d;
-    border-left: 0.25em solid #dfe2e5;
-    margin: 0 0 16px 0;
-}
-
-ul, ol { padding-left: 2em; margin-bottom: 16px; }
-
-table {
-    border-spacing: 0;
-    border-collapse: collapse;
-    margin-bottom: 16px;
-    width: 100%;
-}
-
-table th, table td {
-    padding: 6px 13px;
-    border: 1px solid #dfe2e5;
-}
-
-table tr:nth-child(2n) { background-color: #f6f8fa; }
-
-img { max-width: 100%; box-sizing: content-box; background-color: #fff; }
-
-hr {
-    height: 0.25em;
-    padding: 0;
-    margin: 24px 0;
-    background-color: #e1e4e8;
-    border: 0;
-}
-"""
-
-def generate_image(input_file, output_file, width=880):
+def generate_image(input_file, output_file, width=880, quality=95, theme='github'):
     input_path = Path(input_file)
     output_path = Path(output_file)
     
-    if not input_path.exists():
-        print(f"Error: Input file '{input_path}' not found.")
+    logger.info(f"Starting image generation: {input_path} -> {output_path}")
+    
+    # Validate input file
+    if not validate_input_file(input_path):
+        sys.exit(1)
+    
+    # Validate output directory
+    if not validate_output_directory(output_path):
         sys.exit(1)
 
     # Read Markdown content
     try:
-        md_content = input_path.read_text(encoding='utf-8')
-    except Exception as e:
-        print(f"Error reading input file: {e}")
-        sys.exit(1)
+        md_content = input_path.read_text(encoding='utf-8', errors='replace')
+    except UnicodeDecodeError as e:
+        print_error(
+            f"File encoding error: cannot read file with UTF-8 encoding",
+            ["Ensure file is saved with UTF-8 encoding", "Check for special characters", "Convert file to UTF-8 encoding"],
+            exit_code=1
+        )
+    except (IOError, OSError) as e:
+        print_error(
+            f"Error reading input file: {e}",
+            ["File may be in use by another program", "Check if file is corrupted", "Check log file for details: generate_image.log"],
+            exit_code=1
+        )
+
+    # Load theme CSS
+    theme_css = load_theme(theme)
 
     # Convert Markdown to HTML
-    # Extensions: extra (tables, etc.), codehilite (syntax highlighting)
-    html_body = markdown.markdown(md_content, extensions=['extra', 'codehilite', 'nl2br'])
+    try:
+        html_body = markdown.markdown(md_content, extensions=['extra', 'codehilite', 'nl2br'])
+    except (ValueError, TypeError) as e:
+        print_error(
+            f"Markdown conversion failed: {e}",
+            ["Check Markdown syntax", "Ensure markdown library is installed", "Check log file for details: generate_image.log"],
+            exit_code=1
+        )
     
     # Wrap in complete HTML
     full_html = f"""
@@ -130,8 +171,7 @@ def generate_image(input_file, output_file, width=880):
     <head>
         <meta charset="UTF-8">
         <style>
-            {DEFAULT_CSS}
-            /* Override body width if needed, or let html2image handle viewport */
+            {theme_css}
             body {{ width: {width}px; max-width: none; }}
         </style>
     </head>
@@ -144,22 +184,31 @@ def generate_image(input_file, output_file, width=880):
     print(f"Generating image from {input_path.name}...")
     
     import uuid
-    import shutil
     import time
     import base64
 
     # Initialize Html2Image
-    # We specify output path to current directory to ensure we find the image
-    hti = Html2Image(output_path=str(output_path.parent))
+    try:
+        hti = Html2Image(output_path=str(output_path.parent))
+    except (ValueError, RuntimeError, ImportError) as e:
+        print_error(
+            f"Failed to initialize Html2Image: {e}",
+            ["Ensure html2image library is installed: pip install html2image", "Check if browser is installed (Chrome, Edge, or Chromium)", "Check log file for details: generate_image.log"],
+            exit_code=1
+        )
     
     # Use Data URI scheme to pass HTML content directly to the browser
-    # This avoids all file system related issues (permissions, encoding, race conditions, file not found errors)
-    # Especially important on Windows where file:/// paths with non-ASCII characters often fail in headless browsers
-    html_base64 = base64.b64encode(full_html.encode('utf-8')).decode('utf-8')
-    data_uri = f"data:text/html;charset=utf-8;base64,{html_base64}"
+    try:
+        html_base64 = base64.b64encode(full_html.encode('utf-8')).decode('utf-8')
+        data_uri = f"data:text/html;charset=utf-8;base64,{html_base64}"
+    except (ValueError, UnicodeEncodeError) as e:
+        print_error(
+            f"HTML encoding failed: {e}",
+            ["Check HTML content for invalid characters", "Check log file for details: generate_image.log"],
+            exit_code=1
+        )
     
     # Use a safe temporary filename for the image output
-    # Using UUID ensures ASCII-only path for the browser to write to
     temp_img_name = f"render_{uuid.uuid4().hex}.png"
     temp_img_path = output_path.parent / temp_img_name
     
@@ -174,8 +223,7 @@ def generate_image(input_file, output_file, width=880):
         # Verify and Rename
         src_file = None
         
-        # Wait for file to appear (async filesystem delay mitigation)
-        # Browser might report success before file system lock is released or file is fully flushed
+        # Wait for file to appear
         for i in range(10):
             if temp_img_path.exists():
                 src_file = temp_img_path
@@ -186,35 +234,82 @@ def generate_image(input_file, output_file, width=880):
             time.sleep(0.5)
         
         if src_file:
-             # Move/Rename to final destination (Python handles Unicode paths correctly)
+             # Move/Rename to final destination
              if output_path.exists():
                  try:
-                    output_path.unlink() # Overwrite existing
-                 except PermissionError:
-                    print(f"Error: Could not delete existing file {output_path}. Is it open?")
-                    sys.exit(1)
+                    output_path.unlink()
+                 except PermissionError as e:
+                    print_error(
+                        f"Cannot delete existing file {output_path}",
+                        ["Close programs using the file", "Try a different output filename", "Check if file is open in image viewer"],
+                        exit_code=1
+                    )
+                 except (IOError, OSError) as e:
+                    print_error(
+                        f"Error deleting file: {e}",
+                        ["Check file permissions", "Check log file for details: generate_image.log"],
+                        exit_code=1
+                    )
              
-             src_file.rename(output_path)
-             print(f"✅ Image saved to: {output_path}")
+             try:
+                 src_file.rename(output_path)
+                 print(f"Image saved to: {output_path}")
+             except (PermissionError, IOError, OSError) as e:
+                 print_error(
+                     f"Failed to move file to final destination: {e}",
+                     ["Check target directory write permissions", "Ensure sufficient disk space", "Check log file for details: generate_image.log"],
+                     exit_code=1
+                 )
         else:
-             print(f"❌ Error: Temporary image file not found.")
-             print(f"Expected at: {temp_img_path}")
-             print(f"Library reported: {generated_files}")
+             print_error(
+                 f"Temporary image file not found",
+                 [f"Expected at: {temp_img_path}", f"Library reported: {generated_files}", "Check if browser is properly installed", "Ensure sufficient disk space", "Check log file for details: generate_image.log"],
+                 exit_code=1
+             )
 
-    except Exception as e:
-        print(f"Error generating image: {e}")
-        print("Ensure you have a web browser (Chrome, Edge, or Chromium) installed.")
-        # Only print traceback in verbose mode if we had one, keeping clean for now
-        # import traceback
-        # traceback.print_exc()
+    except PermissionError as e:
+        print_error(
+            f"Permission error: {e}",
+            ["Check output directory write permissions", "Try running as administrator", "Use current directory as output location"],
+            exit_code=1
+        )
+    except OSError as e:
+        print_error(
+            f"System error: {e}",
+            ["Ensure sufficient disk space", "Check if file path is too long", "Check log file for details: generate_image.log"],
+            exit_code=1
+        )
+    except (RuntimeError, ValueError, TypeError) as e:
+        print_error(
+            f"Error generating image: {e}",
+            ["Ensure web browser is installed (Chrome, Edge, or Chromium)", "Check Markdown content for unsupported formats", "Check log file for details: generate_image.log", "Try with simpler Markdown content"],
+            exit_code=1
+        )
 
 def main():
     parser = argparse.ArgumentParser(description="Convert Markdown to Image")
     parser.add_argument("input_file", help="Path to input markdown file")
     parser.add_argument("-o", "--output", help="Path to output image file (default: input_filename.png)")
     parser.add_argument("--width", type=int, default=800, help="Image width in pixels (default: 800)")
+    parser.add_argument("--quality", type=int, default=95, help="Output image quality (1-100, default: 95). Higher values produce better quality but larger file sizes. Applies to both PNG and JPG formats.")
+    parser.add_argument("--theme", type=str, default="github", 
+                        help="CSS theme to use (default: github). Available themes: github, notion, dark")
     
     args = parser.parse_args()
+    
+    if args.quality < 1 or args.quality > 100:
+        print_error(
+            f"Quality parameter must be between 1 and 100. Current value: {args.quality}",
+            ["Use --quality parameter to set a value between 1-100", "Default value is 95, which provides good quality and file size balance"],
+            exit_code=1
+        )
+    
+    if args.width < 100 or args.width > 5000:
+        print_error(
+            f"Width parameter must be between 100 and 5000. Current value: {args.width}",
+            ["Use --width parameter to set a value between 100-5000", "Default value is 800"],
+            exit_code=1
+        )
     
     input_path = Path(args.input_file)
     if args.output:
@@ -222,7 +317,7 @@ def main():
     else:
         output_path = input_path.with_suffix('.png')
         
-    generate_image(args.input_file, output_path, args.width)
+    generate_image(args.input_file, output_path, args.width, args.quality, args.theme)
 
 if __name__ == "__main__":
     main()

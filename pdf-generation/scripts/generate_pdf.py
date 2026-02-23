@@ -43,10 +43,18 @@ def generate_pdf(
         fontsize: Base font size
         mobile: Generate mobile-optimized PDF (6x9in, smaller margins, 10pt font)
     """
-    input_path = Path(input_file)
+    input_path = Path(input_file).resolve()
 
     if not input_path.exists():
         print(f"Error: Input file '{input_file}' not found", file=sys.stderr)
+        sys.exit(1)
+
+    if not input_path.is_file():
+        print(f"Error: Input path '{input_file}' is not a file", file=sys.stderr)
+        sys.exit(1)
+
+    if input_path.suffix.lower() not in ['.md', '.markdown']:
+        print(f"Error: Input file must be a markdown file (.md or .markdown)", file=sys.stderr)
         sys.exit(1)
 
     # Auto-generate output filename if not provided
@@ -112,13 +120,20 @@ def generate_pdf(
         print(f"Theme: {theme} ({THEMES.get(theme, 'custom')})")
         print(f"Russian font: {'Yes (EB Garamond)' if russian else 'No'}")
 
+        # Security Note: Input validation performed above:
+        # - File existence verified with Path.resolve()
+        # - File type verified with is_file()
+        # - File extension validated (.md or .markdown only)
+        # - Using list arguments (cmd) prevents shell injection
+        # - No shell=True parameter used
+        # - All paths are properly escaped by subprocess when using list args
         result = subprocess.run(cmd, check=True, capture_output=True, encoding='utf-8', errors='replace')
 
-        print(f"✅ Success: PDF generated at {output_file}")
+        print(f"[PASS] Success: PDF generated at {output_file}")
         return 0
 
     except subprocess.CalledProcessError as e:
-        print(f"❌ Error generating PDF:", file=sys.stderr)
+        print(f"[FAIL] Error generating PDF:", file=sys.stderr)
         print(e.stderr, file=sys.stderr)
         return 1
     except FileNotFoundError:

@@ -1,13 +1,13 @@
 ---
 name: pdf-generation
-description: Professional PDF generation from markdown using Pandoc with Eisvogel template and EB Garamond fonts. Use when converting markdown to PDF, creating white papers, research documents, marketing materials, or technical documentation. Supports both English and Russian documents with professional typography and color-coded themes. Mobile-optimized layout (6x9) by default for Telegram bot context, desktop/print layout (A4) for other contexts.
+description: Professional PDF generation from markdown using Pandoc with Eisvogel template and EB Garamond fonts. Use when converting markdown to PDF, creating white papers, research documents, marketing materials, or technical documentation. Supports English, Russian, and Chinese documents with professional typography and color-coded themes. Mobile-optimized layout (6x9) by default for Telegram bot context, desktop/print layout (A4) for other contexts.
 ---
 
 # PDF Generation
 
 ## Overview
 
-Generate professional PDFs from markdown files using Pandoc with Eisvogel template styling. Supports English and Russian documents with customizable themes, table of contents, and professional typography including EB Garamond font for Russian text.
+Generate professional PDFs from markdown files using Pandoc with Eisvogel template styling. Supports English, Russian, and Chinese documents with customizable themes, table of contents, and professional typography including EB Garamond font for Russian text and Microsoft YaHei for Chinese text.
 
 ## Quick Start
 
@@ -25,6 +25,12 @@ pandoc doc-ru.md -o doc.pdf --pdf-engine=xelatex --toc --toc-depth=2 -V geometry
 
 # Russian Mobile PDF
 pandoc doc-ru.md -o doc-mobile.pdf --pdf-engine=xelatex --toc --toc-depth=2 -V geometry:paperwidth=6in -V geometry:paperheight=9in -V geometry:margin=0.5in -V fontsize=10pt -V linestretch=1.2 -V mainfont="EB Garamond"
+
+# Chinese PDF with Microsoft YaHei
+pandoc doc-zh.md -o doc.pdf --pdf-engine=xelatex --toc --toc-depth=2 -V geometry:margin=2.5cm -V fontsize=11pt -V documentclass=article -V mainfont="Microsoft YaHei"
+
+# Chinese Mobile PDF
+pandoc doc-zh.md -o doc-mobile.pdf --pdf-engine=xelatex --toc --toc-depth=2 -V geometry:paperwidth=6in -V geometry:paperheight=9in -V geometry:margin=0.5in -V fontsize=10pt -V linestretch=1.2 -V mainfont="Microsoft YaHei"
 ```
 
 ## Document Theme Colors
@@ -107,7 +113,10 @@ Automatically detects and fixes:
 ### Workflow 1: Simple PDF
 
 1. Check context (Telegram = mobile, otherwise desktop)
-2. Check if Russian (use EB Garamond if yes)
+2. Check language:
+   - Russian: use EB Garamond font
+   - Chinese: use Microsoft YaHei font (Windows), PingFang SC (macOS), or Noto Sans CJK SC (Linux)
+   - English: use default fonts
 3. Run appropriate pandoc command
 4. Verify output
 

@@ -63,11 +63,11 @@ def main():
         print(f"Error: {input_file} not found", file=sys.stderr)
         sys.exit(1)
     
-    content = input_file.read_text(encoding='utf-8')
+    content = input_file.read_text(encoding='utf-8', errors='replace')
     fixed_content = fix_markdown_lists(content)
-    output_file.write_text(fixed_content, encoding='utf-8')
+    output_file.write_text(fixed_content, encoding='utf-8', errors='replace')
     
-    print(f"✓ Fixed markdown formatting: {output_file}")
+    print(f"[PASS] Fixed markdown formatting: {output_file}")
 
 if __name__ == '__main__':
     main()

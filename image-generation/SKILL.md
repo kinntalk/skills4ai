@@ -36,6 +36,52 @@ You can specify the output filename and the content width:
 python .trae/skills/image-generation/scripts/generate_image.py input.md -o output.jpg --width 1000
 ```
 
+### Quality Control
+
+Control the output image quality with the `--quality` parameter (range: 1-100, default: 95):
+
+```bash
+python .trae/skills/image-generation/scripts/generate_image.py input.md --quality 90
+```
+
+- **Higher quality (90-100)**: Best visual quality, larger file sizes. Recommended for final outputs and documentation.
+- **Medium quality (70-89)**: Good balance between quality and file size. Suitable for web sharing.
+- **Lower quality (1-69)**: Smaller file sizes, reduced visual quality. Useful for quick previews or bandwidth-constrained scenarios.
+
+The quality setting applies to both PNG and JPG output formats.
+
+### Theme Selection
+
+Choose from multiple CSS themes to customize the visual style of your output images:
+
+```bash
+python .trae/skills/image-generation/scripts/generate_image.py input.md --theme notion
+```
+
+Available themes:
+
+- **github** (default): GitHub-style markdown rendering with clean, professional appearance. Features:
+  - Light background (#ffffff)
+  - Gray code blocks (#f6f8fa)
+  - Subtle borders and separators
+  - GitHub's signature typography
+
+- **notion**: Minimalist, clean design inspired by Notion. Features:
+  - Light background with wider padding
+  - Muted code blocks (#f7f6f3)
+  - Softer borders and rounded corners
+  - Increased line height for readability
+  - Italic blockquotes
+
+- **dark**: Dark mode theme for reduced eye strain. Features:
+  - Dark background (#0d1117)
+  - Dark code blocks (#161b22)
+  - Light text (#c9d1d9)
+  - Blue links (#58a6ff)
+  - High contrast for readability
+
+The theme parameter is backward compatible - if not specified, it defaults to the "github" theme.
+
 ## System Requirements
 
 - **Python 3.6+**

@@ -1,0 +1,104 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    font-size: 16px;
+    line-height: 1.6;
+    word-wrap: break-word;
+    color: #37352f;
+    background-color: #ffffff;
+    margin: 0;
+    padding: 60px;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 32px;
+    margin-bottom: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+h1 { font-size: 2.25em; margin-top: 0; }
+h2 { font-size: 1.75em; }
+h3 { font-size: 1.5em; }
+h4 { font-size: 1.25em; }
+
+p { margin-top: 0; margin-bottom: 16px; }
+
+code {
+    padding: 0.2em 0.4em;
+    margin: 0;
+    font-size: 85%;
+    background-color: rgba(135, 131, 120, 0.15);
+    border-radius: 3px;
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    color: #eb5757;
+}
+
+pre {
+    padding: 16px;
+    overflow: auto;
+    font-size: 14px;
+    line-height: 1.5;
+    background-color: #f7f6f3;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    border: 1px solid #e9e9e7;
+}
+
+pre code {
+    display: inline;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    line-height: inherit;
+    word-wrap: normal;
+    background-color: transparent;
+    border: 0;
+    color: inherit;
+}
+
+blockquote {
+    padding: 0 1em;
+    color: #6b6b6b;
+    border-left: 3px solid #e0e0e0;
+    margin: 0 0 16px 0;
+    font-style: italic;
+}
+
+ul, ol { padding-left: 1.5em; margin-bottom: 16px; }
+
+li { margin-bottom: 4px; }
+
+table {
+    border-spacing: 0;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+    width: 100%;
+    border: 1px solid #e9e9e7;
+}
+
+table th, table td {
+    padding: 8px 12px;
+    border: 1px solid #e9e9e7;
+}
+
+table th {
+    background-color: #f7f6f3;
+    font-weight: 600;
+}
+
+table tr:nth-child(2n) { background-color: #faf9f7; }
+
+img { max-width: 100%; box-sizing: content-box; background-color: #fff; }
+
+hr {
+    height: 1px;
+    padding: 0;
+    margin: 32px 0;
+    background-color: #e9e9e7;
+    border: 0;
+}
+
+a { color: #2eaadc; text-decoration: none; }
+a:hover { text-decoration: underline; }
