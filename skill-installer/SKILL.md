@@ -1,6 +1,6 @@
 ---
 name: skill-installer
-description: A tool to install skills from remote git repositories directly into the .trae/skills directory. Supports subdirectories for monorepo skill collections, skill catalog browsing, dependency management, license verification, health checks, and version rollback.
+description: Install and manage skills from Git repositories into .trae/skills directory. Supports subdirectories, catalog browsing, dependency management, license verification, health checks, and version rollback.
 ---
 
 # Skill Installer

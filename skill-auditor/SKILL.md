@@ -1,7 +1,7 @@
 ---
 name: skill-auditor
-description: A standard compliance checking tool for Trae skills. Use this skill when you need to verify if a skill follows best practices, specifically checking for dependency completeness, proper file encoding, path consistency, cross-platform compatibility, internationalization support, and correct packaging structure.
-description_zh: Trae skills 标准合规性检查工具。当您需要验证 skill 是否遵循最佳实践时使用此 skill，专门检查依赖完整性、正确的文件编码、路径一致性、跨平台兼容性、国际化支持和正确的打包结构。
+description: Standard compliance checker for Trae skills. Verifies dependency completeness, file encoding, path consistency, cross-platform compatibility, i18n support, and packaging structure. Use when auditing skills before publishing or verifying compliance.
+description_zh: Trae skills 标准合规性检查工具。检查依赖完整性、文件编码、路径一致性、跨平台兼容性、国际化支持和打包结构。在发布前审计 skill 或验证合规性时使用。
 ---
 
 # Skill Auditor / Skill 审计工具
@@ -359,172 +359,51 @@ The auditor uses four severity levels to classify issues:
 
 ## Usage Examples
 
-### Running Security Checks
+### Basic Audit
 
 ```powershell
-# Run strict mode to check all security issues
-python scripts/audit_skill.py ../my-skill --level strict
+# Audit a skill with standard checks
+python scripts/audit_skill.py ../my-skill
 
-# Run with verbose output to see detailed security findings
+# Strict mode with all security and quality checks
 python scripts/audit_skill.py ../my-skill --level strict --verbose
-
-# Example output for security issues:
-# [FAIL] Security Analysis: Malicious Script Injection
-#   scripts/handler.py:45: eval() with potential user input. This is a critical security vulnerability.
-# [FAIL] Security Analysis: Code Execution Safety
-#   scripts/utils.py:23: exec() detected. Dynamic code execution is a critical security risk.
-```
-
-### Running Quality Checks
-
-```powershell
-# Run standard mode to check quality issues
-python scripts/audit_skill.py ../my-skill --level standard
-
-# Example output for quality issues:
-# [WARN] Quality Checks: Error Handling Patterns
-#   scripts/main.py:67: Bare except clause detected. Use specific exception types.
-# [WARN] Quality Checks: Logging Practices
-#   scripts/handler.py:34: Potential sensitive data in log message: 'password'.
-```
-
-### Interpreting Severity Levels
-
-```powershell
-# Example audit output with severity indicators
-# CRITICAL issues (must fix):
-# [FAIL] Security Analysis: Data Masking
-#   scripts/config.py:12: Potential hardcoded sensitive data: api_key = "sk-12345..."
-
-# HIGH issues (should fix soon):
-# [WARN] Security Analysis: Filesystem Security
-#   scripts/utils.py:56: open() with potential user input. Path traversal vulnerability.
-
-# MEDIUM issues (should fix):
-# [WARN] Quality Checks: Input Validation
-#   scripts/handler.py:89: No type checking for user input.
-
-# LOW issues (nice to fix):
-# [INFO] Output Quality: Token Optimization
-#   scripts/main.py:123: Function is 65 lines long. Consider splitting.
 ```
 
 ### Fixing Common Issues
 
-#### Example 1: Fixing Security Issue - Code Injection
+**Security Issue - Code Injection:**
 
-**Before (vulnerable):**
+Before:
 ```python
-# scripts/handler.py
-def process_user_code(user_input):
-    result = eval(user_input)  # CRITICAL: Code injection
-    return result
+result = eval(user_input)  # CRITICAL: Code injection
 ```
 
-**After (secure):**
+After:
 ```python
-# scripts/handler.py
 import ast
-
-def process_user_code(user_input):
-    try:
-        result = ast.literal_eval(user_input)  # Safe for literals only
-        return result
-    except (ValueError, SyntaxError):
-        raise ValueError("Invalid input: only literals allowed")
+result = ast.literal_eval(user_input)  # Safe for literals only
 ```
 
-#### Example 2: Fixing Quality Issue - Error Handling
+**Quality Issue - Error Handling:**
 
-**Before (poor error handling):**
+Before:
 ```python
-# scripts/utils.py
-def read_config(filename):
-    try:
-        with open(filename) as f:
-            return json.load(f)
-    except:  # BAD: Bare except clause
-        return None
+try:
+    with open(filename) as f:
+        return json.load(f)
+except:  # BAD: Bare except clause
+    return None
 ```
 
-**After (proper error handling):**
+After:
 ```python
-# scripts/utils.py
-def read_config(filename):
-    try:
-        with open(filename, encoding='utf-8') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Config file not found: {filename}")
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON in config file: {e}")
-    except IOError as e:
-        raise IOError(f"Error reading config file: {e}")
-```
-
-#### Example 3: Fixing Output Quality Issue - Verbose Output
-
-**Before (excessive output):**
-```python
-# scripts/processor.py
-def process_data(data):
-    print("Starting processing...")
-    print(f"Data length: {len(data)}")
-    print("Processing item 1...")
-    print("Processing item 2...")
-    print("Processing item 3...")
-    # ... many more print statements
-    print("Done!")
-    return result
-```
-
-**After (concise output):**
-```python
-# scripts/processor.py
-import logging
-
-logger = logging.getLogger(__name__)
-
-def process_data(data):
-    logger.info(f"Processing {len(data)} items")
-    result = transform(data)
-    logger.info("Processing complete")
-    return result
-```
-
-### CI/CD Integration
-
-```yaml
-# .github/workflows/skill-audit.yml
-name: Skill Audit
-on: [push, pull_request]
-
-jobs:
-  audit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-      
-      - name: Install dependencies
-        run: |
-          pip install pyyaml
-          
-      - name: Run skill auditor (strict mode)
-        run: |
-          python .trae/skills/skill-auditor/scripts/audit_skill.py \
-            . --level strict --json > audit-results.json
-          
-      - name: Upload audit results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: audit-results
-          path: audit-results.json
+try:
+    with open(filename, encoding='utf-8') as f:
+        return json.load(f)
+except FileNotFoundError:
+    raise FileNotFoundError(f"Config file not found: {filename}")
+except json.JSONDecodeError as e:
+    raise ValueError(f"Invalid JSON in config file: {e}")
 ```
 
 ## Resources

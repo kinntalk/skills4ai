@@ -37,7 +37,7 @@ def get_sessions_sorted(project_dir: Path) -> List[Path]:
 def parse_session_messages(session_file: Path) -> List[Dict]:
     """Parse all messages from a session file, preserving order."""
     messages = []
-    with open(session_file, 'r', encoding='utf-8') as f:
+    with open(session_file, 'r', encoding='utf-8', errors='replace') as f:
         for line_num, line in enumerate(f):
             try:
                 data = json.loads(line)

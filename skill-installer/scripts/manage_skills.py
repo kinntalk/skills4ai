@@ -10,7 +10,10 @@ import argparse
 import json
 import subprocess
 import tempfile
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 # Import install_skill to reuse installation logic
 # Assuming manage_skills.py is in the same directory as install_skill.py
@@ -125,7 +128,18 @@ def load_registry():
     try:
         content = REGISTRY_FILE.read_text(encoding='utf-8')
         return json.loads(content).get('skills', {})
+    except UnicodeDecodeError as e:
+        logger.error(f"Unicode decode error reading {REGISTRY_FILE}: {e}")
+        try:
+            content = REGISTRY_FILE.read_text(encoding='utf-8', errors='replace')
+            logger.warning(f"Retrying with errors='replace' for {REGISTRY_FILE}")
+            return json.loads(content).get('skills', {})
+        except Exception as e2:
+            logger.error(f"Failed to read {REGISTRY_FILE} even with errors='replace': {e2}")
+            print(f"{RED}Error reading skills.json: {e}{RESET}")
+            return {}
     except Exception as e:
+        logger.error(f"Error reading {REGISTRY_FILE}: {e}")
         print(f"{RED}Error reading skills.json: {e}{RESET}")
         return {}
 
@@ -210,15 +224,12 @@ def safe_rmtree(path, retries=5, delay=0.5):
         try:
             shutil.rmtree(path)
             return True
-        except PermissionError:
+        except Exception as e:
             if i < retries - 1:
                 time.sleep(delay)
             else:
                 print(MSG_DELETE_LOCKED.format(path=path))
                 return False
-        except Exception as e:
-            print(MSG_DELETE_ERROR.format(path=path, error=e))
-            return False
     return False
 
 def uninstall_skill(name):
@@ -604,7 +615,21 @@ def health_check_command(skill_name=None):
                         issues.append(f"YAML parsing error: {e}")
                         recommendations.append("Fix YAML syntax in frontmatter")
                         print(MSG_HEALTH_CHECK_SKILL_MD_INVALID.format(error=f"YAML error: {e}"))
+        except UnicodeDecodeError as e:
+            logger.error(f"Unicode decode error reading {skill_md_path}: {e}")
+            try:
+                content = skill_md_path.read_text(encoding='utf-8', errors='replace')
+                logger.warning(f"Retrying with errors='replace' for {skill_md_path}")
+                issues.append(f"Encoding issues in SKILL.md: {e}")
+                recommendations.append("Fix encoding issues in SKILL.md")
+                print(MSG_HEALTH_CHECK_SKILL_MD_INVALID.format(error=f"Encoding error: {e}"))
+            except Exception as e2:
+                logger.error(f"Failed to read {skill_md_path} even with errors='replace': {e2}")
+                issues.append(f"Error reading SKILL.md: {e2}")
+                recommendations.append("Ensure SKILL.md is readable and properly formatted")
+                print(MSG_HEALTH_CHECK_SKILL_MD_INVALID.format(error=str(e2)))
         except Exception as e:
+            logger.error(f"Error reading {skill_md_path}: {e}")
             issues.append(f"Error reading SKILL.md: {e}")
             recommendations.append("Ensure SKILL.md is readable and properly formatted")
             print(MSG_HEALTH_CHECK_SKILL_MD_INVALID.format(error=str(e)))
@@ -755,8 +780,12 @@ def rollback_skill(skill_name, version=None):
             skills[skill_name]['updated'] = time.strftime('%Y-%m-%d %H:%M:%S')
 
             try:
-                REGISTRY_FILE.write_text(json.dumps({'skills': skills}, indent=2), encoding='utf-8')
+                REGISTRY_FILE.write_text(json.dumps({'skills': skills}, indent=2), encoding='utf-8', errors='strict')
+            except UnicodeEncodeError as e:
+                logger.error(f"Unicode encode error writing to {REGISTRY_FILE}: {e}")
+                print(f"{COLOR_YELLOW}Warning: Could not update skills.json due to encoding error: {e}{COLOR_RESET}")
             except Exception as e:
+                logger.error(f"Error writing to {REGISTRY_FILE}: {e}")
                 print(f"{COLOR_YELLOW}Warning: Could not update skills.json: {e}{COLOR_RESET}")
         else:
             raise Exception("Git checkout failed")
@@ -842,7 +871,7 @@ def update_skill(name, force=False, auto_confirm=False):
                          repo_name = parts[-1]
                      user_name = parts[-2]
                      install_source = f"{user_name}/{repo_name}/{subdir}"
-                 except:
+                 except (IndexError, ValueError):
                      # Fallback
                      install_source = f"{repo_url} --subdir {subdir}" # Hypothetical, but install_skill doesn't support flags in source string
                      # Actually, let's just use the tree format, it's safer for the parser
@@ -863,7 +892,7 @@ def update_skill(name, force=False, auto_confirm=False):
         try:
             skill_path.rename(backup_path)
             print(MSG_BACKUP_CREATED.format(path=backup_path))
-        except Exception as e:
+        except (PermissionError, OSError) as e:
             print(MSG_BACKUP_ERROR.format(error=e))
             return
     

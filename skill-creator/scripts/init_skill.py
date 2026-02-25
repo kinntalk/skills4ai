@@ -214,7 +214,7 @@ def init_skill(skill_name, path):
     try:
         skill_dir.mkdir(parents=True, exist_ok=False)
         print(f"[PASS] Created skill directory: {skill_dir}")
-    except Exception as e:
+    except (OSError, PermissionError) as e:
         print(f"[FAIL] Error creating directory: {e}")
         return None
 
@@ -227,9 +227,9 @@ def init_skill(skill_name, path):
 
     skill_md_path = skill_dir / 'SKILL.md'
     try:
-        skill_md_path.write_text(skill_content, encoding='utf-8')
+        skill_md_path.write_text(skill_content, encoding='utf-8', errors='replace')
         print("[PASS] Created SKILL.md")
-    except Exception as e:
+    except (OSError, PermissionError) as e:
         print(f"[FAIL] Error creating SKILL.md: {e}")
         return None
 
@@ -239,7 +239,7 @@ def init_skill(skill_name, path):
         scripts_dir = skill_dir / 'scripts'
         scripts_dir.mkdir(exist_ok=True)
         example_script = scripts_dir / 'example.py'
-        example_script.write_text(EXAMPLE_SCRIPT.format(skill_name=skill_name), encoding='utf-8')
+        example_script.write_text(EXAMPLE_SCRIPT.format(skill_name=skill_name), encoding='utf-8', errors='replace')
         example_script.chmod(0o755)
         print("[PASS] Created scripts/example.py")
 
@@ -247,16 +247,16 @@ def init_skill(skill_name, path):
         references_dir = skill_dir / 'references'
         references_dir.mkdir(exist_ok=True)
         example_reference = references_dir / 'api_reference.md'
-        example_reference.write_text(EXAMPLE_REFERENCE.format(skill_title=skill_title), encoding='utf-8')
+        example_reference.write_text(EXAMPLE_REFERENCE.format(skill_title=skill_title), encoding='utf-8', errors='replace')
         print("[PASS] Created references/api_reference.md")
 
-        # Create assets/ directory with example asset placeholder
+        # Create assets/ directory with example asset
         assets_dir = skill_dir / 'assets'
         assets_dir.mkdir(exist_ok=True)
         example_asset = assets_dir / 'example_asset.txt'
-        example_asset.write_text(EXAMPLE_ASSET, encoding='utf-8')
+        example_asset.write_text(EXAMPLE_ASSET, encoding='utf-8', errors='replace')
         print("[PASS] Created assets/example_asset.txt")
-    except Exception as e:
+    except (OSError, PermissionError) as e:
         print(f"[FAIL] Error creating resource directories: {e}")
         return None
 

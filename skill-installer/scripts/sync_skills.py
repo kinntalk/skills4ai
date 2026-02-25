@@ -9,7 +9,10 @@ import os
 import json
 import datetime
 import re
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 try:
     from messages import *
@@ -74,7 +77,16 @@ def validate_skill_md(skill_path):
     
     try:
         content = skill_md_path.read_text(encoding='utf-8')
+    except UnicodeDecodeError as e:
+        logger.error(f"Unicode decode error reading {skill_md_path}: {e}")
+        try:
+            content = skill_md_path.read_text(encoding='utf-8', errors='replace')
+            logger.warning(f"Retrying with errors='replace' for {skill_md_path}")
+        except Exception as e2:
+            logger.error(f"Failed to read {skill_md_path} even with errors='replace': {e2}")
+            return False, f"Failed to read SKILL.md: {e2}"
     except Exception as e:
+        logger.error(f"Error reading {skill_md_path}: {e}")
         return False, f"Failed to read SKILL.md: {e}"
     
     if not content.strip():
@@ -94,6 +106,7 @@ def validate_skill_md(skill_path):
     except ImportError:
         return False, "PyYAML not installed, cannot validate YAML"
     except Exception as e:
+        logger.error(f"YAML parsing error in {skill_md_path}: {e}")
         return False, f"Failed to parse YAML: {e}"
     
     if not isinstance(frontmatter, dict):
@@ -124,7 +137,16 @@ def check_skill_dependencies(skill_path, installed_skills):
     
     try:
         content = skill_md_path.read_text(encoding='utf-8')
-    except Exception:
+    except UnicodeDecodeError as e:
+        logger.error(f"Unicode decode error reading {skill_md_path}: {e}")
+        try:
+            content = skill_md_path.read_text(encoding='utf-8', errors='replace')
+            logger.warning(f"Retrying with errors='replace' for {skill_md_path}")
+        except Exception as e2:
+            logger.error(f"Failed to read {skill_md_path} even with errors='replace': {e2}")
+            return [], []
+    except (PermissionError, OSError) as e:
+        logger.error(f"Error reading {skill_md_path}: {e}")
         return [], []
     
     yaml_pattern = r'^---\s*\n(.*?)\n---'
@@ -138,7 +160,8 @@ def check_skill_dependencies(skill_path, installed_skills):
     try:
         import yaml
         frontmatter = yaml.safe_load(yaml_content)
-    except Exception:
+    except Exception as e:
+        logger.error(f"YAML parsing error in {skill_md_path}: {e}")
         return [], []
     
     if not isinstance(frontmatter, dict):
@@ -196,10 +219,46 @@ def prune_skill_map(installed_skills):
             skill_map['detection_rules']['priority_order'] = new_order
             
         # Write back to file
-        SKILL_MAP_FILE.write_text(json.dumps(skill_map, indent=2, ensure_ascii=False), encoding='utf-8')
-        print(f"Updated skill_map.json (removed {len(skills_to_remove)} entries)")
+        try:
+            SKILL_MAP_FILE.write_text(json.dumps(skill_map, indent=2, ensure_ascii=False), encoding='utf-8', errors='strict')
+            print(f"Updated skill_map.json (removed {len(skills_to_remove)} entries)")
+        except UnicodeEncodeError as e:
+            logger.error(f"Unicode encode error writing to {SKILL_MAP_FILE}: {e}")
+            print(f"{RED}Error writing to skill_map.json due to encoding error: {e}{RESET}")
             
+    except UnicodeDecodeError as e:
+        logger.error(f"Unicode decode error reading {SKILL_MAP_FILE}: {e}")
+        try:
+            content = SKILL_MAP_FILE.read_text(encoding='utf-8', errors='replace')
+            logger.warning(f"Retrying with errors='replace' for {SKILL_MAP_FILE}")
+            skill_map = json.loads(content)
+            # Continue with the prune logic...
+            if 'skills' not in skill_map:
+                return
+            skills_to_remove = []
+            for name in skill_map['skills']:
+                if name not in installed_skills:
+                    skills_to_remove.append(name)
+            if not skills_to_remove:
+                return
+            for name in skills_to_remove:
+                del skill_map['skills'][name]
+                print(f"Pruned '{name}' from skill_map.json")
+            if 'detection_rules' in skill_map and 'priority_order' in skill_map['detection_rules']:
+                original_order = skill_map['detection_rules']['priority_order']
+                new_order = [s for s in original_order if s not in skills_to_remove]
+                skill_map['detection_rules']['priority_order'] = new_order
+            try:
+                SKILL_MAP_FILE.write_text(json.dumps(skill_map, indent=2, ensure_ascii=False), encoding='utf-8', errors='strict')
+                print(f"Updated skill_map.json (removed {len(skills_to_remove)} entries)")
+            except UnicodeEncodeError as e2:
+                logger.error(f"Unicode encode error writing to {SKILL_MAP_FILE}: {e2}")
+                print(f"{RED}Error writing to skill_map.json due to encoding error: {e2}{RESET}")
+        except Exception as e2:
+            logger.error(f"Failed to read {SKILL_MAP_FILE} even with errors='replace': {e2}")
+            print(f"{RED}Error pruning skill_map.json: {e2}{RESET}")
     except Exception as e:
+        logger.error(f"Error pruning skill_map.json: {e}")
         print(f"{RED}Error pruning skill_map.json: {e}{RESET}")
 
 def scan_skills():
@@ -226,8 +285,21 @@ def scan_skills():
                     source = existing_info.get('source', source)
                     subdir = existing_info.get('subdir', subdir)
                     version = existing_info.get('version', version)
-        except Exception:
-            pass
+        except UnicodeDecodeError as e:
+            logger.error(f"Unicode decode error reading {REGISTRY_FILE}: {e}")
+            try:
+                content = REGISTRY_FILE.read_text(encoding='utf-8', errors='replace')
+                logger.warning(f"Retrying with errors='replace' for {REGISTRY_FILE}")
+                existing = json.loads(content)
+                if skill_name in existing.get('skills', {}):
+                    existing_info = existing['skills'][skill_name]
+                    source = existing_info.get('source', source)
+                    subdir = existing_info.get('subdir', subdir)
+                    version = existing_info.get('version', version)
+            except Exception as e2:
+                logger.error(f"Failed to read {REGISTRY_FILE} even with errors='replace': {e2}")
+        except Exception as e:
+            logger.error(f"Error reading {REGISTRY_FILE}: {e}")
             
         # Try to update version from git if possible (and if it's a git repo)
         try:
@@ -239,7 +311,7 @@ def scan_skills():
                     result = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=skill_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors='replace')
                     if result.returncode == 0:
                         version = result.stdout.strip()
-        except:
+        except (subprocess.CalledProcessError, FileNotFoundError, PermissionError, OSError):
             pass
         
         # Validate SKILL.md
@@ -294,7 +366,12 @@ def sync_registry():
         
         print(MSG_SYNCED_SUCCESS.format(count=len(skills)))
         print(MSG_REGISTRY_FILE.format(path=REGISTRY_FILE))
+    except UnicodeEncodeError as e:
+        logger.error(f"Unicode encode error writing to {REGISTRY_FILE}: {e}")
+        print(f"{RED}Error writing registry due to encoding error: {e}{RESET}")
+        return False
     except Exception as e:
+        logger.error(f"Error writing registry: {e}")
         print(f"{RED}Error writing registry: {e}{RESET}")
         return False
     

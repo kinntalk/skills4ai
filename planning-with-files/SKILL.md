@@ -1,7 +1,7 @@
 ---
 name: planning-with-files
 version: "2.10.0"
-description: Implements Manus-style file-based planning for complex tasks. Creates task_plan.md, findings.md, and progress.md. Use when starting complex multi-step tasks, research projects, or any task requiring >5 tool calls. Now with automatic session recovery after /clear.
+description: Implements Manus-style file-based planning for complex tasks. Creates task_plan.md, findings.md, and progress.md. Use for multi-step tasks (3+ steps), research projects, building projects, or tasks spanning many tool calls. Includes automatic session recovery after /clear.
 user-invocable: true
 allowed-tools:
   - Read
@@ -213,6 +213,12 @@ If you can answer these, your context management is solid:
 - Simple questions
 - Single-file edits
 - Quick lookups
+
+## Examples
+
+**Build me a dashboard** - Multi-step project requiring planning, component creation, and integration.
+
+**Analyze this codebase and refactor** - Research task spanning multiple files and requiring systematic approach.
 
 ## Templates
 

@@ -5,10 +5,14 @@ Update All Skills - 自动更新所有已安装的 Trae skills
 """
 
 import sys
+import os
 import json
 import datetime
 import subprocess
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 try:
     from messages import *
@@ -58,7 +62,11 @@ def log_message(message, end='\n', flush=False):
     try:
         with open(LOG_FILE, 'a', encoding='utf-8') as f:
             f.write(log_entry + '\n')
+    except UnicodeEncodeError as e:
+        logger.error(f"Unicode encode error writing to {LOG_FILE}: {e}")
+        print(f"{RED}Warning: Could not write to log file due to encoding error: {e}{RESET}")
     except Exception as e:
+        logger.error(f"Error writing to {LOG_FILE}: {e}")
         print(f"{RED}Warning: Could not write to log file: {e}{RESET}")
 
 def load_registry():
@@ -67,7 +75,18 @@ def load_registry():
     try:
         content = REGISTRY_FILE.read_text(encoding='utf-8')
         return json.loads(content).get('skills', {})
+    except UnicodeDecodeError as e:
+        logger.error(f"Unicode decode error reading {REGISTRY_FILE}: {e}")
+        try:
+            content = REGISTRY_FILE.read_text(encoding='utf-8', errors='replace')
+            logger.warning(f"Retrying with errors='replace' for {REGISTRY_FILE}")
+            return json.loads(content).get('skills', {})
+        except Exception as e2:
+            logger.error(f"Failed to read {REGISTRY_FILE} even with errors='replace': {e2}")
+            log_message(f"{RED}Error reading skills.json: {e}{RESET}")
+            return {}
     except Exception as e:
+        logger.error(f"Error reading {REGISTRY_FILE}: {e}")
         log_message(f"{RED}Error reading skills.json: {e}{RESET}")
         return {}
 
