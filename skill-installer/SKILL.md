@@ -1,6 +1,6 @@
 ---
 name: skill-installer
-description: Install and manage skills from Git repositories into .trae/skills directory. Supports subdirectories, catalog browsing, dependency management, license verification, health checks, and version rollback.
+description: Install and manage skills from Git repositories into .trae/skills directory. Supports subdirectories, catalog browsing, dependency management, license verification, health checks, version rollback, encoding detection, and encoding conversion.
 ---
 
 # Skill Installer
@@ -20,6 +20,8 @@ The `skill-installer` simplifies the process of adding new skills to your projec
 - **License Verification**: Automatically detects and validates license compatibility.
 - **Health Checks**: Validate installed skills for proper structure and dependencies.
 - **Version Rollback**: Rollback to previous versions using git history.
+- **Encoding Detection**: Detect file encoding using chardet library for single files or directories.
+- **Encoding Conversion**: Convert files from one encoding to another (e.g., GBK to UTF-8) with auto-detection support.
 
 ## Usage
 
@@ -421,6 +423,96 @@ python scripts/install_skill.py user/repo --path ./custom/skills
 python scripts/install_skill.py --yes brainstorming
 ```
 
+### Encoding Detection
+
+Detect file encoding using the `detect_encoding.py` script:
+
+```bash
+python .trae/skills/skill-installer/scripts/detect_encoding.py <path>
+```
+
+**Examples:**
+```bash
+# Detect encoding of a single file
+python scripts/detect_encoding.py file.txt
+
+# Detect encoding for all files in a directory
+python scripts/detect_encoding.py directory/
+
+# Detect encoding recursively in subdirectories
+python scripts/detect_encoding.py directory/ --recursive
+
+# Detect encoding for specific file extensions only
+python scripts/detect_encoding.py directory/ --extensions .py .txt .md
+
+# Show detailed information including language detection
+python scripts/detect_encoding.py file.txt --verbose
+
+# Output results in JSON format
+python scripts/detect_encoding.py directory/ --json
+
+# Save results to a JSON file
+python scripts/detect_encoding.py directory/ --recursive --output results.json
+```
+
+The detection script provides:
+- Detected encoding name (e.g., 'utf-8', 'gbk', 'gb2312')
+- Confidence level (0.0 to 1.0)
+- Detected language (optional)
+- Summary statistics for batch operations
+
+### Encoding Conversion
+
+Convert files from one encoding to another using the `convert_encoding.py` script:
+
+```bash
+python .trae/skills/skill-installer/scripts/convert_encoding.py <path> --target <encoding>
+```
+
+**Examples:**
+```bash
+# Convert a single file to UTF-8 (auto-detect source encoding)
+python scripts/convert_encoding.py file.txt --target utf-8
+
+# Convert with explicit source encoding
+python scripts/convert_encoding.py file.txt --source gbk --target utf-8
+
+# Convert all files in a directory to UTF-8
+python scripts/convert_encoding.py directory/ --target utf-8
+
+# Convert recursively in subdirectories
+python scripts/convert_encoding.py directory/ --target utf-8 --recursive
+
+# Convert specific file extensions only
+python scripts/convert_encoding.py directory/ --target utf-8 --extensions .py .txt
+
+# Overwrite original files (default: create new file with encoding suffix)
+python scripts/convert_encoding.py file.txt --target utf-8 --overwrite
+
+# Convert without creating backup files
+python scripts/convert_encoding.py file.txt --target utf-8 --no-backup
+
+# Use error handling strategy for problematic characters
+python scripts/convert_encoding.py file.txt --target utf-8 --errors replace
+
+# Dry run - show what would be converted without actually converting
+python scripts/convert_encoding.py directory/ --target utf-8 --dry-run
+```
+
+**Error handling strategies:**
+- `strict` (default): Raise an exception on encoding errors
+- `ignore`: Ignore characters that cannot be encoded/decoded
+- `replace`: Replace unencodable characters with a replacement marker
+- `surrogateescape`: Use surrogate escape for error handling
+
+The conversion script provides:
+- Automatic source encoding detection (if not specified)
+- Backup file creation (optional)
+- Batch conversion for directories
+- Recursive directory processing
+- File extension filtering
+- Summary statistics
+
 ## Interaction Rules
 
 > **Important Rule for AI Assistants:**
@@ -433,3 +525,11 @@ python scripts/install_skill.py --yes brainstorming
 ## Requirements
 
 - `git` must be installed and available in the system PATH.
+- `chardet` library is required for encoding detection and conversion features. Install with:
+  ```bash
+  pip install chardet
+  ```
+  Or install all dependencies from requirements.txt:
+  ```bash
+  pip install -r .trae/skills/skill-installer/scripts/requirements.txt
+  ```

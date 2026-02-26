@@ -84,7 +84,17 @@ This skill enforces a comprehensive 9-point standard check that every production
 - **Why:** Python defaults to system locale (e.g., CP1252 or GBK on Windows), which can cause encoding issues. Use `encoding='utf-8'` for Chinese text files (recommended), but encoding should match actual file content.
 - **Note:** `encoding='utf-8'` is recommended for Chinese text but not mandatory. Choose encoding based on actual file content.
 
-#### 3.2 Path Consistency
+#### 3.2 Encoding Parameter Check
+- **Check:** Validates that all file operations in text mode specify an explicit `encoding` parameter.
+- **Why:** Ensures consistent behavior across different platforms and prevents encoding-related errors. Recommended to use `encoding='utf-8'` for cross-platform compatibility.
+- **Severity:** HIGH
+
+#### 3.3 Errors Parameter Check
+- **Check:** Validates that all file operations in text mode specify an `errors` parameter (preferably `errors='replace'`).
+- **Why:** Prevents crashes when file content contains non-UTF8 characters. Using `errors='replace'` ensures graceful error handling.
+- **Severity:** HIGH
+
+#### 3.4 Path Consistency
 - **Check:** Scans for references to deprecated or incorrect paths (e.g., `.trae/skills`).
 - **Why:** Ensures all documentation and scripts point to the correct `.trae/skills` directory structure.
 
@@ -200,27 +210,32 @@ This skill enforces a comprehensive 9-point standard check that every production
 - **Why:** Proper error handling prevents crashes and improves reliability.
 - **Severity:** MEDIUM
 
-#### 11.2 Logging Practices
+#### 11.2 Exception Handling Specificity
+- **Check:** Validates that exception handlers use specific exception types instead of generic `Exception` or bare `except:` clauses.
+- **Why:** Specific exception types allow for better error handling and prevent catching unexpected exceptions. Use specific types like `FileNotFoundError`, `PermissionError`, `ValueError`, etc.
+- **Severity:** HIGH
+
+#### 11.3 Logging Practices
 - **Check:** Validates logging best practices including proper logging level usage, sensitive data in logs, log message formatting, and structured logging patterns.
 - **Why:** Proper logging helps debugging while avoiding sensitive data exposure.
 - **Severity:** LOW
 
-#### 11.3 Input Validation
+#### 11.4 Input Validation
 - **Check:** Validates input validation implementation including user input sanitization, type checking, and boundary validation.
 - **Why:** Input validation prevents injection attacks and data corruption.
 - **Severity:** HIGH
 
-#### 11.4 Output Sanitization
+#### 11.5 Output Sanitization
 - **Check:** Validates output sanitization including HTML/XML escaping, JSON serialization safety, and user output encoding.
 - **Why:** Output sanitization prevents XSS and injection attacks.
 - **Severity:** MEDIUM
 
-#### 11.5 Dependency Security
+#### 11.6 Dependency Security
 - **Check:** Validates dependency security including known vulnerabilities, outdated packages, and insecure dependencies.
 - **Why:** Vulnerable dependencies can introduce security risks.
 - **Severity:** MEDIUM
 
-#### 11.6 Technical Standards
+#### 11.7 Technical Standards
 - **Check:** Validates overall technical standards compliance across all quality dimensions.
 - **Why:** Ensures code meets professional quality standards.
 - **Severity:** MEDIUM
@@ -337,7 +352,7 @@ The auditor performs checks in 12 sections:
 
 1. **Basic Structure** - Frontmatter, name consistency, directory structure
 2. **Dependencies** - Dependency integrity and requirements.txt validation
-3. **Encoding & Path Safety** - File encoding and path reference checks
+3. **Encoding & Path Safety** - File encoding, encoding parameter, errors parameter, and path reference checks
 4. **Packaging** - Packaging structure and template validation
 5. **Subprocess & Path Operations** - Subprocess robustness and risky operations
 6. **Cross-Platform Compatibility** - Platform-specific commands and path handling
@@ -345,7 +360,7 @@ The auditor performs checks in 12 sections:
 8. **Absolute References** - Hardcoded absolute paths detection
 9. **Registry & Map Consistency** - skills.json and skill_map.json validation
 10. **Security Analysis** - Malicious script injection, permission abuse, prompt injection, code execution safety, filesystem security, and network security
-11. **Quality Checks** - Error handling, logging practices, input validation, output sanitization, dependency security, and technical standards
+11. **Quality Checks** - Error handling patterns, exception handling specificity, logging practices, input validation, output sanitization, dependency security, and technical standards
 12. **Output Quality** - Data masking, infinite loops, token optimization, AI execution effectiveness, verbose output, and redundant code detection
 
 ### Severity Levels
@@ -398,7 +413,7 @@ except:  # BAD: Bare except clause
 After:
 ```python
 try:
-    with open(filename, encoding='utf-8') as f:
+    with open(filename, encoding='utf-8', errors='replace') as f:
         return json.load(f)
 except FileNotFoundError:
     raise FileNotFoundError(f"Config file not found: {filename}")
@@ -410,4 +425,8 @@ except json.JSONDecodeError as e:
 
 ### scripts/
 - `audit_skill.py`: The main executable script that performs all checks.
+- `errors_replace_check.py`: Specialized checker for errors='replace' parameter in file operations.
+- `encoding_check.py`: Specialized checker for encoding parameter in file operations.
+- `exception_handling_check.py`: Specialized checker for specific exception types instead of generic Exception.
+- `output_quality_checks.py`: Additional quality check functions for data masking, infinite loops, token optimization, etc.
 - `requirements.txt`: Dependencies for the audit script (requires `PyYAML`).

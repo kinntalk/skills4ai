@@ -5,11 +5,11 @@
       "description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
       "keywords": [
         "discover",
+        "find skills",
         "helps",
-        "users",
-        "agent",
         "install",
-        "find skills"
+        "users",
+        "agent"
       ],
       "aliases": [
         "find-skills"
@@ -84,30 +84,60 @@
       "name": "brainstorming",
       "description": "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.",
       "keywords": [
-        "work",
+        "creative",
         "this",
-        "brainstorming",
+        "work",
         "before",
         "must",
-        "creative"
+        "brainstorming"
       ],
       "aliases": [
         "brainstorming"
+      ]
+    },
+    "dispatching-parallel-agents": {
+      "name": "dispatching-parallel-agents",
+      "description": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies",
+      "keywords": [
+        "when",
+        "that",
+        "tasks",
+        "independent",
+        "dispatching parallel agents",
+        "facing"
+      ],
+      "aliases": [
+        "dispatching-parallel-agents"
       ]
     },
     "executing-plans": {
       "name": "executing-plans",
       "description": "Use when you have a written implementation plan to execute in a separate session with review checkpoints",
       "keywords": [
-        "plan",
-        "have",
         "when",
+        "have",
+        "written",
+        "plan",
         "executing plans",
-        "implementation",
-        "written"
+        "implementation"
       ],
       "aliases": [
         "executing-plans"
+      ]
+    },
+    "finishing-a-development-branch": {
+      "name": "finishing-a-development-branch",
+      "description": "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup",
+      "keywords": [
+        "when",
+        "tests",
+        "implementation",
+        "complete",
+        "pass",
+        "finishing a development branch"
+      ],
+      "aliases": [
+        "finishing-a-development-branch"
       ]
     },
     "image-generation": {
@@ -123,6 +153,16 @@
       ],
       "aliases": [
         "image-generation"
+      ]
+    },
+    "obsidian-skills": {
+      "name": "obsidian-skills",
+      "description": "",
+      "keywords": [
+        "obsidian skills"
+      ],
+      "aliases": [
+        "obsidian-skills"
       ]
     },
     "pdf-generation": {
@@ -170,16 +210,61 @@
         "powershell-windows"
       ]
     },
+    "receiving-code-review": {
+      "name": "receiving-code-review",
+      "description": "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation",
+      "keywords": [
+        "feedback",
+        "when",
+        "receiving code review",
+        "code",
+        "review",
+        "receiving"
+      ],
+      "aliases": [
+        "receiving-code-review"
+      ]
+    },
+    "requesting-code-review": {
+      "name": "requesting-code-review",
+      "description": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements",
+      "keywords": [
+        "when",
+        "requesting code review",
+        "implementing",
+        "tasks",
+        "completing",
+        "major"
+      ],
+      "aliases": [
+        "requesting-code-review"
+      ]
+    },
+    "subagent-driven-development": {
+      "name": "subagent-driven-development",
+      "description": "Use when executing implementation plans with independent tasks in the current session",
+      "keywords": [
+        "with",
+        "when",
+        "executing",
+        "plans",
+        "implementation",
+        "subagent driven development"
+      ],
+      "aliases": [
+        "subagent-driven-development"
+      ]
+    },
     "systematic-debugging": {
       "name": "systematic-debugging",
       "description": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
       "keywords": [
-        "encountering",
-        "failure",
-        "test",
         "systematic debugging",
+        "when",
+        "failure",
         "unexpected",
-        "when"
+        "encountering",
+        "test"
       ],
       "aliases": [
         "systematic-debugging"
@@ -200,6 +285,21 @@
         "template-skill"
       ]
     },
+    "test-driven-development": {
+      "name": "test-driven-development",
+      "description": "Use when implementing any feature or bugfix, before writing implementation code",
+      "keywords": [
+        "when",
+        "test driven development",
+        "bugfix",
+        "implementing",
+        "before",
+        "feature"
+      ],
+      "aliases": [
+        "test-driven-development"
+      ]
+    },
     "ui-ux-pro-max": {
       "name": "ui-ux-pro-max",
       "description": "UI/UX design intelligence. 50 styles, 21 palettes, 50 font pairings, 20 charts, 9 stacks (React, Next.js, Vue, Svelte, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui). Actions: plan, build, create, design, implement, review, fix, improve, optimize, enhance, refactor, check UI/UX code. Projects: website, landing page, dashboard, admin panel, e-commerce, SaaS, portfolio, blog, mobile app, .html, .tsx, .vue, .svelte. Elements: button, modal, navbar, sidebar, card, table, form, chart. Styles: glassmorphism, claymorphism, minimalism, brutalism, neumorphism, bento grid, dark mode, responsive, skeuomorphism, flat design. Topics: color palette, accessibility, animation, layout, typography, font pairing, spacing, hover, shadow, gradient. Integrations: shadcn/ui MCP for component search and examples.",
@@ -215,14 +315,29 @@
         "ui-ux-pro-max"
       ]
     },
+    "using-git-worktrees": {
+      "name": "using-git-worktrees",
+      "description": "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification",
+      "keywords": [
+        "when",
+        "starting",
+        "work",
+        "using git worktrees",
+        "that",
+        "feature"
+      ],
+      "aliases": [
+        "using-git-worktrees"
+      ]
+    },
     "using-superpowers": {
       "name": "using-superpowers",
       "description": "Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions",
       "keywords": [
         "when",
         "starting",
-        "conversation",
         "establishes",
+        "conversation",
         "find",
         "using superpowers"
       ],
@@ -230,19 +345,49 @@
         "using-superpowers"
       ]
     },
+    "verification-before-completion": {
+      "name": "verification-before-completion",
+      "description": "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always",
+      "keywords": [
+        "when",
+        "work",
+        "verification before completion",
+        "about",
+        "claim",
+        "complete"
+      ],
+      "aliases": [
+        "verification-before-completion"
+      ]
+    },
     "writing-plans": {
       "name": "writing-plans",
       "description": "Use when you have a spec or requirements for a multi-step task, before touching code",
       "keywords": [
         "when",
-        "multi",
-        "requirements",
-        "writing plans",
         "have",
-        "spec"
+        "spec",
+        "writing plans",
+        "multi",
+        "requirements"
       ],
       "aliases": [
         "writing-plans"
+      ]
+    },
+    "writing-skills": {
+      "name": "writing-skills",
+      "description": "Use when creating new skills, editing existing skills, or verifying skills work before deployment",
+      "keywords": [
+        "when",
+        "existing",
+        "writing skills",
+        "creating",
+        "editing",
+        "skills"
+      ],
+      "aliases": [
+        "writing-skills"
       ]
     }
   },
@@ -264,7 +409,17 @@
       "systematic-debugging",
       "powershell-windows",
       "anthropic-quickstarts",
-      "agent-skills"
+      "agent-skills",
+      "dispatching-parallel-agents",
+      "finishing-a-development-branch",
+      "receiving-code-review",
+      "requesting-code-review",
+      "subagent-driven-development",
+      "test-driven-development",
+      "using-git-worktrees",
+      "verification-before-completion",
+      "writing-skills",
+      "obsidian-skills"
     ],
     "exact_match": {
       "find skills": "find-skills",

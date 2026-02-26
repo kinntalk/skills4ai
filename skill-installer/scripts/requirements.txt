@@ -1,3 +1,4 @@
 # Python packages required
 PyYAML>=6.0
+chardet>=5.0.0
 # Git CLI is used via subprocess

@@ -81,15 +81,23 @@ def validate_input_file(input_path):
     try:
         with open(input_path, 'r', encoding='utf-8', errors='replace') as f:
             f.read(1)
-    except UnicodeDecodeError as e:
-        return print_error(
+    except (IOError, OSError, PermissionError) as e:
+        print_error(
             f"Error reading file '{input_path}': {e}",
-            ["File may have encoding issues", "Ensure file is saved with UTF-8 encoding", "Check for special characters"]
+            ["File may be in use by another program", "Check if file is corrupted", "Close programs using the file"],
+            exit_code=1
         )
-    except (IOError, OSError) as e:
-        return print_error(
+    except UnicodeDecodeError as e:
+        print_error(
             f"Error reading file '{input_path}': {e}",
-            ["File may be in use by another program", "Check if file is corrupted", "Close programs using the file"]
+            ["File may have encoding issues", "Ensure file is saved with UTF-8 encoding", "Check for special characters"],
+            exit_code=1
+        )
+    except (ValueError, TypeError, RuntimeError) as e:
+        print_error(
+            f"Error reading file '{input_path}': {e}",
+            ["Markdown content may be invalid", "Check Markdown syntax", "Ensure markdown library is installed"],
+            exit_code=1
         )
     
     return True
@@ -104,19 +112,22 @@ def validate_output_directory(output_path):
         except (IOError, OSError, PermissionError) as e:
             return print_error(
                 f"Cannot create output directory '{output_dir}': {e}",
-                ["Check parent directory write permissions", "Try a different output path", "Use current directory as output location"]
+                ["Check parent directory write permissions", "Try a different output path", "Use current directory as output location"],
+                exit_code=1
             )
     
     if not os.access(output_dir, os.W_OK):
         return print_error(
             f"Cannot write to output directory '{output_dir}' (insufficient permissions)",
-            ["Check directory permissions", "Ensure you have write access", "Try a different output directory"]
+            ["Check directory permissions", "Ensure you have write access", "Try running as administrator"],
+            exit_code=1
         )
     
     if output_path.exists() and not os.access(output_path, os.W_OK):
         return print_error(
             f"Cannot overwrite existing file '{output_path}' (insufficient permissions)",
-            ["File may be open in another program", "Close programs using the file", "Try a different output filename"]
+            ["File may be open in another program", "Close programs using the file", "Try a different output filename"],
+            exit_code=1
         )
     
     return True
@@ -223,8 +234,9 @@ def generate_image(input_file, output_file, width=880, quality=95, theme='github
         # Verify and Rename
         src_file = None
         
-        # Wait for file to appear
-        for i in range(10):
+        # Wait for file to appear with timeout
+        max_attempts = 10
+        for i in range(max_attempts):
             if temp_img_path.exists():
                 src_file = temp_img_path
                 break
@@ -233,6 +245,15 @@ def generate_image(input_file, output_file, width=880, quality=95, theme='github
                 break
             time.sleep(0.5)
         
+        # Check if file was found
+        if src_file is None:
+            print_error(
+                f"Image generation failed: temporary file not created after {max_attempts} attempts",
+                ["Check if browser is properly installed", "Ensure html2image library is installed", "Check log file for details: generate_image.log"],
+                exit_code=1
+            )
+        
+        # Move/Rename to final destination
         if src_file:
              # Move/Rename to final destination
              if output_path.exists():
@@ -295,7 +316,11 @@ def main():
     parser.add_argument("--theme", type=str, default="github", 
                         help="CSS theme to use (default: github). Available themes: github, notion, dark")
     
-    args = parser.parse_args()
+    try:
+        args = parser.parse_args()
+    except SystemExit as e:
+        print(f"参数解析错误: {e}")
+        sys.exit(1)
     
     if args.quality < 1 or args.quality > 100:
         print_error(

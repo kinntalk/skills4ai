@@ -14,6 +14,11 @@ import datetime
 import ast
 from pathlib import Path
 
+# Import specialized checkers
+from errors_replace_check import check_errors_replace
+from encoding_check import check_encoding_parameter
+from exception_handling_check import check_exception_handling
+
 # Initialize ANSI color support
 def init_color_support():
     """Initialize color output support based on terminal capabilities."""
@@ -2099,6 +2104,25 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
         for issue in msg:
             print(f"      - {issue}")
         has_errors = True
+    
+    # New specialized checks
+    ok, msg = check_errors_replace(skill_path)
+    if ok:
+        print_pass(msg, json_output)
+    else:
+        print_fail("Found file operations without errors='replace':", json_output)
+        for issue in msg:
+            print(f"      - {issue}")
+        has_errors = True
+    
+    ok, msg = check_encoding_parameter(skill_path)
+    if ok:
+        print_pass(msg, json_output)
+    else:
+        print_fail("Found file operations without encoding parameter:", json_output)
+        for issue in msg:
+            print(f"      - {issue}")
+        has_errors = True
         
     ok, msg = check_path_consistency(skill_path)
     if ok:
@@ -2338,6 +2362,22 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
             print_pass(msg, json_output)
         else:
             print_fail("Error handling pattern issues:", json_output)
+            if isinstance(msg, list):
+                for issue in msg: 
+                    print(f"      - [HIGH] {issue}")
+                    quality_issues += 1
+                    high_issues += 1
+            else:
+                print(f"      - [HIGH] {msg}")
+                quality_issues += 1
+                high_issues += 1
+            has_errors = True
+        
+        ok, msg = check_exception_handling(skill_path)
+        if ok:
+            print_pass(msg, json_output)
+        else:
+            print_fail("Exception handling specificity issues:", json_output)
             if isinstance(msg, list):
                 for issue in msg: 
                     print(f"      - [HIGH] {issue}")

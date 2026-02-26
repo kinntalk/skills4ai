@@ -239,7 +239,7 @@ def init_skill(skill_name, path):
         scripts_dir = skill_dir / 'scripts'
         scripts_dir.mkdir(exist_ok=True)
         example_script = scripts_dir / 'example.py'
-        example_script.write_text(EXAMPLE_SCRIPT.format(skill_name=skill_name), encoding='utf-8', errors='replace')
+        example_script.write_text(EXAMPLE_SCRIPT.format(skill_name=skill_name), encoding='utf-8')
         example_script.chmod(0o755)
         print("[PASS] Created scripts/example.py")
 
@@ -247,14 +247,14 @@ def init_skill(skill_name, path):
         references_dir = skill_dir / 'references'
         references_dir.mkdir(exist_ok=True)
         example_reference = references_dir / 'api_reference.md'
-        example_reference.write_text(EXAMPLE_REFERENCE.format(skill_title=skill_title), encoding='utf-8', errors='replace')
+        example_reference.write_text(EXAMPLE_REFERENCE.format(skill_title=skill_title), encoding='utf-8')
         print("[PASS] Created references/api_reference.md")
 
         # Create assets/ directory with example asset
         assets_dir = skill_dir / 'assets'
         assets_dir.mkdir(exist_ok=True)
         example_asset = assets_dir / 'example_asset.txt'
-        example_asset.write_text(EXAMPLE_ASSET, encoding='utf-8', errors='replace')
+        example_asset.write_text(EXAMPLE_ASSET, encoding='utf-8')
         print("[PASS] Created assets/example_asset.txt")
     except (OSError, PermissionError) as e:
         print(f"[FAIL] Error creating resource directories: {e}")
