@@ -2,7 +2,7 @@
   "skills": {
     "find-skills": {
       "name": "find-skills",
-      "description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
+      "description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when user is looking for functionality that might exist as an installable skill.",
       "keywords": [
         "discover",
         "find skills",
@@ -32,7 +32,7 @@
     },
     "skill-installer": {
       "name": "skill-installer",
-      "description": "A tool to install skills from remote git repositories directly into the .trae/skills directory. Supports subdirectories for monorepo skill collections.",
+      "description": "A tool to install skills from remote git repositories directly into .trae/skills directory. Supports subdirectories for monorepo skill collections.",
       "keywords": [
         "skill installer",
         "skills",
@@ -47,7 +47,7 @@
     },
     "skill-auditor": {
       "name": "skill-auditor",
-      "description": "A standard compliance checking tool for Trae skills. Use this skill when you need to verify if a skill follows best practices, specifically checking for dependency completeness, proper file encoding, path consistency, cross-platform compatibility, internationalization support, and correct packaging structure.",
+      "description": "A standard compliance checking tool for Trae skills. Use this skill when you need to verify if a skill follows best practices, specifically checking for dependency completeness, proper file encoding, path consistency, cross-platform compatibility, internationalization support and correct packaging structure.",
       "keywords": [
         "trae",
         "compliance",
@@ -62,26 +62,21 @@
     },
     "agent-skills": {
       "name": "agent-skills",
-      "description": "",
+      "description": "Collection of agent skills for React, React Native, and web development. Includes composition patterns, best practices, and design guidelines.",
       "keywords": [
-        "agent skills"
+        "agent skills",
+        "react",
+        "react native",
+        "web development",
+        "composition patterns",
+        "best practices"
       ],
       "aliases": [
         "agent-skills"
       ]
     },
-    "anthropic-quickstarts": {
-      "name": "anthropic-quickstarts",
-      "description": "",
-      "keywords": [
-        "anthropic quickstarts"
-      ],
-      "aliases": [
-        "anthropic-quickstarts"
-      ]
-    },
-    "brainstorming": {
-      "name": "brainstorming",
+    "sp-brainstorming": {
+      "name": "sp-brainstorming",
       "description": "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.",
       "keywords": [
         "creative",
@@ -92,11 +87,11 @@
         "brainstorming"
       ],
       "aliases": [
-        "brainstorming"
+        "sp-brainstorming"
       ]
     },
-    "dispatching-parallel-agents": {
-      "name": "dispatching-parallel-agents",
+    "sp-dispatching-parallel-agents": {
+      "name": "sp-dispatching-parallel-agents",
       "description": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies",
       "keywords": [
         "when",
@@ -107,11 +102,11 @@
         "facing"
       ],
       "aliases": [
-        "dispatching-parallel-agents"
+        "sp-dispatching-parallel-agents"
       ]
     },
-    "executing-plans": {
-      "name": "executing-plans",
+    "sp-executing-plans": {
+      "name": "sp-executing-plans",
       "description": "Use when you have a written implementation plan to execute in a separate session with review checkpoints",
       "keywords": [
         "when",
@@ -122,12 +117,12 @@
         "implementation"
       ],
       "aliases": [
-        "executing-plans"
+        "sp-executing-plans"
       ]
     },
-    "finishing-a-development-branch": {
-      "name": "finishing-a-development-branch",
-      "description": "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup",
+    "sp-finishing-a-development-branch": {
+      "name": "sp-finishing-a-development-branch",
+      "description": "Use when implementation is complete, all tests pass, and you need to decide how to integrate work - guides completion of development work by presenting structured options for merge, PR, or cleanup",
       "keywords": [
         "when",
         "tests",
@@ -137,7 +132,7 @@
         "finishing a development branch"
       ],
       "aliases": [
-        "finishing-a-development-branch"
+        "sp-finishing-a-development-branch"
       ]
     },
     "image-generation": {
@@ -157,9 +152,13 @@
     },
     "obsidian-skills": {
       "name": "obsidian-skills",
-      "description": "",
+      "description": "Collection of Obsidian-specific skills for note management, markdown editing, canvas creation, and database operations.",
       "keywords": [
-        "obsidian skills"
+        "obsidian skills",
+        "note management",
+        "markdown",
+        "canvas",
+        "database"
       ],
       "aliases": [
         "obsidian-skills"
@@ -182,7 +181,7 @@
     },
     "planning-with-files": {
       "name": "planning-with-files",
-      "description": "Implements Manus-style file-based planning for complex tasks. Creates task_plan.md, findings.md, and progress.md. Use when starting complex multi-step tasks, research projects, or any task requiring >5 tool calls. Now with automatic session recovery after /clear.",
+      "description": "Implements Manus-style file-based planning for complex tasks. Creates task_plan.md, findings.md and progress.md. Use when starting complex multi-step tasks, research projects, or any task requiring >5 tool calls. Now with automatic session recovery after /clear.",
       "keywords": [
         "planning with files",
         "implements",
@@ -210,8 +209,8 @@
         "powershell-windows"
       ]
     },
-    "receiving-code-review": {
-      "name": "receiving-code-review",
+    "sp-receiving-code-review": {
+      "name": "sp-receiving-code-review",
       "description": "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation",
       "keywords": [
         "feedback",
@@ -222,11 +221,11 @@
         "receiving"
       ],
       "aliases": [
-        "receiving-code-review"
+        "sp-receiving-code-review"
       ]
     },
-    "requesting-code-review": {
-      "name": "requesting-code-review",
+    "sp-requesting-code-review": {
+      "name": "sp-requesting-code-review",
       "description": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements",
       "keywords": [
         "when",
@@ -237,12 +236,12 @@
         "major"
       ],
       "aliases": [
-        "requesting-code-review"
+        "sp-requesting-code-review"
       ]
     },
-    "subagent-driven-development": {
-      "name": "subagent-driven-development",
-      "description": "Use when executing implementation plans with independent tasks in the current session",
+    "sp-subagent-driven-development": {
+      "name": "sp-subagent-driven-development",
+      "description": "Use when executing implementation plans with independent tasks in current session",
       "keywords": [
         "with",
         "when",
@@ -252,11 +251,11 @@
         "subagent driven development"
       ],
       "aliases": [
-        "subagent-driven-development"
+        "sp-subagent-driven-development"
       ]
     },
-    "systematic-debugging": {
-      "name": "systematic-debugging",
+    "sp-systematic-debugging": {
+      "name": "sp-systematic-debugging",
       "description": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
       "keywords": [
         "systematic debugging",
@@ -267,26 +266,11 @@
         "test"
       ],
       "aliases": [
-        "systematic-debugging"
+        "sp-systematic-debugging"
       ]
     },
-    "template-skill": {
-      "name": "template-skill",
-      "description": "Replace with description of the skill and when Claude should use it.",
-      "keywords": [
-        "skill",
-        "template skill",
-        "description",
-        "when",
-        "replace",
-        "with"
-      ],
-      "aliases": [
-        "template-skill"
-      ]
-    },
-    "test-driven-development": {
-      "name": "test-driven-development",
+    "sp-test-driven-development": {
+      "name": "sp-test-driven-development",
       "description": "Use when implementing any feature or bugfix, before writing implementation code",
       "keywords": [
         "when",
@@ -297,7 +281,7 @@
         "feature"
       ],
       "aliases": [
-        "test-driven-development"
+        "sp-test-driven-development"
       ]
     },
     "ui-ux-pro-max": {
@@ -315,8 +299,8 @@
         "ui-ux-pro-max"
       ]
     },
-    "using-git-worktrees": {
-      "name": "using-git-worktrees",
+    "sp-using-git-worktrees": {
+      "name": "sp-using-git-worktrees",
       "description": "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification",
       "keywords": [
         "when",
@@ -327,11 +311,11 @@
         "feature"
       ],
       "aliases": [
-        "using-git-worktrees"
+        "sp-using-git-worktrees"
       ]
     },
-    "using-superpowers": {
-      "name": "using-superpowers",
+    "sp-using-superpowers": {
+      "name": "sp-using-superpowers",
       "description": "Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions",
       "keywords": [
         "when",
@@ -342,11 +326,11 @@
         "using superpowers"
       ],
       "aliases": [
-        "using-superpowers"
+        "sp-using-superpowers"
       ]
     },
-    "verification-before-completion": {
-      "name": "verification-before-completion",
+    "sp-verification-before-completion": {
+      "name": "sp-verification-before-completion",
       "description": "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always",
       "keywords": [
         "when",
@@ -357,11 +341,11 @@
         "complete"
       ],
       "aliases": [
-        "verification-before-completion"
+        "sp-verification-before-completion"
       ]
     },
-    "writing-plans": {
-      "name": "writing-plans",
+    "sp-writing-plans": {
+      "name": "sp-writing-plans",
       "description": "Use when you have a spec or requirements for a multi-step task, before touching code",
       "keywords": [
         "when",
@@ -372,11 +356,11 @@
         "requirements"
       ],
       "aliases": [
-        "writing-plans"
+        "sp-writing-plans"
       ]
     },
-    "writing-skills": {
-      "name": "writing-skills",
+    "sp-writing-skills": {
+      "name": "sp-writing-skills",
       "description": "Use when creating new skills, editing existing skills, or verifying skills work before deployment",
       "keywords": [
         "when",
@@ -387,7 +371,7 @@
         "skills"
       ],
       "aliases": [
-        "writing-skills"
+        "sp-writing-skills"
       ]
     }
   },
@@ -401,25 +385,23 @@
       "pdf-generation",
       "ui-ux-pro-max",
       "planning-with-files",
-      "template-skill",
-      "using-superpowers",
-      "brainstorming",
-      "writing-plans",
-      "executing-plans",
-      "systematic-debugging",
+      "sp-brainstorming",
+      "sp-writing-plans",
+      "sp-executing-plans",
+      "sp-systematic-debugging",
       "powershell-windows",
-      "anthropic-quickstarts",
-      "agent-skills",
-      "dispatching-parallel-agents",
-      "finishing-a-development-branch",
-      "receiving-code-review",
-      "requesting-code-review",
-      "subagent-driven-development",
-      "test-driven-development",
-      "using-git-worktrees",
-      "verification-before-completion",
-      "writing-skills",
-      "obsidian-skills"
+      "sp-test-driven-development",
+      "sp-subagent-driven-development",
+      "sp-dispatching-parallel-agents",
+      "sp-finishing-a-development-branch",
+      "sp-receiving-code-review",
+      "sp-requesting-code-review",
+      "sp-using-superpowers",
+      "sp-verification-before-completion",
+      "sp-using-git-worktrees",
+      "sp-writing-skills",
+      "obsidian-skills",
+      "agent-skills"
     ],
     "exact_match": {
       "find skills": "find-skills",

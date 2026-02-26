@@ -9,7 +9,7 @@
     "skill-creator": {
       "source": "https://github.com/anthropics/skills",
       "subdir": "skills/skill-creator",
-      "version": "1ed29a03dc852d30fa6ef2ca53a67dc2c2c2c563",
+      "version": "1ed29a03dc852d30fa6ef2ca53a67dc2c2c563",
       "updated_at": "2026-02-20T01:51:42.009612"
     },
     "skill-installer": {
@@ -30,31 +30,25 @@
       "version": "e23951b8cad2f4b1e7e176c5731127c1263fe86f",
       "updated_at": "2026-02-20T00:15:14.020911"
     },
-    "anthropic-quickstarts": {
-      "source": "https://github.com/anthropics/anthropic-quickstarts",
-      "subdir": "",
-      "version": "4b2549e8093a6dee1c394bdd8fcf83cb914a271a",
-      "updated_at": "2026-02-20T00:14:17.206046"
-    },
-    "brainstorming": {
+    "sp-brainstorming": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/brainstorming",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
       "updated_at": "2026-02-26T16:19:23.480278"
     },
-    "dispatching-parallel-agents": {
+    "sp-dispatching-parallel-agents": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/dispatching-parallel-agents",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
       "updated_at": "2026-02-26T16:19:26.691035"
     },
-    "executing-plans": {
+    "sp-executing-plans": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/executing-plans",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
       "updated_at": "2026-02-26T16:19:29.634592"
     },
-    "finishing-a-development-branch": {
+    "sp-finishing-a-development-branch": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/finishing-a-development-branch",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
@@ -90,37 +84,31 @@
       "version": "030af25d55426ac66a52c233be4f8b150786fb22",
       "updated_at": "2026-02-19T22:58:16.706870"
     },
-    "receiving-code-review": {
+    "sp-receiving-code-review": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/receiving-code-review",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
       "updated_at": "2026-02-26T16:19:35.710935"
     },
-    "requesting-code-review": {
+    "sp-requesting-code-review": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/requesting-code-review",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
       "updated_at": "2026-02-26T16:19:38.833053"
     },
-    "subagent-driven-development": {
+    "sp-subagent-driven-development": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/subagent-driven-development",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
       "updated_at": "2026-02-26T16:19:42.450040"
     },
-    "systematic-debugging": {
+    "sp-systematic-debugging": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/systematic-debugging",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
       "updated_at": "2026-02-26T16:19:45.498382"
     },
-    "template-skill": {
-      "source": "https://github.com/anthropics/skills.git",
-      "subdir": "template",
-      "version": "1ed29a03dc852d30fa6ef2ca53a67dc2c2c2c563",
-      "updated_at": "2026-02-16T01:28:32.288832"
-    },
-    "test-driven-development": {
+    "sp-test-driven-development": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/test-driven-development",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
@@ -132,31 +120,31 @@
       "version": "6623f12b4058d09618c89cffb2de59a47c45f999",
       "updated_at": "2026-02-16T00:23:22.725465"
     },
-    "using-git-worktrees": {
+    "sp-using-git-worktrees": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/using-git-worktrees",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
       "updated_at": "2026-02-26T16:19:51.606446"
     },
-    "using-superpowers": {
+    "sp-using-superpowers": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/using-superpowers",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
       "updated_at": "2026-02-26T16:19:54.560922"
     },
-    "verification-before-completion": {
+    "sp-verification-before-completion": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/verification-before-completion",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
       "updated_at": "2026-02-26T16:19:57.643011"
     },
-    "writing-plans": {
+    "sp-writing-plans": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/writing-plans",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
       "updated_at": "2026-02-26T16:20:01.342493"
     },
-    "writing-skills": {
+    "sp-writing-skills": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/writing-skills",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
