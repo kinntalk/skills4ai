@@ -2,13 +2,13 @@
   "skills": {
     "find-skills": {
       "name": "find-skills",
-      "description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when user is looking for functionality that might exist as an installable skill.",
+      "description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
       "keywords": [
-        "discover",
-        "find skills",
+        "find-skills",
         "helps",
-        "install",
         "users",
+        "discover",
+        "install",
         "agent"
       ],
       "aliases": [
@@ -17,14 +17,13 @@
     },
     "skill-creator": {
       "name": "skill-creator",
-      "description": "Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabilities with specialized knowledge, workflows, or tool integrations.",
+      "description": "Guide for creating effective skills that extend Claude's capabilities with specialized knowledge, workflows, or tool integrations. Use when creating new skills, updating existing skills, or asking about skill development best practices.",
       "keywords": [
-        "skills",
+        "skill-creator",
+        "guide",
         "creating",
         "effective",
-        "guide",
-        "skill creator",
-        "this"
+        "skills"
       ],
       "aliases": [
         "skill-creator"
@@ -32,14 +31,13 @@
     },
     "skill-installer": {
       "name": "skill-installer",
-      "description": "A tool to install skills from remote git repositories directly into .trae/skills directory. Supports subdirectories for monorepo skill collections.",
+      "description": "Install and manage skills from Git repositories into .trae/skills directory. Supports subdirectories, catalog browsing, dependency management, license verification, health checks, version rollback, encoding detection, and encoding conversion.",
       "keywords": [
-        "skill installer",
-        "skills",
-        "tool",
-        "from",
+        "skill-installer",
         "install",
-        "remote"
+        "manage",
+        "skills",
+        "repositories"
       ],
       "aliases": [
         "skill-installer"
@@ -47,104 +45,44 @@
     },
     "skill-auditor": {
       "name": "skill-auditor",
-      "description": "A standard compliance checking tool for Trae skills. Use this skill when you need to verify if a skill follows best practices, specifically checking for dependency completeness, proper file encoding, path consistency, cross-platform compatibility, internationalization support and correct packaging structure.",
+      "description": "Standard compliance checker for Trae skills. Verifies dependency completeness, file encoding, path consistency, cross-platform compatibility, i18n support, and packaging structure. Use when auditing skills before publishing or verifying compliance.",
       "keywords": [
-        "trae",
+        "skill-auditor",
+        "standard",
         "compliance",
-        "tool",
-        "skill auditor",
-        "checking",
-        "standard"
+        "checker",
+        "trae",
+        "skills"
       ],
       "aliases": [
         "skill-auditor"
       ]
     },
-    "agent-skills": {
-      "name": "agent-skills",
-      "description": "Collection of agent skills for React, React Native, and web development. Includes composition patterns, best practices, and design guidelines.",
+    "async-python-patterns": {
+      "name": "async-python-patterns",
+      "description": "Master Python asyncio, concurrent programming, and async/await patterns for high-performance applications. Use when building async APIs, concurrent systems, or I/O-bound applications requiring non-blocking operations.",
       "keywords": [
-        "agent skills",
-        "react",
-        "react native",
-        "web development",
-        "composition patterns",
-        "best practices"
+        "async-python-patterns",
+        "master",
+        "python",
+        "asyncio",
+        "concurrent",
+        "programming"
       ],
       "aliases": [
-        "agent-skills"
-      ]
-    },
-    "sp-brainstorming": {
-      "name": "sp-brainstorming",
-      "description": "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.",
-      "keywords": [
-        "creative",
-        "this",
-        "work",
-        "before",
-        "must",
-        "brainstorming"
-      ],
-      "aliases": [
-        "sp-brainstorming"
-      ]
-    },
-    "sp-dispatching-parallel-agents": {
-      "name": "sp-dispatching-parallel-agents",
-      "description": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies",
-      "keywords": [
-        "when",
-        "that",
-        "tasks",
-        "independent",
-        "dispatching parallel agents",
-        "facing"
-      ],
-      "aliases": [
-        "sp-dispatching-parallel-agents"
-      ]
-    },
-    "sp-executing-plans": {
-      "name": "sp-executing-plans",
-      "description": "Use when you have a written implementation plan to execute in a separate session with review checkpoints",
-      "keywords": [
-        "when",
-        "have",
-        "written",
-        "plan",
-        "executing plans",
-        "implementation"
-      ],
-      "aliases": [
-        "sp-executing-plans"
-      ]
-    },
-    "sp-finishing-a-development-branch": {
-      "name": "sp-finishing-a-development-branch",
-      "description": "Use when implementation is complete, all tests pass, and you need to decide how to integrate work - guides completion of development work by presenting structured options for merge, PR, or cleanup",
-      "keywords": [
-        "when",
-        "tests",
-        "implementation",
-        "complete",
-        "pass",
-        "finishing a development branch"
-      ],
-      "aliases": [
-        "sp-finishing-a-development-branch"
+        "async-python-patterns"
       ]
     },
     "image-generation": {
       "name": "image-generation",
       "description": "Converts Markdown documents to high-quality images (PNG/JPG) using Python and headless browser rendering. Ideal for creating social media posts, documentation screenshots, and sharing rich text content as images.",
       "keywords": [
-        "high",
+        "image-generation",
         "converts",
-        "image generation",
-        "quality",
         "markdown",
-        "documents"
+        "documents",
+        "high",
+        "quality"
       ],
       "aliases": [
         "image-generation"
@@ -152,13 +90,14 @@
     },
     "obsidian-skills": {
       "name": "obsidian-skills",
-      "description": "Collection of Obsidian-specific skills for note management, markdown editing, canvas creation, and database operations.",
+      "description": "Skill collection containing multiple sub-skills",
       "keywords": [
-        "obsidian skills",
-        "note management",
-        "markdown",
-        "canvas",
-        "database"
+        "obsidian-skills",
+        "skill",
+        "collection",
+        "containing",
+        "multiple",
+        "skills"
       ],
       "aliases": [
         "obsidian-skills"
@@ -166,14 +105,13 @@
     },
     "pdf-generation": {
       "name": "pdf-generation",
-      "description": "Professional PDF generation from markdown using Pandoc with Eisvogel template and EB Garamond fonts. Use when converting markdown to PDF, creating white papers, research documents, marketing materials, or technical documentation. Supports both English and Russian documents with professional typography and color-coded themes. Mobile-optimized layout (6x9) by default for Telegram bot context, desktop/print layout (A4) for other contexts.",
+      "description": "Professional PDF generation from markdown using Pandoc with Eisvogel template and EB Garamond fonts. Use when converting markdown to PDF, creating white papers, research documents, marketing materials, or technical documentation. Supports English, Russian, and Chinese documents with professional typography and color-coded themes. Mobile-optimized layout (6x9) by default for Telegram bot context, desktop/print layout (A4) for other contexts.",
       "keywords": [
-        "using",
-        "pdf generation",
-        "generation",
+        "pdf-generation",
         "professional",
-        "from",
-        "markdown"
+        "generation",
+        "markdown",
+        "using"
       ],
       "aliases": [
         "pdf-generation"
@@ -181,14 +119,14 @@
     },
     "planning-with-files": {
       "name": "planning-with-files",
-      "description": "Implements Manus-style file-based planning for complex tasks. Creates task_plan.md, findings.md and progress.md. Use when starting complex multi-step tasks, research projects, or any task requiring >5 tool calls. Now with automatic session recovery after /clear.",
+      "description": "Implements Manus-style file-based planning for complex tasks. Creates task_plan.md, findings.md, and progress.md. Use for multi-step tasks (3+ steps), research projects, building projects, or tasks spanning many tool calls. Includes automatic session recovery after /clear.",
       "keywords": [
-        "planning with files",
+        "planning-with-files",
         "implements",
         "manus",
         "style",
-        "based",
-        "file"
+        "file",
+        "based"
       ],
       "aliases": [
         "planning-with-files"
@@ -198,27 +136,164 @@
       "name": "powershell-windows",
       "description": "PowerShell Windows patterns. Critical pitfalls, operator syntax, error handling.",
       "keywords": [
-        "powershell windows",
-        "critical",
+        "powershell-windows",
         "powershell",
-        "pitfalls",
         "windows",
-        "patterns"
+        "patterns",
+        "critical",
+        "pitfalls"
       ],
       "aliases": [
         "powershell-windows"
+      ]
+    },
+    "proxy-manager": {
+      "name": "proxy-manager",
+      "description": "代理配置管理工具，用于配置和管理代理设置，解决访问 GitHub 等远程仓库时的网络连接问题",
+      "keywords": [
+        "proxy-manager",
+        "github"
+      ],
+      "aliases": [
+        "proxy-manager"
+      ]
+    },
+    "python-design-patterns": {
+      "name": "python-design-patterns",
+      "description": "Python design patterns including KISS, Separation of Concerns, Single Responsibility, and composition over inheritance. Use when making architecture decisions, refactoring code structure, or evaluating when abstractions are appropriate.",
+      "keywords": [
+        "python-design-patterns",
+        "python",
+        "design",
+        "patterns",
+        "including",
+        "kiss"
+      ],
+      "aliases": [
+        "python-design-patterns"
+      ]
+    },
+    "python-packaging": {
+      "name": "python-packaging",
+      "description": "Create distributable Python packages with proper project structure, setup.py/pyproject.toml, and publishing to PyPI. Use when packaging Python libraries, creating CLI tools, or distributing Python code.",
+      "keywords": [
+        "python-packaging",
+        "create",
+        "distributable",
+        "python",
+        "packages"
+      ],
+      "aliases": [
+        "python-packaging"
+      ]
+    },
+    "python-performance-optimization": {
+      "name": "python-performance-optimization",
+      "description": "Profile and optimize Python code using cProfile, memory profilers, and performance best practices. Use when debugging slow Python code, optimizing bottlenecks, or improving application performance.",
+      "keywords": [
+        "python-performance-optimization",
+        "profile",
+        "optimize",
+        "python",
+        "code",
+        "using"
+      ],
+      "aliases": [
+        "python-performance-optimization"
+      ]
+    },
+    "python-testing-patterns": {
+      "name": "python-testing-patterns",
+      "description": "Implement comprehensive testing strategies with pytest, fixtures, mocking, and test-driven development. Use when writing Python tests, setting up test suites, or implementing testing best practices.",
+      "keywords": [
+        "python-testing-patterns",
+        "implement",
+        "comprehensive",
+        "testing",
+        "strategies"
+      ],
+      "aliases": [
+        "python-testing-patterns"
+      ]
+    },
+    "skills-registry-sync": {
+      "name": "skills-registry-sync",
+      "description": "Automatically check, update, and maintain consistency of skills registry files (skills.json, skill_map.json, AGENTS.md). Use when skills are installed/uninstalled, when registry files need synchronization, or for periodic maintenance to ensure all registration information is accurate and up-to-date.",
+      "keywords": [
+        "skills-registry-sync",
+        "automatically",
+        "check",
+        "update",
+        "maintain",
+        "consistency"
+      ],
+      "aliases": [
+        "skills-registry-sync"
+      ]
+    },
+    "sp-brainstorming": {
+      "name": "sp-brainstorming",
+      "description": "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.",
+      "keywords": [
+        "sp-brainstorming",
+        "must",
+        "before",
+        "creative",
+        "work"
+      ],
+      "aliases": [
+        "sp-brainstorming"
+      ]
+    },
+    "sp-dispatching-parallel-agents": {
+      "name": "sp-dispatching-parallel-agents",
+      "description": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies",
+      "keywords": [
+        "sp-dispatching-parallel-agents",
+        "facing",
+        "independent",
+        "tasks"
+      ],
+      "aliases": [
+        "sp-dispatching-parallel-agents"
+      ]
+    },
+    "sp-executing-plans": {
+      "name": "sp-executing-plans",
+      "description": "Use when you have a written implementation plan to execute in a separate session with review checkpoints",
+      "keywords": [
+        "sp-executing-plans",
+        "written",
+        "implementation",
+        "plan"
+      ],
+      "aliases": [
+        "sp-executing-plans"
+      ]
+    },
+    "sp-finishing-a-development-branch": {
+      "name": "sp-finishing-a-development-branch",
+      "description": "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup",
+      "keywords": [
+        "sp-finishing-a-development-branch",
+        "implementation",
+        "complete",
+        "tests",
+        "pass"
+      ],
+      "aliases": [
+        "sp-finishing-a-development-branch"
       ]
     },
     "sp-receiving-code-review": {
       "name": "sp-receiving-code-review",
       "description": "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation",
       "keywords": [
-        "feedback",
-        "when",
-        "receiving code review",
+        "sp-receiving-code-review",
+        "receiving",
         "code",
         "review",
-        "receiving"
+        "feedback"
       ],
       "aliases": [
         "sp-receiving-code-review"
@@ -228,11 +303,10 @@
       "name": "sp-requesting-code-review",
       "description": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements",
       "keywords": [
-        "when",
-        "requesting code review",
-        "implementing",
-        "tasks",
+        "sp-requesting-code-review",
         "completing",
+        "tasks",
+        "implementing",
         "major"
       ],
       "aliases": [
@@ -241,14 +315,12 @@
     },
     "sp-subagent-driven-development": {
       "name": "sp-subagent-driven-development",
-      "description": "Use when executing implementation plans with independent tasks in current session",
+      "description": "Use when executing implementation plans with independent tasks in the current session",
       "keywords": [
-        "with",
-        "when",
+        "sp-subagent-driven-development",
         "executing",
-        "plans",
         "implementation",
-        "subagent driven development"
+        "plans"
       ],
       "aliases": [
         "sp-subagent-driven-development"
@@ -258,12 +330,11 @@
       "name": "sp-systematic-debugging",
       "description": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
       "keywords": [
-        "systematic debugging",
-        "when",
-        "failure",
-        "unexpected",
+        "sp-systematic-debugging",
         "encountering",
-        "test"
+        "test",
+        "failure",
+        "unexpected"
       ],
       "aliases": [
         "sp-systematic-debugging"
@@ -273,42 +344,24 @@
       "name": "sp-test-driven-development",
       "description": "Use when implementing any feature or bugfix, before writing implementation code",
       "keywords": [
-        "when",
-        "test driven development",
-        "bugfix",
+        "sp-test-driven-development",
         "implementing",
-        "before",
-        "feature"
+        "feature",
+        "bugfix",
+        "before"
       ],
       "aliases": [
         "sp-test-driven-development"
-      ]
-    },
-    "ui-ux-pro-max": {
-      "name": "ui-ux-pro-max",
-      "description": "UI/UX design intelligence. 50 styles, 21 palettes, 50 font pairings, 20 charts, 9 stacks (React, Next.js, Vue, Svelte, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui). Actions: plan, build, create, design, implement, review, fix, improve, optimize, enhance, refactor, check UI/UX code. Projects: website, landing page, dashboard, admin panel, e-commerce, SaaS, portfolio, blog, mobile app, .html, .tsx, .vue, .svelte. Elements: button, modal, navbar, sidebar, card, table, form, chart. Styles: glassmorphism, claymorphism, minimalism, brutalism, neumorphism, bento grid, dark mode, responsive, skeuomorphism, flat design. Topics: color palette, accessibility, animation, layout, typography, font pairing, spacing, hover, shadow, gradient. Integrations: shadcn/ui MCP for component search and examples.",
-      "keywords": [
-        "intelligence",
-        "font",
-        "ui ux pro max",
-        "palettes",
-        "design",
-        "styles"
-      ],
-      "aliases": [
-        "ui-ux-pro-max"
       ]
     },
     "sp-using-git-worktrees": {
       "name": "sp-using-git-worktrees",
       "description": "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification",
       "keywords": [
-        "when",
+        "sp-using-git-worktrees",
         "starting",
-        "work",
-        "using git worktrees",
-        "that",
-        "feature"
+        "feature",
+        "work"
       ],
       "aliases": [
         "sp-using-git-worktrees"
@@ -318,12 +371,11 @@
       "name": "sp-using-superpowers",
       "description": "Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions",
       "keywords": [
-        "when",
+        "sp-using-superpowers",
         "starting",
-        "establishes",
         "conversation",
-        "find",
-        "using superpowers"
+        "establishes",
+        "find"
       ],
       "aliases": [
         "sp-using-superpowers"
@@ -333,11 +385,9 @@
       "name": "sp-verification-before-completion",
       "description": "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always",
       "keywords": [
-        "when",
-        "work",
-        "verification before completion",
-        "about",
+        "sp-verification-before-completion",
         "claim",
+        "work",
         "complete"
       ],
       "aliases": [
@@ -348,12 +398,10 @@
       "name": "sp-writing-plans",
       "description": "Use when you have a spec or requirements for a multi-step task, before touching code",
       "keywords": [
-        "when",
-        "have",
+        "sp-writing-plans",
         "spec",
-        "writing plans",
-        "multi",
-        "requirements"
+        "requirements",
+        "multi"
       ],
       "aliases": [
         "sp-writing-plans"
@@ -363,12 +411,11 @@
       "name": "sp-writing-skills",
       "description": "Use when creating new skills, editing existing skills, or verifying skills work before deployment",
       "keywords": [
-        "when",
-        "existing",
-        "writing skills",
+        "sp-writing-skills",
         "creating",
+        "skills",
         "editing",
-        "skills"
+        "existing"
       ],
       "aliases": [
         "sp-writing-skills"
@@ -383,13 +430,11 @@
       "skill-auditor",
       "image-generation",
       "pdf-generation",
-      "ui-ux-pro-max",
       "planning-with-files",
       "sp-brainstorming",
       "sp-writing-plans",
       "sp-executing-plans",
       "sp-systematic-debugging",
-      "powershell-windows",
       "sp-test-driven-development",
       "sp-subagent-driven-development",
       "sp-dispatching-parallel-agents",
@@ -401,10 +446,16 @@
       "sp-using-git-worktrees",
       "sp-writing-skills",
       "obsidian-skills",
-      "agent-skills"
+      "python-performance-optimization",
+      "python-testing-patterns",
+      "async-python-patterns",
+      "python-packaging",
+      "python-design-patterns",
+      "proxy-manager",
+      "skills-registry-sync",
+      "powershell-windows"
     ],
     "exact_match": {
-      "find skills": "find-skills",
       "image generation": "image-generation",
       "pdf generation": "pdf-generation",
       "skill auditor": "skill-auditor",
@@ -412,15 +463,9 @@
       "skill installer": "skill-installer"
     },
     "partial_match": {
-      "helps": "find-skills",
-      "agent": "find-skills",
       "install": [
-        "find-skills",
         "skill-installer"
       ],
-      "discover": "find-skills",
-      "users": "find-skills",
-      "find skills": "find-skills",
       "high": "image-generation",
       "documents": "image-generation",
       "converts": "image-generation",

@@ -16,6 +16,43 @@ import datetime
 import re
 import yaml
 from pathlib import Path
+
+# Proxy configuration
+proxy_config = {
+    'http': None,
+    'https': None,
+    'no_proxy': None
+}
+
+def setup_proxy(http_proxy=None, https_proxy=None, no_proxy=None):
+    """Setup proxy configuration for git operations"""
+    global proxy_config
+    
+    # Auto-detect from environment if not explicitly provided
+    proxy_config['http'] = http_proxy or os.environ.get('HTTP_PROXY') or os.environ.get('http_proxy')
+    proxy_config['https'] = https_proxy or os.environ.get('HTTPS_PROXY') or os.environ.get('https_proxy')
+    proxy_config['no_proxy'] = no_proxy or os.environ.get('NO_PROXY') or os.environ.get('no_proxy')
+    
+    if proxy_config['http'] or proxy_config['https']:
+        print(f"{COLOR_CYAN}[PROXY] Using proxy configuration{COLOR_RESET}")
+        if proxy_config['http']:
+            print(f"{COLOR_CYAN}[PROXY] HTTP Proxy: {proxy_config['http']}{COLOR_RESET}")
+        if proxy_config['https']:
+            print(f"{COLOR_CYAN}[PROXY] HTTPS Proxy: {proxy_config['https']}{COLOR_RESET}")
+
+def get_proxy_env():
+    """Get proxy environment variables for subprocess"""
+    env = os.environ.copy()
+    if proxy_config['http']:
+        env['HTTP_PROXY'] = proxy_config['http']
+        env['http_proxy'] = proxy_config['http']
+    if proxy_config['https']:
+        env['HTTPS_PROXY'] = proxy_config['https']
+        env['https_proxy'] = proxy_config['https']
+    if proxy_config['no_proxy']:
+        env['NO_PROXY'] = proxy_config['no_proxy']
+        env['no_proxy'] = proxy_config['no_proxy']
+    return env
 try:
     from messages import *
 except ImportError:
@@ -67,11 +104,7 @@ def verbose_print(msg_type, **kwargs):
             dep = kwargs.get('dep', '')
             print(MSG_VERBOSE_DEPENDENCY_CHECK.format(dep=dep))
 
-try:
-    import skill_catalog
-except ImportError:
-    # Fallback if skill_catalog not found
-    skill_catalog = None
+
 
 def run_command(cmd, cwd=None, capture_output=False):
     """Run a shell command and check for errors"""
@@ -79,12 +112,15 @@ def run_command(cmd, cwd=None, capture_output=False):
         cmd_str = ' '.join(cmd) if isinstance(cmd, list) else cmd
         verbose_print('git', cmd=cmd_str)
         
+        # Get proxy environment
+        env = get_proxy_env()
+        
         if capture_output:
-            result = subprocess.run(cmd, check=True, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors='replace')
+            result = subprocess.run(cmd, check=True, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors='replace', env=env)
             verbose_print('git', output=result.stdout.strip())
             return result.stdout.strip()
         else:
-            subprocess.run(cmd, check=True, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.run(cmd, check=True, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
             return True
     except subprocess.CalledProcessError as e:
         if not capture_output:
@@ -591,151 +627,20 @@ def resolve_source(source):
         # user/repo/subdir format - use parse_source directly
         return parse_source(source)
     
-    # For 2-part format, we need to determine if it's user/repo or category/skill-name
-    # Try catalog first if available
-    if skill_catalog:
-        print(MSG_RESOLVING_SKILL.format(name=source))
-        
-        # First, try to get skill directly (supports category/name format)
-        skill = skill_catalog.get_skill(source)
-        
-        if skill:
-            # Skill found in catalog
-            skill_source = skill.get('source', '')
-            
-            # Check if it's a local skill
-            if skill_source == 'local':
-                print(f"{COLOR_YELLOW}Warning: Skill '{source}' is marked as local and cannot be installed from remote.{COLOR_RESET}")
-                print(MSG_TRY_SEARCH)
-                return None, None
-            
-            # Parse the source URL to extract repo_url and subdir
-            if skill_source.startswith("https://") or skill_source.startswith("git@"):
-                # Full URL
-                parts = skill_source.split('/tree/main/')
-                if len(parts) > 1:
-                    repo_url, subdir = parts[0], parts[1]
-                else:
-                    repo_url, subdir = skill_source, ""
-            else:
-                # Try as user/repo format
-                repo_url, subdir = parse_source(skill_source)
-            
-            print(MSG_SKILL_RESOLVED.format(name=source, source=repo_url))
-            if subdir:
-                print(MSG_SUBDIR.format(subdir=subdir))
-            
-            return repo_url, subdir
-        
-        # Skill not found, try to resolve as alias
-        resolved_name = skill_catalog.resolve_alias(source)
-        
-        if resolved_name:
-            # Alias resolved, get the skill info
-            skill = skill_catalog.get_skill(resolved_name)
-            
-            if skill:
-                skill_source = skill.get('source', '')
-                
-                if skill_source == 'local':
-                    print(f"{COLOR_YELLOW}Warning: Skill '{resolved_name}' (resolved from alias '{source}') is marked as local.{COLOR_RESET}")
-                    print(MSG_TRY_SEARCH)
-                    return None, None
-                
-                # Parse the source URL
-                if skill_source.startswith("https://") or skill_source.startswith("git@"):
-                    parts = skill_source.split('/tree/main/')
-                    if len(parts) > 1:
-                        repo_url, subdir = parts[0], parts[1]
-                    else:
-                        repo_url, subdir = skill_source, ""
-                else:
-                    repo_url, subdir = parse_source(skill_source)
-                
-                print(MSG_SKILL_RESOLVED.format(name=source, source=repo_url))
-                if subdir:
-                    print(MSG_SUBDIR.format(subdir=subdir))
-                
-                return repo_url, subdir
-        
-        # Check if it has a category prefix (2-part format)
-        if len(parts) == 2:
-            category, skill_name = parts
-            
-            # Try to get categories to show helpful error
-            try:
-                categories = skill_catalog.list_categories()
-                category_names = [cat['name'] for cat in categories]
-                
-                if category in category_names:
-                    # It is a valid category, but skill not found
-                    print(MSG_SKILL_NOT_FOUND_CATALOG_FULL.format(name=source))
-                    print(MSG_TRY_SEARCH)
-                    return None, None
-                else:
-                    # Not a valid category, treat as user/repo format
-                    print(f"{COLOR_YELLOW}Category '{category}' not found. Treating as user/repo format.{COLOR_RESET}")
-                    return parse_source(source)
-            except Exception:
-                # If we can't check categories, treat as user/repo format
-                return parse_source(source)
-        
-        # Single-part format or other - skill not found in catalog
-        print(MSG_SKILL_NOT_FOUND_CATALOG_FULL.format(name=source))
-        print(MSG_TRY_SEARCH)
-        return None, None
-    
-    # No catalog available, fall back to parse_source
+    # For 2-part format, treat as user/repo format
     return parse_source(source)
 
 def interactive_menu():
     """
-    Display available categories and allow user to select one.
+    Display available skills and allow user to select one.
     
     Returns:
-        Selected category name or None if user exits
+        Selected skill source or None if user exits
     """
-    if not skill_catalog:
-        print(f"{COLOR_RED}Error: skill_catalog module not available. Cannot run interactive mode.{COLOR_RESET}")
-        return None
-    
-    try:
-        categories = skill_catalog.list_categories()
-    except Exception as e:
-        print(f"{COLOR_RED}Error loading categories: {e}{COLOR_RESET}")
-        return None
-    
-    if not categories:
-        print(f"{COLOR_YELLOW}No categories found in catalog.{COLOR_RESET}")
-        return None
-    
-    while True:
-        print(MSG_INTERACTIVE_CATEGORIES_HEADER)
-        for idx, cat in enumerate(categories, 1):
-            print(MSG_INTERACTIVE_CATEGORY_ITEM.format(
-                index=idx,
-                name=cat['name'],
-                description=cat['description']
-            ))
-        
-        choice = input(MSG_INTERACTIVE_SELECT_CATEGORY).strip().lower()
-        
-        if choice in ('exit', 'quit', 'q'):
-            return None
-        
-        if choice in ('back', 'b'):
-            continue
-        
-        if choice.isdigit():
-            idx = int(choice) - 1
-            if 0 <= idx < len(categories):
-                return categories[idx]['name']
-        
-        for cat in categories:
-            if cat['name'].lower() == choice:
-                return cat['name']
-        
-        print(MSG_INTERACTIVE_INVALID_CHOICE)
+    print(f"{COLOR_CYAN}Interactive Skill Installation{COLOR_RESET}")
+    print("This mode is not available without skill_catalog.")
+    print("Please use a direct Git URL or user/repo format.")
+    return None
 
 def select_skill_from_category(category):
     """
@@ -747,53 +652,10 @@ def select_skill_from_category(category):
     Returns:
         Selected skill dictionary or None if user exits
     """
-    if not skill_catalog:
-        print(f"{COLOR_RED}Error: skill_catalog module not available.{COLOR_RESET}")
-        return None
-    
-    try:
-        skills = skill_catalog.list_skills(category=category)
-    except Exception as e:
-        print(f"{COLOR_RED}Error loading skills for category '{category}': {e}{COLOR_RESET}")
-        return None
-    
-    if not skills:
-        print(f"{COLOR_YELLOW}No skills found in category '{category}'.{COLOR_RESET}")
-        return None
-    
-    while True:
-        print(MSG_INTERACTIVE_SKILLS_HEADER.format(category=category))
-        for idx, skill in enumerate(skills, 1):
-            print(MSG_INTERACTIVE_SKILL_ITEM.format(
-                index=idx,
-                name=skill['name'],
-                description=skill['description']
-            ))
-            if skill.get('aliases'):
-                print(MSG_INTERACTIVE_SKILL_ALIASES.format(aliases=', '.join(skill['aliases'])))
-        
-        choice = input(MSG_INTERACTIVE_SELECT_SKILL).strip().lower()
-        
-        if choice in ('exit', 'quit', 'q'):
-            return None
-        
-        if choice in ('back', 'b'):
-            return None
-        
-        if choice.isdigit():
-            idx = int(choice) - 1
-            if 0 <= idx < len(skills):
-                return skills[idx]
-        
-        for skill in skills:
-            if skill['name'].lower() == choice:
-                return skill
-            if skill.get('aliases'):
-                for alias in skill['aliases']:
-                    if alias.lower() == choice:
-                        return skill
-        
-        print(MSG_INTERACTIVE_INVALID_CHOICE)
+    print(f"{COLOR_CYAN}Interactive Skill Selection{COLOR_RESET}")
+    print("This mode is not available without skill_catalog.")
+    print("Please use a direct Git URL or user/repo format.")
+    return None
 
 def preview_skill(skill_info):
     """
@@ -1199,19 +1061,22 @@ if __name__ == "__main__":
     parser.add_argument("--yes", action="store_true", help="Auto-install all dependencies without prompting")
     parser.add_argument("--interactive", "-i", action="store_true", help="Run in interactive mode to browse and install skills from catalog")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose mode for detailed debug output")
+    parser.add_argument("--http-proxy", help="HTTP proxy URL (e.g., http://proxy.example.com:8080)")
+    parser.add_argument("--https-proxy", help="HTTPS proxy URL (e.g., https://proxy.example.com:8080)")
+    parser.add_argument("--no-proxy", help="Comma-separated list of hosts to bypass proxy")
     
     args = parser.parse_args()
     
     # Set verbose mode
     set_verbose(args.verbose)
     
+    # Setup proxy configuration
+    setup_proxy(args.http_proxy, args.https_proxy, args.no_proxy)
+    
     if args.interactive:
-        if not skill_catalog:
-            print(f"{COLOR_RED}Error: skill_catalog module not available. Interactive mode requires skill_catalog.{COLOR_RESET}")
-            sys.exit(1)
-        
-        interactive_install(args.path, not args.no_audit, args.force, args.yes)
-        sys.exit(0)
+        print(f"{COLOR_RED}Error: Interactive mode is not available without skill_catalog.{COLOR_RESET}")
+        print("Please use a direct Git URL or user/repo format.")
+        sys.exit(1)
     
     if not args.source:
         parser.print_help()

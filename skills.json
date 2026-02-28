@@ -1,154 +1,364 @@
 {
   "skills": {
-    "find-skills": {
-      "source": "https://github.com/vercel-labs/skills.git",
-      "subdir": "skills/find-skills",
-      "version": "b248cdf08f647faf8b7a00e4d89344d9b83ab0e1",
-      "updated_at": "2026-02-25T17:02:06.604259"
-    },
     "skill-creator": {
       "source": "https://github.com/anthropics/skills",
       "subdir": "skills/skill-creator",
       "version": "1ed29a03dc852d30fa6ef2ca53a67dc2c2c563",
-      "updated_at": "2026-02-20T01:51:42.009612"
+      "updated_at": "2026-02-28T13:40:28.988639",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
     "skill-installer": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-02-16T00:23:22.725276"
+      "updated_at": "2026-02-28T13:40:28.989855",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
     "skill-auditor": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-02-16T00:23:22.724972"
+      "updated_at": "2026-02-28T13:40:28.987865",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
-    "agent-skills": {
-      "source": "https://github.com/vercel-labs/agent-skills.git",
+    "skills-registry-sync": {
+      "source": "local",
       "subdir": "",
-      "version": "e23951b8cad2f4b1e7e176c5731127c1263fe86f",
-      "updated_at": "2026-02-20T00:15:14.020911"
+      "version": "unknown",
+      "updated_at": "2026-02-28T13:40:28.990811",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
-    "sp-brainstorming": {
-      "source": "https://github.com/obra/superpowers.git",
-      "subdir": "skills/brainstorming",
-      "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
-      "updated_at": "2026-02-26T16:19:23.480278"
+    "async-python-patterns": {
+      "source": "https://github.com/wshobson/agents.git",
+      "subdir": "plugins/python-development/skills/async-python-patterns",
+      "version": "ade0c7a211d04fa1354d10359737cace5c6fc5b0",
+      "updated_at": "2026-02-28T13:40:28.936727",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
-    "sp-dispatching-parallel-agents": {
-      "source": "https://github.com/obra/superpowers.git",
-      "subdir": "skills/dispatching-parallel-agents",
-      "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
-      "updated_at": "2026-02-26T16:19:26.691035"
-    },
-    "sp-executing-plans": {
-      "source": "https://github.com/obra/superpowers.git",
-      "subdir": "skills/executing-plans",
-      "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
-      "updated_at": "2026-02-26T16:19:29.634592"
-    },
-    "sp-finishing-a-development-branch": {
-      "source": "https://github.com/obra/superpowers.git",
-      "subdir": "skills/finishing-a-development-branch",
-      "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
-      "updated_at": "2026-02-26T16:19:32.708045"
+    "find-skills": {
+      "source": "https://github.com/vercel-labs/skills",
+      "subdir": "skills/find-skills",
+      "version": "5ac56d8d6b6f74a7f8169e2bc9b45336aa01a8bf",
+      "updated_at": "2026-02-28T13:40:28.938426",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
     "image-generation": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-02-16T00:23:22.724615"
+      "updated_at": "2026-02-28T13:40:28.939357",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
     "obsidian-skills": {
       "source": "https://github.com/kepano/obsidian-skills.git",
       "subdir": "",
       "version": "be978124b80dc6b60586773e1d125d1cdf36d26a",
-      "updated_at": "2026-02-26T18:05:11.326222"
+      "updated_at": "2026-02-28T13:40:28.979095",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
     "pdf-generation": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-02-16T00:23:22.724797"
+      "updated_at": "2026-02-28T13:40:28.979923",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
     "planning-with-files": {
       "source": "https://github.com/othmanadi/planning-with-files",
       "subdir": "skills/planning-with-files",
       "version": "4292f000a15ecf07a6d0900ab495b80864de2a15",
-      "updated_at": "2026-02-16T00:34:55.763170"
+      "updated_at": "2026-02-28T13:40:28.982623",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
     "powershell-windows": {
       "source": "https://github.com/davila7/claude-code-templates.git",
       "subdir": "cli-tool/components/skills/development/powershell-windows",
-      "version": "030af25d55426ac66a52c233be4f8b150786fb22",
-      "updated_at": "2026-02-19T22:58:16.706870"
+      "version": "7d1be1c50e59a9faf2c74599883c9e6320cf5aeb",
+      "updated_at": "2026-02-28T13:40:28.983307",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
+    },
+    "proxy-manager": {
+      "source": "local",
+      "subdir": "",
+      "version": "unknown",
+      "updated_at": "2026-02-28T13:40:28.984398",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
+    },
+    "python-design-patterns": {
+      "source": "https://github.com/wshobson/agents.git",
+      "subdir": "plugins/python-development/skills/python-design-patterns",
+      "version": "ade0c7a211d04fa1354d10359737cace5c6fc5b0",
+      "updated_at": "2026-02-28T13:40:28.985124",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
+    },
+    "python-packaging": {
+      "source": "https://github.com/wshobson/agents.git",
+      "subdir": "plugins/python-development/skills/python-packaging",
+      "version": "ade0c7a211d04fa1354d10359737cace5c6fc5b0",
+      "updated_at": "2026-02-28T13:40:28.985774",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
+    },
+    "python-performance-optimization": {
+      "source": "https://github.com/wshobson/agents",
+      "subdir": "plugins/python-development/skills/python-performance-optimization",
+      "version": "ade0c7a211d04fa1354d10359737cace5c6fc5b0",
+      "updated_at": "2026-02-28T13:40:28.986410",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
+    },
+    "python-testing-patterns": {
+      "source": "https://github.com/wshobson/agents.git",
+      "subdir": "plugins/python-development/skills/python-testing-patterns",
+      "version": "ade0c7a211d04fa1354d10359737cace5c6fc5b0",
+      "updated_at": "2026-02-28T13:40:28.987049",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
+    },
+    "sp-brainstorming": {
+      "source": "https://github.com/obra/superpowers.git",
+      "subdir": "skills/brainstorming",
+      "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
+      "updated_at": "2026-02-28T13:40:28.991637",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
+    },
+    "sp-dispatching-parallel-agents": {
+      "source": "https://github.com/obra/superpowers.git",
+      "subdir": "skills/dispatching-parallel-agents",
+      "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
+      "updated_at": "2026-02-28T13:40:28.992254",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
+    },
+    "sp-executing-plans": {
+      "source": "https://github.com/obra/superpowers.git",
+      "subdir": "skills/executing-plans",
+      "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
+      "updated_at": "2026-02-28T13:40:28.992821",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
+    },
+    "sp-finishing-a-development-branch": {
+      "source": "https://github.com/obra/superpowers.git",
+      "subdir": "skills/finishing-a-development-branch",
+      "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
+      "updated_at": "2026-02-28T13:40:28.993439",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
     "sp-receiving-code-review": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/receiving-code-review",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
-      "updated_at": "2026-02-26T16:19:35.710935"
+      "updated_at": "2026-02-28T13:40:28.994067",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
     "sp-requesting-code-review": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/requesting-code-review",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
-      "updated_at": "2026-02-26T16:19:38.833053"
+      "updated_at": "2026-02-28T13:40:28.994648",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
     "sp-subagent-driven-development": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/subagent-driven-development",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
-      "updated_at": "2026-02-26T16:19:42.450040"
+      "updated_at": "2026-02-28T13:40:28.995204",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
     "sp-systematic-debugging": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/systematic-debugging",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
-      "updated_at": "2026-02-26T16:19:45.498382"
+      "updated_at": "2026-02-28T13:40:28.995755",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
     "sp-test-driven-development": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/test-driven-development",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
-      "updated_at": "2026-02-26T16:19:48.557135"
-    },
-    "ui-ux-pro-max": {
-      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "subdir": "skills/ui-ux-pro-max",
-      "version": "6623f12b4058d09618c89cffb2de59a47c45f999",
-      "updated_at": "2026-02-16T00:23:22.725465"
+      "updated_at": "2026-02-28T13:40:28.996298",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
     "sp-using-git-worktrees": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/using-git-worktrees",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
-      "updated_at": "2026-02-26T16:19:51.606446"
+      "updated_at": "2026-02-28T13:40:28.996903",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
     "sp-using-superpowers": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/using-superpowers",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
-      "updated_at": "2026-02-26T16:19:54.560922"
+      "updated_at": "2026-02-28T13:40:28.997495",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
     "sp-verification-before-completion": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/verification-before-completion",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
-      "updated_at": "2026-02-26T16:19:57.643011"
+      "updated_at": "2026-02-28T13:40:28.998175",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
     "sp-writing-plans": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/writing-plans",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
-      "updated_at": "2026-02-26T16:20:01.342493"
+      "updated_at": "2026-02-28T13:40:28.998912",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     },
     "sp-writing-skills": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/writing-skills",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
-      "updated_at": "2026-02-26T16:20:08.179592"
+      "updated_at": "2026-02-28T13:40:28.999562",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
     }
   }
 }
