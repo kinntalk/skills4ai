@@ -73,6 +73,31 @@
         "async-python-patterns"
       ]
     },
+    "baoyu-url-to-markdown": {
+      "name": "baoyu-url-to-markdown",
+      "description": "Fetch any URL and convert to markdown using Chrome CDP. Supports two modes - auto-capture on page load, or wait for user signal (for pages requiring login). Use when user wants to save a webpage as markdown.",
+      "keywords": [
+        "convert",
+        "fetch",
+        "markdown",
+        "using",
+        "chrome",
+        "baoyu url to markdown"
+      ],
+      "aliases": [
+        "baoyu-url-to-markdown"
+      ]
+    },
+    "browser-use": {
+      "name": "browser-use",
+      "description": "",
+      "keywords": [
+        "browser use"
+      ],
+      "aliases": [
+        "browser-use"
+      ]
+    },
     "image-generation": {
       "name": "image-generation",
       "description": "Converts Markdown documents to high-quality images (PNG/JPG) using Python and headless browser rendering. Ideal for creating social media posts, documentation screenshots, and sharing rich text content as images.",
@@ -453,7 +478,9 @@
       "python-design-patterns",
       "proxy-manager",
       "skills-registry-sync",
-      "powershell-windows"
+      "powershell-windows",
+      "browser-use",
+      "baoyu-url-to-markdown"
     ],
     "exact_match": {
       "image generation": "image-generation",

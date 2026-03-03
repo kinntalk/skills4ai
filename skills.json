@@ -1,5 +1,17 @@
 {
   "skills": {
+    "find-skills": {
+      "source": "https://github.com/vercel-labs/skills",
+      "subdir": "skills/find-skills",
+      "version": "5ac56d8d6b6f74a7f8169e2bc9b45336aa01a8bf",
+      "updated_at": "2026-02-28T13:40:28.938426",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
+    },
     "skill-creator": {
       "source": "https://github.com/anthropics/skills",
       "subdir": "skills/skill-creator",
@@ -36,18 +48,6 @@
         "satisfied_deps": []
       }
     },
-    "skills-registry-sync": {
-      "source": "local",
-      "subdir": "",
-      "version": "unknown",
-      "updated_at": "2026-02-28T13:40:28.990811",
-      "health": {
-        "is_valid": true,
-        "validation_error": null,
-        "missing_deps": [],
-        "satisfied_deps": []
-      }
-    },
     "async-python-patterns": {
       "source": "https://github.com/wshobson/agents.git",
       "subdir": "plugins/python-development/skills/async-python-patterns",
@@ -60,17 +60,17 @@
         "satisfied_deps": []
       }
     },
-    "find-skills": {
-      "source": "https://github.com/vercel-labs/skills",
-      "subdir": "skills/find-skills",
-      "version": "5ac56d8d6b6f74a7f8169e2bc9b45336aa01a8bf",
-      "updated_at": "2026-02-28T13:40:28.938426",
-      "health": {
-        "is_valid": true,
-        "validation_error": null,
-        "missing_deps": [],
-        "satisfied_deps": []
-      }
+    "baoyu-url-to-markdown": {
+      "source": "https://github.com/jimliu/baoyu-skills.git",
+      "subdir": "skills/baoyu-url-to-markdown",
+      "version": "7cc2e640b0d4dbe40e050a19e59fa604a1f5e9a3",
+      "updated_at": "2026-03-02T10:19:48.120594"
+    },
+    "browser-use": {
+      "source": "https://github.com/browser-use/browser-use",
+      "subdir": "",
+      "version": "c21cfc7d417ed481622124f3618d693d5be4e21b",
+      "updated_at": "2026-02-28T16:18:32.780698"
     },
     "image-generation": {
       "source": "local",
@@ -185,6 +185,18 @@
       "subdir": "plugins/python-development/skills/python-testing-patterns",
       "version": "ade0c7a211d04fa1354d10359737cace5c6fc5b0",
       "updated_at": "2026-02-28T13:40:28.987049",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
+    },
+    "skills-registry-sync": {
+      "source": "local",
+      "subdir": "",
+      "version": "unknown",
+      "updated_at": "2026-02-28T13:40:28.990811",
       "health": {
         "is_valid": true,
         "validation_error": null,
