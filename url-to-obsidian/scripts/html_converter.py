@@ -28,6 +28,8 @@ MIN_CONTENT_LENGTH = 120
 GOOD_CONTENT_LENGTH = 900
 
 CONTENT_SELECTORS = [
+    ".dw-doc-content",
+    ".dw-main-content[role='content']",
     "article",
     "main article",
     "[role='main'] article",
@@ -41,6 +43,9 @@ CONTENT_SELECTORS = [
     "[role='main']",
     "#content",
     ".content",
+    ".sect1",
+    "#preamble",
+    ".sectionbody",
 ]
 
 REMOVE_SELECTORS = [
@@ -122,17 +127,34 @@ def extract_with_selector(html: str) -> Tuple[Optional[str], str]:
     soup = BeautifulSoup(html, "html.parser")
     
     for selector in CONTENT_SELECTORS:
-        element = soup.select_one(selector)
-        if element:
-            for remove_selector in REMOVE_SELECTORS:
-                for el in element.select(remove_selector):
-                    el.decompose()
-            
-            text = element.get_text()
-            if len(text.strip()) >= MIN_CONTENT_LENGTH:
-                title = soup.find("title")
-                title_text = title.get_text().strip() if title else None
-                return title_text, str(element)
+        elements = soup.select(selector)
+        if elements:
+            # For selectors that match multiple sections (like .sect1),
+            # combine all matching elements
+            if len(elements) > 1:
+                combined_html = ""
+                for element in elements:
+                    for remove_selector in REMOVE_SELECTORS:
+                        for el in element.select(remove_selector):
+                            el.decompose()
+                    combined_html += str(element)
+                
+                text = BeautifulSoup(combined_html, "html.parser").get_text()
+                if len(text.strip()) >= MIN_CONTENT_LENGTH:
+                    title = soup.find("title")
+                    title_text = title.get_text().strip() if title else None
+                    return title_text, combined_html
+            else:
+                element = elements[0]
+                for remove_selector in REMOVE_SELECTORS:
+                    for el in element.select(remove_selector):
+                        el.decompose()
+                
+                text = element.get_text()
+                if len(text.strip()) >= MIN_CONTENT_LENGTH:
+                    title = soup.find("title")
+                    title_text = title.get_text().strip() if title else None
+                    return title_text, str(element)
     
     return None, ""
 
@@ -270,8 +292,12 @@ def extract_content(html: str) -> dict:
     """
     title, content_html = extract_with_readability(html)
     
-    if not content_html:
-        title, content_html = extract_with_selector(html)
+    # Try selector extraction and use it if it returns more content
+    selector_title, selector_content = extract_with_selector(html)
+    if selector_content:
+        if not content_html or len(selector_content) > len(content_html):
+            title = selector_title or title
+            content_html = selector_content
     
     if not content_html:
         soup = BeautifulSoup(html, "html.parser")
