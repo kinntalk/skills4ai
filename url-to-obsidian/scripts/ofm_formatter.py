@@ -18,22 +18,30 @@ def clean_html_tags(content: str) -> str:
     Converts common HTML elements to markdown equivalents and removes
     unnecessary HTML tags.
     
+    Note: Tables are handled by markdownify in html_converter.py,
+    so we don't process table tags here to preserve table structure.
+    
+    Note: Code blocks are protected to preserve their content.
+    
     Args:
         content: Markdown content with HTML tags
         
     Returns:
         Cleaned markdown content
     """
-    content = re.sub(r'<table[^>]*>', '\n', content)
-    content = re.sub(r'</table>', '\n', content)
-    content = re.sub(r'<tr[^>]*>', '', content)
-    content = re.sub(r'</tr>', '\n', content)
-    content = re.sub(r'<td[^>]*>', ' ', content)
-    content = re.sub(r'</td>', ' ', content)
-    content = re.sub(r'<th[^>]*>', ' ', content)
-    content = re.sub(r'</th>', ' ', content)
-    content = re.sub(r'<tbody[^>]*>', '', content)
-    content = re.sub(r'</tbody>', '', content)
+    code_blocks = []
+    def save_code_block(match):
+        code_blocks.append(match.group(0))
+        return f'__CODE_BLOCK_{len(code_blocks)-1}__'
+    
+    content = re.sub(r'```[\s\S]*?```', save_code_block, content)
+    
+    content = re.sub(
+        r'<div class="obsidian-callout" data-type="([^"]+)"[^>]*>([^<]+)</div>',
+        lambda m: f'> [!{m.group(1)}]\n> {m.group(2)}',
+        content
+    )
+    
     content = re.sub(r'<i[^>]*title="([^"]*)"[^>]*></i>', r'> [!note] \1\n>', content)
     content = re.sub(r'<i[^>]*>([^<]*)</i>', r'*\1*', content)
     content = re.sub(r'<b[^>]*>([^<]*)</b>', r'**\1**', content)
@@ -49,6 +57,13 @@ def clean_html_tags(content: str) -> str:
     content = re.sub(r'\n{3,}', '\n\n', content)
     content = re.sub(r'[ \t]+$', '', content, flags=re.MULTILINE)
     content = re.sub(r'^\s*\|\s*$', '', content, flags=re.MULTILINE)
+    
+    content = re.sub(r'^Copy\s*$', '', content, flags=re.MULTILINE)
+    content = re.sub(r'(\S)Copy$', r'\1', content, flags=re.MULTILINE)
+    content = re.sub(r'Copy(\s*__CODE_BLOCK_)', r'\1', content)
+    
+    for i, block in enumerate(code_blocks):
+        content = content.replace(f'__CODE_BLOCK_{i}__', block)
     
     return content.strip()
 

@@ -71,6 +71,16 @@ REMOVE_SELECTORS = [
     ".cookie-consent",
     "[role='navigation']",
     "[aria-label*='cookie' i]",
+    ".copy",
+    ".copy-button",
+    "button.copy",
+    ".btn-copy",
+    "[data-copy]",
+    ".code-actions",
+    ".source-toolbox",
+    ".code-copy-btn",
+    "button.code-copy-btn",
+    "pre button",
 ]
 
 
@@ -241,6 +251,65 @@ def extract_published_time(html: str) -> Optional[str]:
     return None
 
 
+def convert_admonition_to_callout(html: str) -> str:
+    """Convert Asciidoctor admonition blocks to Obsidian callouts.
+    
+    Asciidoctor uses:
+    <div class="admonitionblock note">
+      <table>
+        <tbody>
+          <tr>
+            <td class="icon"><i class="fa icon-note" title="Note"></i></td>
+            <td class="content">Content here</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    Obsidian callout format:
+    > [!note]
+    > Content here
+    
+    Args:
+        html: HTML content
+        
+    Returns:
+        HTML with admonitions converted to callout-friendly format
+    """
+    soup = BeautifulSoup(html, 'html.parser')
+    
+    admonition_map = {
+        'note': 'note',
+        'tip': 'tip',
+        'warning': 'warning',
+        'caution': 'warning',
+        'important': 'important',
+        'attention': 'warning',
+        'hint': 'tip',
+    }
+    
+    for adm in soup.select('.admonitionblock'):
+        classes = adm.get('class', [])
+        adm_type = 'note'
+        for c in classes:
+            if c in admonition_map:
+                adm_type = admonition_map[c]
+                break
+        
+        content_td = adm.select_one('.content')
+        if content_td:
+            content = content_td.get_text(strip=True)
+            
+            callout_div = soup.new_tag('div')
+            callout_div['class'] = 'obsidian-callout'
+            callout_div['data-type'] = adm_type
+            callout_div.string = content
+            
+            adm.replace_with(callout_div)
+    
+    return str(soup)
+
+
 def html_to_markdown(html: str) -> str:
     """Convert HTML to Markdown.
     
@@ -250,6 +319,15 @@ def html_to_markdown(html: str) -> str:
     Returns:
         Markdown content
     """
+    html = convert_admonition_to_callout(html)
+    
+    soup = BeautifulSoup(html, 'html.parser')
+    for callout in soup.select('.obsidian-callout'):
+        callout_type = callout.get('data-type', 'note')
+        callout_text = callout.get_text(strip=True)
+        callout.replace_with(BeautifulSoup(f'\n> [!{callout_type}]\n> {callout_text}\n', 'html.parser'))
+    
+    html = str(soup)
     cleaned = clean_html(html)
     
     markdown = md(
