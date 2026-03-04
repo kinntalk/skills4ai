@@ -80,17 +80,23 @@ class UrlToObsidianConverter:
             if on_status:
                 on_status(f"Capturing: {url}")
             
+            chrome_path = self.config_manager.get('browser.chrome_path')
+            
             extracted = run_capture_sync(
                 url,
                 wait_for_login=wait_for_login,
                 headless=headless,
+                chrome_path=chrome_path,
                 on_status=on_status
             )
             
             if not extracted.get("html"):
                 return False, "Failed to extract page content", None
             
-            result = process_extracted_content(extracted)
+            content_config = self.config_manager.get_content_extraction_config()
+            remove_selectors = content_config.get('remove_selectors')
+            
+            result = process_extracted_content(extracted, remove_selectors)
             
             title = result.get("title", "Untitled")
             markdown = result.get("markdown", "")

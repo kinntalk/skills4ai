@@ -42,7 +42,44 @@ DEFAULT_CONFIG = {
     "credentials": {},
     "browser": {
         "profile": None,
-        "timeout": 30000
+        "timeout": 30000,
+        "chrome_path": None
+    },
+    "content_extraction": {
+        "remove_selectors": [
+            "script",
+            "style",
+            "noscript",
+            "template",
+            "iframe",
+            "svg",
+            "path",
+            "nav",
+            "aside",
+            "footer",
+            "header",
+            "form",
+            ".advertisement",
+            ".ads",
+            ".social-share",
+            ".related-articles",
+            ".comments",
+            ".newsletter",
+            ".cookie-banner",
+            ".cookie-consent",
+            "[role='navigation']",
+            "[aria-label*='cookie' i]",
+            ".copy",
+            ".copy-button",
+            "button.copy",
+            ".btn-copy",
+            "[data-copy]",
+            ".code-actions",
+            ".source-toolbox",
+            ".code-copy-btn",
+            "button.code-copy-btn",
+            "pre button"
+        ]
     }
 }
 
@@ -232,7 +269,9 @@ class ConfigManager:
         Returns:
             Dictionary with username and password, or None
         """
-        credentials = self.get(f'credentials.{domain}')
+        config = self.load()
+        credentials = config.get('credentials', {}).get(domain)
+        
         if not credentials:
             return None
         
@@ -335,6 +374,14 @@ class ConfigManager:
             - naming: Naming template for assets
         """
         return self.get('assets', DEFAULT_CONFIG['assets'])
+
+    def get_content_extraction_config(self) -> dict:
+        """Get content extraction configuration.
+        
+        Returns:
+            Content extraction configuration dictionary
+        """
+        return self.get('content_extraction', DEFAULT_CONFIG.get('content_extraction', {}))
 
 
 def get_config_manager() -> ConfigManager:

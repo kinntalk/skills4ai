@@ -48,7 +48,7 @@ CONTENT_SELECTORS = [
     ".sectionbody",
 ]
 
-REMOVE_SELECTORS = [
+DEFAULT_REMOVE_SELECTORS = [
     "script",
     "style",
     "noscript",
@@ -84,20 +84,29 @@ REMOVE_SELECTORS = [
 ]
 
 
-def clean_html(html: str) -> str:
+def clean_html(html: str, remove_selectors: Optional[list] = None) -> str:
     """Clean HTML by removing unwanted elements.
     
     Args:
         html: Raw HTML content
+        remove_selectors: List of CSS selectors to remove
         
     Returns:
         Cleaned HTML
     """
+    if remove_selectors is None:
+        remove_selectors = DEFAULT_REMOVE_SELECTORS
+
     soup = BeautifulSoup(html, "html.parser")
     
-    for selector in REMOVE_SELECTORS:
+    for selector in remove_selectors:
         for element in soup.select(selector):
             element.decompose()
+    
+    # Remove javascript: links
+    for a in soup.find_all('a', href=True):
+        if a['href'].strip().lower().startswith('javascript:'):
+            del a['href']
     
     return str(soup)
 
@@ -125,15 +134,19 @@ def extract_with_readability(html: str) -> Tuple[Optional[str], str]:
         return None, ""
 
 
-def extract_with_selector(html: str) -> Tuple[Optional[str], str]:
+def extract_with_selector(html: str, remove_selectors: Optional[list] = None) -> Tuple[Optional[str], str]:
     """Extract content using CSS selectors.
     
     Args:
         html: Raw HTML content
+        remove_selectors: List of CSS selectors to remove
         
     Returns:
         Tuple of (title, cleaned_html)
     """
+    if remove_selectors is None:
+        remove_selectors = DEFAULT_REMOVE_SELECTORS
+        
     soup = BeautifulSoup(html, "html.parser")
     
     for selector in CONTENT_SELECTORS:
@@ -144,7 +157,7 @@ def extract_with_selector(html: str) -> Tuple[Optional[str], str]:
             if len(elements) > 1:
                 combined_html = ""
                 for element in elements:
-                    for remove_selector in REMOVE_SELECTORS:
+                    for remove_selector in remove_selectors:
                         for el in element.select(remove_selector):
                             el.decompose()
                     combined_html += str(element)
@@ -156,7 +169,7 @@ def extract_with_selector(html: str) -> Tuple[Optional[str], str]:
                     return title_text, combined_html
             else:
                 element = elements[0]
-                for remove_selector in REMOVE_SELECTORS:
+                for remove_selector in remove_selectors:
                     for el in element.select(remove_selector):
                         el.decompose()
                 
@@ -310,11 +323,12 @@ def convert_admonition_to_callout(html: str) -> str:
     return str(soup)
 
 
-def html_to_markdown(html: str) -> str:
+def html_to_markdown(html: str, remove_selectors: Optional[list] = None) -> str:
     """Convert HTML to Markdown.
     
     Args:
         html: HTML content
+        remove_selectors: List of CSS selectors to remove
         
     Returns:
         Markdown content
@@ -328,7 +342,7 @@ def html_to_markdown(html: str) -> str:
         callout.replace_with(BeautifulSoup(f'\n> [!{callout_type}]\n> {callout_text}\n', 'html.parser'))
     
     html = str(soup)
-    cleaned = clean_html(html)
+    cleaned = clean_html(html, remove_selectors)
     
     markdown = md(
         cleaned,
@@ -359,19 +373,23 @@ def normalize_markdown(markdown: str) -> str:
     return markdown.strip()
 
 
-def extract_content(html: str) -> dict:
+def extract_content(html: str, remove_selectors: Optional[list] = None) -> dict:
     """Extract and convert content from HTML.
     
     Args:
         html: Raw HTML content
+        remove_selectors: List of CSS selectors to remove
         
     Returns:
         Dictionary with title, description, author, published, markdown
     """
+    if remove_selectors is None:
+        remove_selectors = DEFAULT_REMOVE_SELECTORS
+
     title, content_html = extract_with_readability(html)
     
     # Try selector extraction and use it if it returns more content
-    selector_title, selector_content = extract_with_selector(html)
+    selector_title, selector_content = extract_with_selector(html, remove_selectors)
     if selector_content:
         if not content_html or len(selector_content) > len(content_html):
             title = selector_title or title
@@ -381,7 +399,7 @@ def extract_content(html: str) -> dict:
         soup = BeautifulSoup(html, "html.parser")
         body = soup.find("body")
         if body:
-            for selector in REMOVE_SELECTORS:
+            for selector in remove_selectors:
                 for el in body.select(selector):
                     el.decompose()
             content_html = str(body)
@@ -392,11 +410,11 @@ def extract_content(html: str) -> dict:
     description = extract_description(html)
     published = extract_published_time(html)
     
-    markdown = html_to_markdown(content_html) if content_html else ""
+    markdown = html_to_markdown(content_html, remove_selectors) if content_html else ""
     
     if not markdown.strip() and html:
         soup = BeautifulSoup(html, "html.parser")
-        for selector in REMOVE_SELECTORS:
+        for selector in remove_selectors:
             for el in soup.select(selector):
                 el.decompose()
         text = soup.get_text(separator='\n', strip=True)
@@ -412,18 +430,19 @@ def extract_content(html: str) -> dict:
     }
 
 
-def process_extracted_content(extracted: dict) -> dict:
+def process_extracted_content(extracted: dict, remove_selectors: Optional[list] = None) -> dict:
     """Process extracted content from CDP client.
     
     Args:
         extracted: Dictionary from cdp_client.extract_page_content
+        remove_selectors: List of CSS selectors to remove
         
     Returns:
         Dictionary with title, description, author, published, markdown, url
     """
     html = extracted.get("html", "")
     
-    result = extract_content(html)
+    result = extract_content(html, remove_selectors)
     
     if extracted.get("title"):
         result["title"] = extracted["title"]

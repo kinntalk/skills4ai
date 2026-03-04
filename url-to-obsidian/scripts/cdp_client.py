@@ -39,13 +39,19 @@ LOGIN_CHECK_INTERVAL_MS = 1000
 MAX_LOGIN_WAIT_MS = 120000
 
 
-def find_chrome_executable() -> Optional[str]:
+def find_chrome_executable(chrome_path: Optional[str] = None) -> Optional[str]:
     """Find Chrome or Edge executable on the system.
     
+    Args:
+        chrome_path: Optional explicit path to Chrome executable
+        
     Returns:
         Path to Chrome executable or None if not found
     """
     import os
+    
+    if chrome_path and Path(chrome_path).exists():
+        return chrome_path
     
     override = os.environ.get("URL_CHROME_PATH", "").strip()
     if override and Path(override).exists():
@@ -255,16 +261,17 @@ class ChromeBrowser:
             port = s.getsockname()[1]
         return port
     
-    def launch(self, url: str, headless: bool = False) -> None:
+    def launch(self, url: str, headless: bool = False, chrome_path: Optional[str] = None) -> None:
         """Launch Chrome browser.
         
         Args:
             url: Initial URL to open
             headless: Whether to run in headless mode
+            chrome_path: Optional path to Chrome executable
         """
-        chrome = find_chrome_executable()
+        chrome = find_chrome_executable(chrome_path)
         if not chrome:
-            raise Exception("Chrome executable not found. Install Chrome or set URL_CHROME_PATH env.")
+            raise Exception("Chrome executable not found. Install Chrome, set URL_CHROME_PATH env, or configure 'browser.chrome_path'.")
         
         self.profile_dir.mkdir(parents=True, exist_ok=True)
         
@@ -834,6 +841,7 @@ async def capture_page(
     url: str,
     wait_for_login: bool = True,
     headless: bool = False,
+    chrome_path: Optional[str] = None,
     on_status: Optional[Callable[[str], None]] = None
 ) -> dict:
     """Capture a web page with optional login detection.
@@ -842,6 +850,7 @@ async def capture_page(
         url: URL to capture
         wait_for_login: Whether to wait for login if detected
         headless: Whether to run browser in headless mode
+        chrome_path: Optional path to Chrome executable
         on_status: Optional callback for status updates
         
     Returns:
@@ -853,7 +862,7 @@ async def capture_page(
         if on_status:
             on_status(f"Launching browser for: {url}")
         
-        browser.launch(url, headless)
+        browser.launch(url, headless, chrome_path)
         await browser.connect()
         
         _, session_id = await browser.get_page_session()
@@ -904,6 +913,7 @@ def run_capture_sync(
     url: str,
     wait_for_login: bool = True,
     headless: bool = False,
+    chrome_path: Optional[str] = None,
     on_status: Optional[Callable[[str], None]] = None
 ) -> dict:
     """Synchronous wrapper for capture_page.
@@ -912,12 +922,13 @@ def run_capture_sync(
         url: URL to capture
         wait_for_login: Whether to wait for login if detected
         headless: Whether to run browser in headless mode
+        chrome_path: Optional path to Chrome executable
         on_status: Optional callback for status updates
         
     Returns:
         Dictionary with extracted content and metadata
     """
-    return asyncio.run(capture_page(url, wait_for_login, headless, on_status))
+    return asyncio.run(capture_page(url, wait_for_login, headless, chrome_path, on_status))
 
 
 if __name__ == "__main__":

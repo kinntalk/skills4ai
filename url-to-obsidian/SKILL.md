@@ -76,13 +76,41 @@ Configuration is stored at `~/.web2obs/config.json`
     "wikilink": false,
     "naming": "{title}-{timestamp}-{index}"
   },
-  "credentials": {}
+  "credentials": {},
+  "browser": {
+    "profile": null,
+    "timeout": 30000,
+    "chrome_path": null
+  },
+  "content_extraction": {
+    "remove_selectors": [
+      "script", "style", "..."
+    ]
+  }
 }
 ```
 
-## Vault Auto-Detection
+## Dependencies
 
-Skill automatically detects vault path from Obsidian global config:
+Install required Python packages using requirements.txt:
+
+```bash
+pip install -r ${SKILL_DIR}/requirements.txt
+```
+
+Or install manually:
+
+```bash
+pip install websockets requests readability-lxml markdownify beautifulsoup4 cryptography
+```
+
+## Testing
+
+Run unit tests:
+
+```bash
+python ${SKILL_DIR}/run_tests.py
+```
 - Windows: `%APPDATA%\obsidian\obsidian.json`
 - macOS: `~/Library/Application Support/obsidian/obsidian.json`
 - Linux: `~/.config/obsidian/obsidian.json`
