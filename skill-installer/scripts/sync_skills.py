@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """
-Skills Sync - 自动扫描并同步 skills.json
-自动扫描 .trae/skills/ 目录下的所有 skills 并更新 skills.json
+Skills Sync - [DEPRECATED] 自动扫描并同步 skills.json
+
+DEPRECATED: This script is deprecated. Please use skills-registry-sync skill instead:
+    python .trae/skills/skills-registry-sync/scripts/sync_registry.py
+
+The skills-registry-sync skill provides more comprehensive registry synchronization
+including skills.json, skill_map.json, and AGENTS.md.
 """
 
 import sys
@@ -13,6 +18,12 @@ import logging
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+DEPRECATION_WARNING = """
+\033[93m[DEPRECATED] sync_skills.py is deprecated.\033[0m
+Please use skills-registry-sync skill instead:
+    python .trae/skills/skills-registry-sync/scripts/sync_registry.py
+"""
 
 try:
     from messages import *
@@ -461,6 +472,8 @@ def list_skills():
 
 def main():
     """主函数"""
+    print(DEPRECATION_WARNING)
+    
     import argparse
     
     parser = argparse.ArgumentParser(description="Sync skills registry")

@@ -145,7 +145,15 @@ def run_command(cmd, cwd=None, capture_output=False):
         return False
 
 def update_registry(dest_root, skill_name, repo_url, subdir, commit_hash):
-    """Update the skills.json registry file"""
+    """
+    [DEPRECATED] Update the skills.json registry file.
+    
+    This function is deprecated. Registry synchronization is now handled by
+    the skills-registry-sync skill. This function is kept for backward compatibility
+    but should not be called directly.
+    
+    Use: python .trae/skills/skills-registry-sync/scripts/sync_registry.py
+    """
     registry_path = dest_root / 'skills.json'
     registry = {'skills': {}}
     
@@ -188,7 +196,15 @@ def update_registry(dest_root, skill_name, repo_url, subdir, commit_hash):
         print(MSG_REGISTRY_WRITE_ERROR.format(error=e))
 
 def update_skill_map(dest_root, skill_name, skill_path):
-    """Update the skill_map.json file with skill metadata"""
+    """
+    [DEPRECATED] Update the skill_map.json file with skill metadata.
+    
+    This function is deprecated. Registry synchronization is now handled by
+    the skills-registry-sync skill. This function is kept for backward compatibility
+    but should not be called directly.
+    
+    Use: python .trae/skills/skills-registry-sync/scripts/sync_registry.py
+    """
     skill_map_path = dest_root / 'skill_map.json'
     skill_map = {'skills': {}, 'detection_rules': {'priority_order': [], 'exact_match': {}, 'partial_match': {}}}
     
@@ -960,11 +976,10 @@ def install_skill(source, dest_root, run_audit=True, force=False, auto_install_d
                         shutil.rmtree(dest_path)
                         return False
         
-        # Update Registry
-        update_registry(dest_root, skill_name, repo_url, subdir, commit_hash)
-        
-        # Update Skill Map
-        update_skill_map(dest_root, skill_name, dest_path)
+        # Note: Registry synchronization (skills.json, skill_map.json, AGENTS.md)
+        # is handled by skills-registry-sync skill.
+        # Run: python .trae/skills/skills-registry-sync/scripts/sync_registry.py
+        print(MSG_REGISTRY_SYNC_REMINDER)
 
         # Handle Dependencies
         dependencies = parse_skill_dependencies(dest_path)

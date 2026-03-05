@@ -10,6 +10,7 @@ Handles:
 import json
 import os
 import base64
+import platform
 from pathlib import Path
 from typing import Any, Optional
 from datetime import datetime
@@ -22,6 +23,24 @@ try:
     from .vault_detector import detect_vault_path, get_vault_attachment_folder
 except ImportError:
     from vault_detector import detect_vault_path, get_vault_attachment_folder
+
+
+def get_platform_config_dir() -> Path:
+    """Get platform-appropriate configuration directory.
+    
+    Returns:
+        Path to configuration directory
+    """
+    system = platform.system()
+    
+    if system == "Windows":
+        base = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming"))
+    elif system == "Darwin":
+        base = Path.home() / "Library" / "Application Support"
+    else:
+        base = Path.home() / ".config"
+    
+    return base / "url-to-obsidian"
 
 
 DEFAULT_CONFIG = {
@@ -92,10 +111,10 @@ class ConfigManager:
         
         Args:
             config_dir: Directory to store configuration files.
-                       Defaults to ~/.web2obs/
+                       Defaults to platform-appropriate directory.
         """
         if config_dir is None:
-            config_dir = Path.home() / ".web2obs"
+            config_dir = get_platform_config_dir()
         
         self.config_dir = Path(config_dir)
         self.config_file = self.config_dir / "config.json"
@@ -249,7 +268,10 @@ class ConfigManager:
         """
         vault_path = self.get('vault_path')
         if vault_path:
-            return Path(vault_path)
+            path = Path(vault_path)
+            # Only use configured path if it exists
+            if path.exists() and path.is_dir():
+                return path
         return None
     
     def set_vault_path(self, path: str | Path) -> None:
@@ -346,7 +368,7 @@ class ConfigManager:
     def get_vault_path_with_auto_detect(self) -> Optional[Path]:
         """Get Obsidian vault path with auto-detection support.
         
-        If vault_path is manually configured, returns it directly.
+        If vault_path is manually configured and valid, returns it.
         If auto_detect_vault is True, attempts to auto-detect the vault.
         
         Returns:
@@ -354,7 +376,10 @@ class ConfigManager:
         """
         vault_path = self.get('vault_path')
         if vault_path:
-            return Path(vault_path)
+            path = Path(vault_path)
+            # Only use configured path if it exists
+            if path.exists() and path.is_dir():
+                return path
         
         if self.get('auto_detect_vault', True):
             detected_path = detect_vault_path()

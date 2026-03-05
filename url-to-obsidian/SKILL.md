@@ -1,3 +1,8 @@
+---
+name: url-to-obsidian
+description: Convert web pages to Obsidian Flavored Markdown and save to your Obsidian vault. Supports login-required pages, automatic vault detection, and asset downloading.
+---
+
 # URL to Obsidian Markdown Converter
 
 Convert any web page to Obsidian Flavored Markdown (OFM) and save directly to your Obsidian vault.
@@ -31,6 +36,7 @@ Convert any web page to Obsidian Flavored Markdown (OFM) and save directly to yo
 - **Asset Downloading**: Automatically downloads images to vault's attachment folder
 - **Encrypted Credentials**: Securely store login credentials for frequently accessed sites
 - **Pure Python**: No external CLI dependencies (uses CDP directly)
+- **Tabbit Browser Support**: Automatically uses Tabbit browser for `*.tabbitbrowser.com/chat` URLs
 
 ## Quick Start
 
@@ -260,6 +266,27 @@ pip install websockets requests readability-lxml markdownify beautifulsoup4 cryp
 6. **OFM Formatting**: Adds frontmatter, callouts, and tags
 7. **Asset Download**: Downloads images to vault attachment folder
 8. **Save to Vault**: Writes final file to Obsidian vault
+
+## Tabbit Browser Support
+
+When the URL matches `*.tabbitbrowser.com/chat`, the skill automatically uses the Tabbit browser instead of Chrome/Edge.
+
+**Detection Method** (cross-platform, no hardcoded paths):
+1. **Environment Variable**: Set `TABBIT_PATH` to the Tabbit executable path
+2. **System PATH**: Uses `shutil.which()` to find `Tabbit.exe` (Windows) or `tabbit` (Linux/macOS)
+
+**Setup**:
+- **Windows**: Add Tabbit's directory to system PATH, or set `TABBIT_PATH` environment variable
+- **Linux/macOS**: Create symlink to `tabbit` in `/usr/local/bin/`, or set `TABBIT_PATH`
+
+Example:
+```bash
+# Windows PowerShell
+$env:TABBIT_PATH = "C:\Users\YourName\AppData\Local\Tabbit\Application\Tabbit.exe"
+
+# Linux/macOS
+export TABBIT_PATH="/opt/tabbit/tabbit"
+```
 
 ## Troubleshooting
 

@@ -1,6 +1,6 @@
 ---
 name: skill-installer
-description: Install and manage skills from Git repositories into .trae/skills directory. Supports subdirectories, catalog browsing, dependency management, license verification, health checks, version rollback, encoding detection, and encoding conversion.
+description: Install and manage skills from Git repositories into .trae/skills directory. Supports subdirectories, catalog browsing, dependency management, license verification, health checks, version rollback, encoding detection, and encoding conversion. Note: Registry synchronization (skills.json, skill_map.json, AGENTS.md) is handled by skills-registry-sync skill.
 ---
 
 # Skill Installer
@@ -8,6 +8,8 @@ description: Install and manage skills from Git repositories into .trae/skills d
 ## Overview
 
 The `skill-installer` simplifies the process of adding new skills to your project. It fetches skills from Git repositories (like GitHub) and installs them into the standard `.trae/skills/` directory. It also automatically triggers `skill-auditor` to verify the quality of installed skills.
+
+**Note:** For registry synchronization (skills.json, skill_map.json, AGENTS.md), use the `skills-registry-sync` skill after installation.
 
 ## Features
 
@@ -22,6 +24,21 @@ The `skill-installer` simplifies the process of adding new skills to your projec
 - **Version Rollback**: Rollback to previous versions using git history.
 - **Encoding Detection**: Detect file encoding using chardet library for single files or directories.
 - **Encoding Conversion**: Convert files from one encoding to another (e.g., GBK to UTF-8) with auto-detection support.
+
+## Registry Synchronization
+
+**Important:** This skill does NOT automatically update registry files (skills.json, skill_map.json, AGENTS.md).
+
+After installing or uninstalling skills, run the `skills-registry-sync` skill to synchronize all registry files:
+
+```bash
+python .trae/skills/skills-registry-sync/scripts/sync_registry.py
+```
+
+This ensures:
+- `skills.json` is updated with source, version, and health status
+- `skill_map.json` is updated with skill metadata (description, keywords, aliases)
+- `AGENTS.md` is updated with skill documentation
 
 ## Usage
 
@@ -516,11 +533,30 @@ The conversion script provides:
 ## Interaction Rules
 
 > **Important Rule for AI Assistants:**
-> If the user requests to install a skill but **does not explicitly mention** using `skill-installer`, you **MUST** ask for confirmation first.
 >
-> **Example:**
-> User: "Install the weather skill."
-> AI: "Would you like me to use the `skill-installer` to fetch and install that skill?"
+> **When to Use skill-installer:**
+> - If the user's request involves **installing** a skill (e.g., "安装 * skill", "install * skill", "从 GitHub 安装", "克隆并安装"), you **MUST** invoke `skill-installer` **IMMEDIATELY** without asking for confirmation.
+> - If the user's request involves **uninstalling** a skill (e.g., "卸载 * skill", "uninstall * skill", "删除 * skill", "移除 * skill"), you **MUST** invoke `skill-installer` **IMMEDIATELY** without asking for confirmation.
+> - The intent to install or uninstall is sufficient - explicit mention of `skill-installer` is **NOT required**.
+>
+> **When NOT to Use skill-installer:**
+> - If the user's request only involves **finding** or **searching** for skills (e.g., "查找 * skill", "find * skill", "搜索 skill"), use the `find-skills` skill instead.
+>
+> **Examples that REQUIRE skill-installer:**
+> - "安装 find-skills 这个 skill" → Use skill-installer
+> - "安装 find-skills" → Use skill-installer
+> - "install find-skills" → Use skill-installer
+> - "从 GitHub 安装 planning-with-files" → Use skill-installer
+> - "克隆并安装这个 skill" → Use skill-installer
+> - "卸载 find-skills" → Use skill-installer
+> - "uninstall find-skills" → Use skill-installer
+> - "删除 planning-with-files" → Use skill-installer
+> - "移除这个 skill" → Use skill-installer
+>
+> **Examples that DO NOT require skill-installer:**
+> - "查找 pdf skill" → Use find-skills
+> - "find skill for debugging" → Use find-skills
+> - "搜索可用的 skills" → Use find-skills
 
 ## Requirements
 

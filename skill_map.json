@@ -17,13 +17,14 @@
     },
     "skill-creator": {
       "name": "skill-creator",
-      "description": "Guide for creating effective skills that extend Claude's capabilities with specialized knowledge, workflows, or tool integrations. Use when creating new skills, updating existing skills, or asking about skill development best practices.",
+      "description": "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, update or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.",
       "keywords": [
         "skill-creator",
-        "guide",
-        "creating",
-        "effective",
-        "skills"
+        "create",
+        "skills",
+        "modify",
+        "improve",
+        "existing"
       ],
       "aliases": [
         "skill-creator"
@@ -31,13 +32,9 @@
     },
     "skill-installer": {
       "name": "skill-installer",
-      "description": "Install and manage skills from Git repositories into .trae/skills directory. Supports subdirectories, catalog browsing, dependency management, license verification, health checks, version rollback, encoding detection, and encoding conversion.",
+      "description": "",
       "keywords": [
-        "skill-installer",
-        "install",
-        "manage",
-        "skills",
-        "repositories"
+        "skill-installer"
       ],
       "aliases": [
         "skill-installer"
@@ -58,6 +55,30 @@
         "skill-auditor"
       ]
     },
+    "agent-browser": {
+      "name": "agent-browser",
+      "description": "Browser automation CLI for AI agents. Use when the user needs to interact with websites, including navigating pages, filling forms, clicking buttons, taking screenshots, extracting data, testing web apps, or automating any browser task. Triggers include requests to \"open a website\", \"fill out a form\", \"click a button\", \"take a screenshot\", \"scrape data from a page\", \"test this web app\", \"login to a site\", \"automate browser actions\", or any task requiring programmatic web interaction.",
+      "keywords": [
+        "agent-browser",
+        "browser",
+        "automation",
+        "agents",
+        "user"
+      ],
+      "aliases": [
+        "agent-browser"
+      ]
+    },
+    "agentskills": {
+      "name": "agentskills",
+      "description": "",
+      "keywords": [
+        "agentskills"
+      ],
+      "aliases": [
+        "agentskills"
+      ]
+    },
     "async-python-patterns": {
       "name": "async-python-patterns",
       "description": "Master Python asyncio, concurrent programming, and async/await patterns for high-performance applications. Use when building async APIs, concurrent systems, or I/O-bound applications requiring non-blocking operations.",
@@ -73,26 +94,44 @@
         "async-python-patterns"
       ]
     },
-    "baoyu-url-to-markdown": {
-      "name": "baoyu-url-to-markdown",
-      "description": "Fetch any URL and convert to markdown using Chrome CDP. Supports two modes - auto-capture on page load, or wait for user signal (for pages requiring login). Use when user wants to save a webpage as markdown.",
+    "bak-skill-creator": {
+      "name": "bak-skill-creator",
+      "description": "Guide for creating effective skills that extend Claude's capabilities with specialized knowledge, workflows, or tool integrations. Use when creating new skills, updating existing skills, or asking about skill development best practices.",
       "keywords": [
-        "convert",
-        "fetch",
-        "markdown",
-        "using",
-        "chrome",
-        "baoyu url to markdown"
+        "bak-skill-creator",
+        "guide",
+        "creating",
+        "effective",
+        "skills"
       ],
       "aliases": [
-        "baoyu-url-to-markdown"
+        "bak-skill-creator"
+      ]
+    },
+    "brainstorming": {
+      "name": "brainstorming",
+      "description": "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.",
+      "keywords": [
+        "brainstorming",
+        "must",
+        "before",
+        "creative",
+        "work"
+      ],
+      "aliases": [
+        "brainstorming"
       ]
     },
     "browser-use": {
       "name": "browser-use",
-      "description": "",
+      "description": "Skill collection containing multiple sub-skills",
       "keywords": [
-        "browser use"
+        "browser-use",
+        "skill",
+        "collection",
+        "containing",
+        "multiple",
+        "skills"
       ],
       "aliases": [
         "browser-use"
@@ -144,7 +183,7 @@
     },
     "planning-with-files": {
       "name": "planning-with-files",
-      "description": "Implements Manus-style file-based planning for complex tasks. Creates task_plan.md, findings.md, and progress.md. Use for multi-step tasks (3+ steps), research projects, building projects, or tasks spanning many tool calls. Includes automatic session recovery after /clear.",
+      "description": "Implements Manus-style file-based planning to organize and track progress on complex tasks. Creates task_plan.md, findings.md, and progress.md. Use when asked to plan out, break down, or organize a multi-step project, research task, or any work requiring >5 tool calls. Supports automatic session recovery after /clear.",
       "keywords": [
         "planning-with-files",
         "implements",
@@ -254,20 +293,6 @@
       ],
       "aliases": [
         "skills-registry-sync"
-      ]
-    },
-    "sp-brainstorming": {
-      "name": "sp-brainstorming",
-      "description": "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.",
-      "keywords": [
-        "sp-brainstorming",
-        "must",
-        "before",
-        "creative",
-        "work"
-      ],
-      "aliases": [
-        "sp-brainstorming"
       ]
     },
     "sp-dispatching-parallel-agents": {
@@ -445,6 +470,36 @@
       "aliases": [
         "sp-writing-skills"
       ]
+    },
+    "url-to-obsidian": {
+      "name": "url-to-obsidian",
+      "description": "Convert web pages to Obsidian Flavored Markdown and save to your Obsidian vault. Supports login-required pages, automatic vault detection, and asset downloading.",
+      "keywords": [
+        "url-to-obsidian",
+        "convert",
+        "pages",
+        "obsidian",
+        "flavored",
+        "markdown"
+      ],
+      "aliases": [
+        "url-to-obsidian"
+      ]
+    },
+    "web-design-guidelines": {
+      "name": "web-design-guidelines",
+      "description": "Review UI code for Web Interface Guidelines compliance. Use when asked to \"review my UI\", \"check accessibility\", \"audit design\", \"review UX\", or \"check my site against best practices\".",
+      "keywords": [
+        "web-design-guidelines",
+        "review",
+        "code",
+        "interface",
+        "guidelines",
+        "compliance"
+      ],
+      "aliases": [
+        "web-design-guidelines"
+      ]
     }
   },
   "detection_rules": {
@@ -455,8 +510,6 @@
       "skill-auditor",
       "image-generation",
       "pdf-generation",
-      "planning-with-files",
-      "sp-brainstorming",
       "sp-writing-plans",
       "sp-executing-plans",
       "sp-systematic-debugging",
@@ -480,7 +533,13 @@
       "skills-registry-sync",
       "powershell-windows",
       "browser-use",
-      "baoyu-url-to-markdown"
+      "url-to-obsidian",
+      "bak-skill-creator",
+      "agent-browser",
+      "web-design-guidelines",
+      "brainstorming",
+      "agentskills",
+      "planning-with-files"
     ],
     "exact_match": {
       "image generation": "image-generation",

@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """
-Skills Consistency Checker - Check consistency across registry files
+Enhanced Skills Consistency Checker - Check consistency across registry files
 
 This script checks:
 - skills.json vs actual skill directories
 - skill_map.json vs skills.json
 - AGENTS.md vs actual skills
+- Source URL format consistency
+- Health field completeness
+- Data format validation
 """
 
 import sys
@@ -70,6 +73,19 @@ def load_json_file(filepath):
         print_status('FAIL', f"Failed to load {filepath.name}: {e}")
         return None
 
+def validate_source_url(source):
+    """Validate and normalize source URL format"""
+    if source == "local":
+        return True, source
+    
+    if not source.startswith(('http://', 'https://')):
+        return False, f"Invalid source URL format: {source}"
+    
+    if source.endswith('.git'):
+        return True, source
+    
+    return False, f"Source URL missing .git suffix: {source}"
+
 def check_skills_json(installed_skills):
     """Check skills.json consistency"""
     print_status('CHECK', "Checking skills.json...")
@@ -96,14 +112,42 @@ def check_skills_json(installed_skills):
     
     for name, info in data.get('skills', {}).items():
         health = info.get('health', {})
+        
+        if not isinstance(health, dict):
+            issues.append(("invalid", f"'{name}': health field is not a dictionary"))
+            continue
+        
+        if 'is_valid' not in health:
+            issues.append(("invalid", f"'{name}': health field missing 'is_valid' key"))
+        
+        if 'validation_error' not in health:
+            issues.append(("invalid", f"'{name}': health field missing 'validation_error' key"))
+        
+        if 'missing_deps' not in health:
+            issues.append(("invalid", f"'{name}': health field missing 'missing_deps' key"))
+        
+        if 'satisfied_deps' not in health:
+            issues.append(("invalid", f"'{name}': health field missing 'satisfied_deps' key"))
+        
         if not health.get('is_valid', True):
             issues.append(("invalid", f"'{name}': {health.get('validation_error', 'Unknown error')}"))
+        
+        source = info.get('source', '')
+        is_valid, msg = validate_source_url(source)
+        if not is_valid:
+            issues.append(("format", f"'{name}': {msg}"))
+        
+        if 'version' not in info:
+            issues.append(("invalid", f"'{name}': missing 'version' field"))
+        
+        if 'updated_at' not in info:
+            issues.append(("invalid", f"'{name}': missing 'updated_at' field"))
     
     if not issues:
         print_status('PASS', "skills.json is consistent")
     else:
         for severity, msg in issues:
-            status = 'FAIL' if severity in ('critical', 'missing') else 'WARN'
+            status = 'FAIL' if severity in ('critical', 'missing', 'invalid') else 'WARN'
             print_status(status, msg)
     
     return issues
@@ -137,11 +181,24 @@ def check_skill_map(installed_skills):
         if skill not in installed_skills:
             issues.append(("orphan", f"'{skill}' in priority_order but not installed"))
     
+    for name, info in data.get('skills', {}).items():
+        if 'name' not in info:
+            issues.append(("invalid", f"'{name}': missing 'name' field"))
+        
+        if 'description' not in info:
+            issues.append(("invalid", f"'{name}': missing 'description' field"))
+        
+        if 'keywords' not in info:
+            issues.append(("invalid", f"'{name}': missing 'keywords' field"))
+        
+        if 'aliases' not in info:
+            issues.append(("invalid", f"'{name}': missing 'aliases' field"))
+    
     if not issues:
         print_status('PASS', "skill_map.json is consistent")
     else:
         for severity, msg in issues:
-            status = 'FAIL' if severity in ('critical', 'missing') else 'WARN'
+            status = 'FAIL' if severity in ('critical', 'missing', 'invalid') else 'WARN'
             print_status(status, msg)
     
     return issues
@@ -234,6 +291,8 @@ def generate_report(all_issues):
     missing_count = sum(1 for issues in all_issues.values() for s, _ in issues if s == 'missing')
     orphan_count = sum(1 for issues in all_issues.values() for s, _ in issues if s == 'orphan')
     mismatch_count = sum(1 for issues in all_issues.values() for s, _ in issues if s == 'mismatch')
+    invalid_count = sum(1 for issues in all_issues.values() for s, _ in issues if s == 'invalid')
+    format_count = sum(1 for issues in all_issues.values() for s, _ in issues if s == 'format')
     
     print(f"\nTotal issues found: {total_issues}")
     
@@ -245,6 +304,10 @@ def generate_report(all_issues):
         print(f"  Orphan entries: {orphan_count}")
     if mismatch_count:
         print(f"  Mismatches: {mismatch_count}")
+    if invalid_count:
+        print(f"  Invalid data: {invalid_count}")
+    if format_count:
+        print(f"  Format issues: {format_count}")
     
     if total_issues == 0:
         print_status('PASS', "All registry files are consistent!")
@@ -256,7 +319,7 @@ def generate_report(all_issues):
     return total_issues
 
 def main():
-    print_status('INFO', "Starting consistency check...")
+    print_status('INFO', "Starting enhanced consistency check...")
     print()
     
     installed_skills = get_installed_skills()

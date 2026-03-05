@@ -23,14 +23,14 @@ try:
     from .asset_handler import AssetHandler
     from .vault_detector import get_vault_attachment_folder, detect_vault_path
     from .cdp_client import run_capture_sync, capture_page
-    from .html_converter import process_extracted_content
+    from .html_converter import process_extracted_content, validate_url
 except ImportError:
     from config_manager import ConfigManager, get_config_manager
     from ofm_formatter import format_ofm, generate_filename, sanitize_filename
     from asset_handler import AssetHandler
     from vault_detector import get_vault_attachment_folder, detect_vault_path
     from cdp_client import run_capture_sync, capture_page
-    from html_converter import process_extracted_content
+    from html_converter import process_extracted_content, validate_url
 
 
 class UrlToObsidianConverter:
@@ -55,6 +55,7 @@ class UrlToObsidianConverter:
         use_wikilink: bool = False,
         wait_for_login: bool = True,
         headless: bool = False,
+        subfolder: Optional[str] = None,
         on_status: Optional[Callable[[str], None]] = None
     ) -> Tuple[bool, str, Optional[Path]]:
         """Convert a URL to Obsidian Flavored Markdown.
@@ -77,6 +78,9 @@ class UrlToObsidianConverter:
             Tuple of (success, message, output_file_path)
         """
         try:
+            if not validate_url(url):
+                return False, "Invalid or unsafe URL. Please provide a valid public HTTP/HTTPS URL.", None
+            
             if on_status:
                 on_status(f"Capturing: {url}")
             
@@ -95,6 +99,11 @@ class UrlToObsidianConverter:
             
             content_config = self.config_manager.get_content_extraction_config()
             remove_selectors = content_config.get('remove_selectors')
+            
+            # For Tabbit chat pages, don't use remove selectors to preserve all chat content
+            is_tabbit_chat = 'tabbitbrowser.com/chat' in url.lower()
+            if is_tabbit_chat:
+                remove_selectors = None
             
             result = process_extracted_content(extracted, remove_selectors)
             
@@ -124,8 +133,8 @@ class UrlToObsidianConverter:
                 if vault_path is None:
                     return False, "Vault path not configured and auto-detection failed. Run: web2obs config set-vault <path>", None
                 
-                subfolder = self.config_manager.get('output.subfolder', 'web-clippings')
-                output_dir = vault_path / subfolder
+                target_subfolder = subfolder or self.config_manager.get('output.subfolder', 'web-clippings')
+                output_dir = vault_path / target_subfolder
                 output_dir.mkdir(parents=True, exist_ok=True)
                 
                 filename = generate_filename(title or "untitled")
@@ -368,6 +377,7 @@ def convert_url(
     config_manager: Optional[ConfigManager] = None,
     download_assets: Optional[bool] = None,
     use_wikilink: bool = False,
+    subfolder: Optional[str] = None,
     on_status: Optional[Callable[[str], None]] = None
 ) -> Tuple[bool, str, Optional[Path]]:
     """Convert a URL to Obsidian Flavored Markdown.
@@ -395,6 +405,7 @@ def convert_url(
         use_wikilink=use_wikilink,
         wait_for_login=wait,
         headless=False,
+        subfolder=subfolder,
         on_status=on_status
     )
 

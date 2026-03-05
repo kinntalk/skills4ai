@@ -37,7 +37,7 @@ def get_sessions_sorted(project_dir: Path) -> List[Path]:
 def parse_session_messages(session_file: Path) -> List[Dict]:
     """Parse all messages from a session file, preserving order."""
     messages = []
-    with open(session_file, 'r', encoding='utf-8', errors='replace') as f:
+    with open(session_file, 'r') as f:
         for line_num, line in enumerate(f):
             try:
                 data = json.loads(line)
@@ -146,6 +146,9 @@ def main():
     has_planning_files = any(
         Path(project_path, f).exists() for f in PLANNING_FILES
     )
+    if not has_planning_files:
+        # No planning files in this project; skip catchup to avoid noise.
+        return
 
     if not project_dir.exists():
         # No previous sessions, nothing to catch up on
@@ -168,11 +171,12 @@ def main():
     messages = parse_session_messages(target_session)
     last_update_line, last_update_file = find_last_planning_update(messages)
 
-    # Only output if there's unsynced content
+    # No planning updates in the target session; skip catchup output.
     if last_update_line < 0:
-        messages_after = extract_messages_after(messages, len(messages) - 30)
-    else:
-        messages_after = extract_messages_after(messages, last_update_line)
+        return
+
+    # Only output if there's unsynced content
+    messages_after = extract_messages_after(messages, last_update_line)
 
     if not messages_after:
         return
@@ -181,11 +185,8 @@ def main():
     print("\n[planning-with-files] SESSION CATCHUP DETECTED")
     print(f"Previous session: {target_session.stem}")
 
-    if last_update_line >= 0:
-        print(f"Last planning update: {last_update_file} at message #{last_update_line}")
-        print(f"Unsynced messages: {len(messages_after)}")
-    else:
-        print("No planning file updates found in previous session")
+    print(f"Last planning update: {last_update_file} at message #{last_update_line}")
+    print(f"Unsynced messages: {len(messages_after)}")
 
     print("\n--- UNSYNCED CONTEXT ---")
     for msg in messages_after[-15:]:  # Last 15 messages

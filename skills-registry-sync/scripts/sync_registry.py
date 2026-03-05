@@ -98,6 +98,29 @@ def validate_skill_md(skill_path):
     
     return True, None, frontmatter
 
+def validate_source_url(source):
+    """Validate and normalize source URL format"""
+    if source == "local":
+        return True, source
+    
+    if not source.startswith(('http://', 'https://')):
+        return False, f"Invalid source URL format: {source}"
+    
+    if source.endswith('.git'):
+        return True, source
+    
+    return False, f"Source URL missing .git suffix: {source}"
+
+def normalize_source_url(source):
+    """Normalize source URL to ensure consistency"""
+    if source == "local":
+        return source
+    
+    if not source.endswith('.git'):
+        return source + '.git'
+    
+    return source
+
 def scan_skills():
     """Scan all installed skills"""
     skills = {}
@@ -118,6 +141,7 @@ def scan_skills():
                 if skill_name in existing.get('skills', {}):
                     existing_info = existing['skills'][skill_name]
                     source = existing_info.get('source', source)
+                    source = normalize_source_url(source)
                     subdir = existing_info.get('subdir', subdir)
                     version = existing_info.get('version', version)
         except Exception:
@@ -181,8 +205,9 @@ def update_skills_json(skills):
     
     sorted_skills = {}
     for name, info in sorted(skills.items(), key=sort_key):
+        normalized_source = normalize_source_url(info["source"])
         sorted_skills[name] = {
-            "source": info["source"],
+            "source": normalized_source,
             "subdir": info["subdir"],
             "version": info["version"],
             "updated_at": info["updated_at"],

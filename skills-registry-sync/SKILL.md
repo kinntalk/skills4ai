@@ -65,6 +65,29 @@ The sync process reports:
 - Health status updates
 - AGENTS.md section updates
 
+## Interaction Rules
+
+> **Important Rule for AI Assistants:**
+>
+> **When to Invoke skills-registry-sync:**
+> - After successfully **installing** a skill (e.g., "安装 * skill", "install * skill")
+> - After successfully **uninstalling** a skill (e.g., "卸载 * skill", "uninstall * skill")
+> - After successfully **creating** a skill (e.g., "生成 * skill", "创建 * skill", "create * skill")
+> - Always invoke **AFTER** the operation completes successfully, **NOT** before.
+>
+> **When NOT to Invoke skills-registry-sync:**
+> - If the install/uninstall/create operation fails or is cancelled
+> - If the user is only searching or viewing skills (no changes made)
+>
+> **Examples that REQUIRE skills-registry-sync (after completion):**
+> - "安装 find-skills 这个 skill" → After installation completes, invoke skills-registry-sync
+> - "安装 find-skills" → After installation completes, invoke skills-registry-sync
+> - "install find-skills" → After installation completes, invoke skills-registry-sync
+> - "卸载 find-skills" → After uninstallation completes, invoke skills-registry-sync
+> - "uninstall find-skills" → After uninstallation completes, invoke skills-registry-sync
+> - "创建一个新的 skill" → After creation completes, invoke skills-registry-sync
+> - "create my-custom skill" → After creation completes, invoke skills-registry-sync
+
 ## Integration
 
 This skill integrates with:

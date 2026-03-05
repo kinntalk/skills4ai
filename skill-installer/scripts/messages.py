@@ -346,3 +346,14 @@ MSG_LICENSE_COMPATIBLE = f"   {COLOR_GREEN}✓ Compatible{COLOR_RESET}"
 MSG_LICENSE_WARNING = f"   {COLOR_YELLOW}⚠ {{message}}{COLOR_RESET}"
 MSG_LICENSE_INCOMPATIBLE = f"   {COLOR_RED}✗ Incompatible{COLOR_RESET}"
 MSG_LICENSE_CONFIRM_INCOMPATIBLE = "   Install anyway? (y/N): "
+
+# Registry Sync Reminder
+MSG_REGISTRY_SYNC_REMINDER = f"""
+{COLOR_CYAN}{ICON_MEMO} Registry synchronization is handled by skills-registry-sync skill.{COLOR_RESET}
+{COLOR_YELLOW}Run the following command to sync registry files:{COLOR_RESET}
+   python .trae/skills/skills-registry-sync/scripts/sync_registry.py
+{COLOR_YELLOW}This will update:{COLOR_RESET}
+   - skills.json (source, version, health status)
+   - skill_map.json (description, keywords, aliases)
+   - AGENTS.md (skill documentation)
+"""

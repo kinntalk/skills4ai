@@ -6,6 +6,7 @@ for content extraction and markdownify for conversion.
 """
 
 import re
+import ipaddress
 from typing import Optional, Tuple
 from urllib.parse import urlparse
 
@@ -21,11 +22,35 @@ except ImportError:
     print("markdownify not installed. Run: pip install markdownify")
     raise
 
+try:
+    import html2text
+except ImportError:
+    print("html2text not installed. Run: pip install html2text")
+    raise
+
 from bs4 import BeautifulSoup
 
 
 MIN_CONTENT_LENGTH = 120
 GOOD_CONTENT_LENGTH = 900
+
+DANGEROUS_TAGS = [
+    'script', 'object', 'embed', 'applet', 'link',
+    'meta', 'base', 'basefont', 'frame', 'frameset',
+    'iframe', 'noframes', 'noscript', 'portal', 'svg'
+]
+
+DANGEROUS_ATTRS = [
+    'onerror', 'onload', 'onclick', 'onmouseover', 'onmouseout',
+    'onmousedown', 'onmouseup', 'onfocus', 'onblur', 'oninput',
+    'onchange', 'onsubmit', 'onreset', 'onkeydown', 'onkeyup',
+    'onkeypress', 'onanimationstart', 'onanimationend', 'onanimationiteration',
+    'ontransitionend', 'ontouchstart', 'ontouchend', 'ontouchmove', 'ontouchcancel'
+]
+
+DANGEROUS_CSS_PROPS = [
+    'expression', 'behavior', '-moz-binding', 'binding'
+]
 
 CONTENT_SELECTORS = [
     ".dw-doc-content",
@@ -46,6 +71,27 @@ CONTENT_SELECTORS = [
     ".sect1",
     "#preamble",
     ".sectionbody",
+    ".theme-doc-markdown",
+    "article.markdown",
+    ".theme-default-content",
+    ".notion-page-content",
+    ".postArticle-content",
+    ".Post-RichText",
+    ".article_body",
+    "[class*='chat']",
+    "[class*='message']",
+    "[class*='conversation']",
+    "[class*='dialog']",
+    "[class*='thread']",
+    "[class*='messages']",
+    "[data-testid*='chat']",
+    "[data-testid*='message']",
+    "[data-testid*='conversation']",
+    ".markdown-body",
+    ".prose",
+    ".chat-content",
+    ".message-content",
+    ".conversation-content",
 ]
 
 DEFAULT_REMOVE_SELECTORS = [
@@ -84,6 +130,100 @@ DEFAULT_REMOVE_SELECTORS = [
 ]
 
 
+def validate_url(url: str) -> bool:
+    """Validate URL to prevent SSRF attacks.
+    
+    Args:
+        url: URL to validate
+        
+    Returns:
+        True if URL is safe, False otherwise
+    """
+    if not url:
+        return False
+    
+    try:
+        parsed = urlparse(url)
+        
+        if parsed.scheme not in ('http', 'https'):
+            return False
+        
+        hostname = parsed.hostname
+        if not hostname:
+            return False
+        
+        try:
+            ip = ipaddress.ip_address(hostname)
+            if ip.is_private or ip.is_reserved or ip.is_loopback:
+                return False
+        except ValueError:
+            pass
+        
+        private_patterns = ['.local', '.intra', '.corp', '.internal', '.lan']
+        if any(hostname.endswith(p) for p in private_patterns):
+            return False
+        
+        if hostname.startswith('0.') or hostname.startswith('127.'):
+            return False
+        
+        if hostname in ('localhost', 'localhost.localdomain'):
+            return False
+        
+        return True
+    except Exception:
+        return False
+
+
+def sanitize_html(html: str) -> str:
+    """Sanitize HTML to prevent XSS attacks.
+    
+    Args:
+        html: Raw HTML content
+        
+    Returns:
+        Sanitized HTML
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    
+    for tag in soup(DANGEROUS_TAGS):
+        tag.decompose()
+    
+    for el in soup.find_all(True):
+        attrs_to_remove = []
+        for attr in list(el.attrs):
+            if attr.lower().startswith('on') or attr.lower() in DANGEROUS_ATTRS:
+                attrs_to_remove.append(attr)
+        
+        for attr in attrs_to_remove:
+            del el[attr]
+        
+        if el.name == 'a' and el.get('href'):
+            href = el['href'].lower().strip()
+            if href.startswith('javascript:') or href.startswith('data:') or href.startswith('vbscript:'):
+                if el.string:
+                    el.replace_with(el.string)
+                else:
+                    el.unwrap()
+        
+        if el.get('style'):
+            style = el['style'].lower()
+            for dangerous_prop in DANGEROUS_CSS_PROPS:
+                if dangerous_prop in style:
+                    del el['style']
+                    break
+        
+        for attr in ['src', 'href', 'data', 'action']:
+            if el.get(attr):
+                val = el[attr].lower()
+                if 'javascript:' in val or 'data:' in val:
+                    if attr == 'src' and el.name == 'img':
+                        el.unwrap()
+                    else:
+                        del el[attr]
+    
+    return str(soup)
+
+
 def clean_html(html: str, remove_selectors: Optional[list] = None) -> str:
     """Clean HTML by removing unwanted elements.
     
@@ -96,14 +236,15 @@ def clean_html(html: str, remove_selectors: Optional[list] = None) -> str:
     """
     if remove_selectors is None:
         remove_selectors = DEFAULT_REMOVE_SELECTORS
-
+    
     soup = BeautifulSoup(html, "html.parser")
     
     for selector in remove_selectors:
         for element in soup.select(selector):
             element.decompose()
     
-    # Remove javascript: links
+    soup = BeautifulSoup(sanitize_html(str(soup)), "html.parser")
+    
     for a in soup.find_all('a', href=True):
         if a['href'].strip().lower().startswith('javascript:'):
             del a['href']
@@ -323,6 +464,50 @@ def convert_admonition_to_callout(html: str) -> str:
     return str(soup)
 
 
+def html_to_markdown_html2text(html: str) -> str:
+    """Convert HTML to Markdown using html2text.
+    
+    This function is optimized for Tabbit chat pages and provides
+    better conversion quality for complex HTML structures.
+    
+    Args:
+        html: HTML content
+        
+    Returns:
+        Markdown content
+    """
+    h = html2text.HTML2Text()
+    
+    # Configure html2text for better conversion quality
+    h.ignore_links = False  # Preserve links
+    h.ignore_images = False  # Preserve images
+    h.ignore_emphasis = False  # Preserve emphasis
+    h.body_width = 0  # Don't wrap lines
+    h.unicode_snob = True  # Use Unicode characters
+    h.skip_internal_links = False  # Keep all links
+    h.inline_links = True  # Use inline links
+    h.protect_links = True  # Protect links from line wrapping
+    h.wrap_links = False  # Don't wrap links
+    h.pad_tables = True  # Pad tables for better readability
+    h.default_image_alt = ''  # Default alt text for images
+    h.ignore_tables = False  # Convert tables
+    h.ignore_images = False  # Convert images
+    h.images_as_html = False  # Use Markdown image syntax
+    h.images_to_alt = False  # Use alt text for images
+    h.single_line_break = False  # Use two line breaks for paragraphs
+    h.ul_item_mark = '-'  # Use - for unordered lists
+    h.emphasis_mark = '*'  # Use * for emphasis
+    h.strong_mark = '**'  # Use ** for strong
+    
+    # Convert HTML to Markdown
+    markdown = h.handle(html)
+    
+    # Clean up excessive newlines
+    markdown = re.sub(r'\n{3,}', '\n\n', markdown)
+    
+    return markdown.strip()
+
+
 def html_to_markdown(html: str, remove_selectors: Optional[list] = None) -> str:
     """Convert HTML to Markdown.
     
@@ -347,7 +532,7 @@ def html_to_markdown(html: str, remove_selectors: Optional[list] = None) -> str:
     markdown = md(
         cleaned,
         heading_style='ATX',
-        strip=['script', 'style', 'iframe', 'noscript'],
+        strip=['script', 'style', 'iframe', 'noscript', 'link'],
         bullets='-',
         escape_asterisks=False,
         escape_underscores=False,
@@ -373,53 +558,103 @@ def normalize_markdown(markdown: str) -> str:
     return markdown.strip()
 
 
-def extract_content(html: str, remove_selectors: Optional[list] = None) -> dict:
+def format_text_content(text: str) -> str:
+    """Format text content for better readability and structure.
+    
+    Args:
+        text: Raw text content
+        
+    Returns:
+        Formatted markdown content
+    """
+    if not text:
+        return ""
+    
+    # Strip leading/trailing whitespace and normalize multiple newlines
+    text = text.strip()
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    
+    return text
+
+
+def extract_content(html: str, remove_selectors: Optional[list] = None, text_content: Optional[str] = None, is_tabbit_chat: bool = False) -> dict:
     """Extract and convert content from HTML.
     
     Args:
         html: Raw HTML content
         remove_selectors: List of CSS selectors to remove
+        text_content: Optional pre-extracted text content
+        is_tabbit_chat: Whether this is a Tabbit chat page
         
     Returns:
         Dictionary with title, description, author, published, markdown
     """
-    if remove_selectors is None:
-        remove_selectors = DEFAULT_REMOVE_SELECTORS
-
-    title, content_html = extract_with_readability(html)
+    soup = BeautifulSoup(html, "html.parser")
     
-    # Try selector extraction and use it if it returns more content
-    selector_title, selector_content = extract_with_selector(html, remove_selectors)
-    if selector_content:
-        if not content_html or len(selector_content) > len(content_html):
-            title = selector_title or title
-            content_html = selector_content
+    # Extract title
+    title = extract_title(html)
     
-    if not content_html:
-        soup = BeautifulSoup(html, "html.parser")
-        body = soup.find("body")
-        if body:
-            for selector in remove_selectors:
-                for el in body.select(selector):
-                    el.decompose()
-            content_html = str(body)
-    
-    if not title:
-        title = extract_title(html)
-    
+    # Extract description
     description = extract_description(html)
+    
+    # Extract published time
     published = extract_published_time(html)
     
-    markdown = html_to_markdown(content_html, remove_selectors) if content_html else ""
+    markdown = ""
     
-    if not markdown.strip() and html:
-        soup = BeautifulSoup(html, "html.parser")
-        for selector in remove_selectors:
-            for el in soup.select(selector):
-                el.decompose()
-        text = soup.get_text(separator='\n', strip=True)
-        text = re.sub(r'\n{3,}', '\n\n', text)
-        markdown = text
+    if is_tabbit_chat:
+        # For Tabbit chat pages, use html2text for better conversion quality
+        print(f"[DEBUG] Converting HTML to Markdown using html2text for Tabbit chat page")
+        markdown = html_to_markdown_html2text(html)
+        print(f"[DEBUG] Markdown length: {len(markdown)}")
+        
+        # If html2text didn't produce good results, fall back to text_content
+        if len(markdown.strip()) < 100 and text_content and len(text_content.strip()) > 50:
+            print(f"[DEBUG] html2text produced insufficient content, falling back to text_content")
+            markdown = format_text_content(text_content)
+            print(f"[DEBUG] Formatted markdown length: {len(markdown)}")
+    else:
+        # For other pages, use the original logic
+        if remove_selectors is None:
+            remove_selectors = DEFAULT_REMOVE_SELECTORS
+        
+        # Strategy 1: Try selector-based extraction (preserves structure)
+        for selector in CONTENT_SELECTORS:
+            elements = soup.select(selector)
+            if elements:
+                combined_html = ""
+                for element in elements:
+                    for remove_selector in remove_selectors:
+                        for el in element.select(remove_selector):
+                            el.decompose()
+                    combined_html += str(element)
+                
+                # Use html_to_markdown to preserve structure
+                markdown = html_to_markdown(combined_html, remove_selectors)
+                
+                # Check if we got meaningful content
+                if markdown and len(markdown.strip()) >= 100:
+                    break
+        
+        # Strategy 2: If selector extraction failed, try Readability
+        if not markdown or len(markdown.strip()) < 100:
+            readability_title, content_html = extract_with_readability(html)
+            if content_html:
+                markdown = html_to_markdown(content_html, remove_selectors)
+        
+        # Strategy 3: If still no content, extract from body
+        if not markdown or len(markdown.strip()) < 100:
+            body = soup.find("body")
+            if body:
+                for selector in remove_selectors:
+                    for el in body.select(selector):
+                        el.decompose()
+                
+                main_content = body.find("main") or body.find("[role='main']")
+                if main_content:
+                    markdown = html_to_markdown(str(main_content), remove_selectors)
+                else:
+                    markdown = html_to_markdown(str(body), remove_selectors)
     
     return {
         "title": title or "Untitled",
@@ -442,7 +677,21 @@ def process_extracted_content(extracted: dict, remove_selectors: Optional[list] 
     """
     html = extracted.get("html", "")
     
-    result = extract_content(html, remove_selectors)
+    # For Tabbit chat pages, don't use remove selectors to preserve all chat content
+    is_tabbit_chat = extracted.get("is_tabbit_chat", False)
+    if is_tabbit_chat:
+        remove_selectors = None
+    
+    # Get text content if available
+    text_content = extracted.get("text_content")
+    
+    # Debug: print extracted content info
+    print(f"[DEBUG] is_tabbit_chat: {is_tabbit_chat}")
+    print(f"[DEBUG] text_content length: {len(text_content) if text_content else 0}")
+    if text_content:
+        print(f"[DEBUG] text_content first 200 chars: {text_content[:200]}")
+    
+    result = extract_content(html, remove_selectors, text_content, is_tabbit_chat)
     
     if extracted.get("title"):
         result["title"] = extracted["title"]

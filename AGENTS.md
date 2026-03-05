@@ -1,8 +1,8 @@
 # AGENTS.md - Skills Registry
 
 **Version:** 1.0.0  
-**Last Updated:** 2026-02-28  
-**Total Skills:** 30
+**Last Updated:** 2026-03-05  
+**Total Skills:** 36
 
 ---
 
@@ -18,11 +18,11 @@ This document provides a comprehensive registry of all available skills in the `
 |-----------|--------|---------|
 | Core Skills | 5 | image-generation, pdf-generation, planning-with-files, powershell-windows, proxy-manager |
 | Tool Skills | 4 | skill-auditor, skill-creator, skill-installer, skills-registry-sync |
-| Superpowers | 14 | sp-brainstorming, sp-dispatching-parallel-agents, sp-executing-plans, sp-finishing-a-development-branch, sp-receiving-code-review, sp-requesting-code-review, sp-subagent-driven-development, sp-systematic-debugging, sp-test-driven-development, sp-using-git-worktrees, sp-using-superpowers, sp-verification-before-completion, sp-writing-plans, sp-writing-skills |
+| Superpowers | 13 | sp-dispatching-parallel-agents, sp-executing-plans, sp-finishing-a-development-branch, sp-receiving-code-review, sp-requesting-code-review, sp-subagent-driven-development, sp-systematic-debugging, sp-test-driven-development, sp-using-git-worktrees, sp-using-superpowers, sp-verification-before-completion, sp-writing-plans, sp-writing-skills |
 | Python Skills | 5 | async-python-patterns, python-design-patterns, python-packaging, python-performance-optimization, python-testing-patterns |
-| Obsidian Skills | 1 | obsidian-skills |
-| Other Skills | 1 | find-skills |
-| **Total** | **30** | |
+| Obsidian Skills | 2 | obsidian-skills, url-to-obsidian |
+| Other Skills | 7 | agent-browser, agentskills, bak-skill-creator, brainstorming, browser-use, find-skills, web-design-guidelines |
+| **Total** | **36** | |
 
 ---
 
@@ -46,7 +46,7 @@ This document provides a comprehensive registry of all available skills in the `
 
 ### planning-with-files
 
-**Description:** Implements Manus-style file-based planning for complex tasks. Creates task_plan.md, findings.md, and progress.md. Use for multi-step tasks (3+ steps), research projects, building projects, or tasks spanning many tool calls. Includes automatic session recovery after /clear.
+**Description:** Implements Manus-style file-based planning to organize and track progress on complex tasks. Creates task_plan.md, findings.md, and progress.md. Use when asked to plan out, break down, or organize a multi-step project, research task, or any work requiring >5 tool calls. Supports automatic session recovery after /clear.
 
 **Path:** `planning-with-files/`
 
@@ -80,7 +80,7 @@ This document provides a comprehensive registry of all available skills in the `
 
 ### skill-creator
 
-**Description:** Guide for creating effective skills that extend Claude's capabilities with specialized knowledge, workflows, or tool integrations. Use when creating new skills, updating existing skills, or asking about skill development best practices.
+**Description:** Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, update or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.
 
 **Path:** `skill-creator/`
 
@@ -88,7 +88,7 @@ This document provides a comprehensive registry of all available skills in the `
 
 ### skill-installer
 
-**Description:** Install and manage skills from Git repositories into .trae/skills directory. Supports subdirectories, catalog browsing, dependency management, license verification, health checks, version rollback, encoding detection, and encoding conversion.
+**Description:** No description available
 
 **Path:** `skill-installer/`
 
@@ -103,14 +103,6 @@ This document provides a comprehensive registry of all available skills in the `
 ---
 
 ## Superpowers
-
-### sp-brainstorming
-
-**Description:** You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.
-
-**Path:** `sp-brainstorming/`
-
----
 
 ### sp-dispatching-parallel-agents
 
@@ -268,13 +260,69 @@ This document provides a comprehensive registry of all available skills in the `
 
 ---
 
+### url-to-obsidian
+
+**Description:** Convert web pages to Obsidian Flavored Markdown and save to your Obsidian vault. Supports login-required pages, automatic vault detection, and asset downloading.
+
+**Path:** `url-to-obsidian/`
+
+---
+
 ## Other Skills
+
+### agent-browser
+
+**Description:** Browser automation CLI for AI agents. Use when the user needs to interact with websites, including navigating pages, filling forms, clicking buttons, taking screenshots, extracting data, testing web apps, or automating any browser task. Triggers include requests to "open a website", "fill out a form", "click a button", "take a screenshot", "scrape data from a page", "test this web app", "login to a site", "automate browser actions", or any task requiring programmatic web interaction.
+
+**Path:** `agent-browser/`
+
+---
+
+### agentskills
+
+**Description:** No description available
+
+**Path:** `agentskills/`
+
+---
+
+### bak-skill-creator
+
+**Description:** Guide for creating effective skills that extend Claude's capabilities with specialized knowledge, workflows, or tool integrations. Use when creating new skills, updating existing skills, or asking about skill development best practices.
+
+**Path:** `bak-skill-creator/`
+
+---
+
+### brainstorming
+
+**Description:** You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.
+
+**Path:** `brainstorming/`
+
+---
+
+### browser-use
+
+**Description:** Skill collection containing multiple sub-skills
+
+**Path:** `browser-use/`
+
+---
 
 ### find-skills
 
 **Description:** Helps users discover and install agent skills when they ask questions like "how do I do X", "find a skill for X", "is there a skill that can...", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.
 
 **Path:** `find-skills/`
+
+---
+
+### web-design-guidelines
+
+**Description:** Review UI code for Web Interface Guidelines compliance. Use when asked to "review my UI", "check accessibility", "audit design", "review UX", or "check my site against best practices".
+
+**Path:** `web-design-guidelines/`
 
 ---
 
@@ -285,13 +333,13 @@ This document provides a comprehensive registry of all available skills in the `
 
 | Category | Count | Percentage |
 |----------|--------|------------|
-| Core Skills | 5 | 16.7% |
-| Tool Skills | 4 | 13.3% |
-| Superpowers | 14 | 46.7% |
-| Python Skills | 5 | 16.7% |
-| Obsidian Skills | 1 | 3.3% |
-| Other Skills | 1 | 3.3% |
-| **Total** | **30** | **100%** |
+| Core Skills | 5 | 13.9% |
+| Tool Skills | 4 | 11.1% |
+| Superpowers | 13 | 36.1% |
+| Python Skills | 5 | 13.9% |
+| Obsidian Skills | 2 | 5.6% |
+| Other Skills | 7 | 19.4% |
+| **Total** | **36** | **100%** |
 
 ---
 

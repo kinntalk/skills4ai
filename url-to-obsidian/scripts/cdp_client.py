@@ -38,17 +38,71 @@ SCROLL_MAX_STEPS = 8
 LOGIN_CHECK_INTERVAL_MS = 1000
 MAX_LOGIN_WAIT_MS = 120000
 
+TABBIT_DEFAULT_DEBUG_PORT = 9222
 
-def find_chrome_executable(chrome_path: Optional[str] = None) -> Optional[str]:
-    """Find Chrome or Edge executable on the system.
+
+def find_tabbit_executable() -> Optional[str]:
+    """Find Tabbit browser executable on the system.
+    
+    Search priority:
+    1. TABBIT_PATH environment variable
+    2. System PATH via shutil.which() (cross-platform)
+    
+    Returns:
+        Path to Tabbit executable or None if not found
+    """
+    import os
+    import shutil
+    
+    env_path = os.environ.get("TABBIT_PATH", "").strip()
+    if env_path and Path(env_path).exists():
+        return env_path
+    
+    system = platform.system()
+    if system == "Windows":
+        return shutil.which("Tabbit.exe")
+    else:
+        return shutil.which("tabbit") or shutil.which("Tabbit")
+
+
+def is_tabbit_chat_url(url: str) -> bool:
+    """Check if URL is a Tabbit chat URL that should use Tabbit browser.
+    
+    Args:
+        url: URL to check
+        
+    Returns:
+        True if URL matches *.tabbitbrowser.com/chat pattern
+    """
+    try:
+        parsed = urlparse(url)
+        host = parsed.netloc.lower()
+        path = parsed.path.lower()
+        
+        if host.endswith("tabbitbrowser.com") and "/chat" in path:
+            return True
+    except Exception:
+        pass
+    
+    return False
+
+
+def find_chrome_executable(chrome_path: Optional[str] = None, prefer_tabbit: bool = False) -> Optional[str]:
+    """Find Chrome or compatible browser executable on the system.
     
     Args:
         chrome_path: Optional explicit path to Chrome executable
+        prefer_tabbit: If True, prefer Tabbit browser for tabbitbrowser.com/chat URLs
         
     Returns:
-        Path to Chrome executable or None if not found
+        Path to browser executable or None if not found
     """
     import os
+    
+    if prefer_tabbit:
+        tabbit_path = find_tabbit_executable()
+        if tabbit_path:
+            return tabbit_path
     
     if chrome_path and Path(chrome_path).exists():
         return chrome_path
@@ -66,6 +120,10 @@ def find_chrome_executable(chrome_path: Optional[str] = None) -> Optional[str]:
             r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
             r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
             r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+            r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe",
+            os.environ.get("LOCALAPPDATA", "") + r"\BraveSoftware\Brave-Browser\Application\brave.exe",
+            r"C:\Program Files\Mozilla Firefox\firefox.exe",
+            r"C:\Program Files (x86)\Mozilla Firefox\firefox.exe",
         ]
     elif system == "Darwin":
         candidates = [
@@ -74,6 +132,8 @@ def find_chrome_executable(chrome_path: Optional[str] = None) -> Optional[str]:
             "/Applications/Google Chrome Beta.app/Contents/MacOS/Google Chrome Beta",
             "/Applications/Chromium.app/Contents/MacOS/Chromium",
             "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+            "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+            "/Applications/Firefox.app/Contents/MacOS/firefox",
         ]
     else:
         candidates = [
@@ -83,11 +143,20 @@ def find_chrome_executable(chrome_path: Optional[str] = None) -> Optional[str]:
             "/usr/bin/chromium-browser",
             "/snap/bin/chromium",
             "/usr/bin/microsoft-edge",
+            "/usr/bin/brave-browser",
+            "/usr/bin/firefox",
         ]
     
     for path in candidates:
-        if Path(path).exists():
-            return path
+        expanded = os.path.expanduser(os.path.expandvars(path))
+        if Path(expanded).exists():
+            return expanded
+    
+    import shutil
+    for browser in ["brave", "firefox", "msedge"]:
+        found = shutil.which(browser)
+        if found:
+            return found
     
     return None
 
@@ -269,16 +338,29 @@ class ChromeBrowser:
             headless: Whether to run in headless mode
             chrome_path: Optional path to Chrome executable
         """
-        chrome = find_chrome_executable(chrome_path)
+        import os
+        
+        self.use_tabbit = is_tabbit_chat_url(url)
+        chrome = find_chrome_executable(chrome_path, prefer_tabbit=self.use_tabbit)
         if not chrome:
             raise Exception("Chrome executable not found. Install Chrome, set URL_CHROME_PATH env, or configure 'browser.chrome_path'.")
         
-        self.profile_dir.mkdir(parents=True, exist_ok=True)
+        if self.use_tabbit:
+            self.port = self._get_free_port()
+            self._connected_to_existing = False
+            
+            tabbit_profile = self.profile_dir.parent / "tabbit-profile"
+            tabbit_profile.mkdir(parents=True, exist_ok=True)
+            profile_to_use = tabbit_profile
+        else:
+            self._connected_to_existing = False
+            self.profile_dir.mkdir(parents=True, exist_ok=True)
+            profile_to_use = self.profile_dir
         
         args = [
             chrome,
             f"--remote-debugging-port={self.port}",
-            f"--user-data-dir={self.profile_dir}",
+            f"--user-data-dir={profile_to_use}",
             "--no-first-run",
             "--no-default-browser-check",
             "--disable-popup-blocking",
@@ -331,6 +413,12 @@ class ChromeBrowser:
             
             await asyncio.sleep(0.2)
         
+        if getattr(self, 'use_tabbit', False):
+            raise TimeoutError(
+                "Tabbit browser debug port not ready. "
+                "Please close any running Tabbit browser instances and try again. "
+                "The browser needs exclusive access to the user data directory."
+            )
         raise TimeoutError("Chrome debug port not ready")
     
     async def get_page_session(self) -> Tuple[str, str]:
@@ -432,9 +520,11 @@ class ChromeBrowser:
         if not self.cdp:
             return
         
+        await asyncio.sleep(1)
+        
         last_height = await self.evaluate_script(session_id, "document.body.scrollHeight")
         
-        for _ in range(steps):
+        for i in range(steps):
             await self.evaluate_script(session_id, "window.scrollTo(0, document.body.scrollHeight)")
             await asyncio.sleep(wait_ms / 1000)
             
@@ -442,8 +532,6 @@ class ChromeBrowser:
             if new_height == last_height:
                 break
             last_height = new_height
-        
-        await self.evaluate_script(session_id, "window.scrollTo(0, 0)")
     
     async def evaluate_script(self, session_id: str, script: str, timeout_ms: int = 30000) -> Any:
         """Evaluate JavaScript in the page.
@@ -493,14 +581,15 @@ class ChromeBrowser:
     async def close(self) -> None:
         """Close the browser and cleanup."""
         if self.cdp:
-            try:
-                await self.cdp.send("Browser.close", {}, timeout_ms=5000)
-            except Exception:
-                pass
+            if not getattr(self, '_connected_to_existing', False):
+                try:
+                    await self.cdp.send("Browser.close", {}, timeout_ms=5000)
+                except Exception:
+                    pass
             await self.cdp.close()
             self.cdp = None
         
-        if self.process:
+        if self.process and not getattr(self, '_connected_to_existing', False):
             try:
                 self.process.terminate()
                 self.process.wait(timeout=5)
@@ -539,14 +628,14 @@ CONTENT_INDICATORS = [
 
 
 async def detect_login_page(session_id: str, browser: ChromeBrowser) -> bool:
-    """Detect if the current page is a login page.
+    """Detect if the current page is a login page or shows "not logged in" state.
     
     Args:
         session_id: Target session ID
         browser: Chrome browser instance
         
     Returns:
-        True if login page is detected
+        True if login page or "not logged in" state is detected
     """
     script = """
     (function() {
@@ -573,6 +662,23 @@ async def detect_login_page(session_id: str, browser: ChromeBrowser) -> bool:
         const loginTextIndicators = ['账号登录', '短信登录', '账号密码', '下次自动登录', '忘记密码', '登录账号', '用户名', 'username', 'password'];
         for (const indicator of loginTextIndicators) {
             if (bodyText.includes(indicator.toLowerCase())) return true;
+        }
+        
+        const notLoggedInIndicators = ['您当前未登录', '当前未登录', '未登录', '请先登录', '请登录后查看', '需要登录后', 'not logged in'];
+        const visibleText = document.body ? document.body.innerText : '';
+        const lowerVisibleText = visibleText.toLowerCase();
+        for (const indicator of notLoggedInIndicators) {
+            if (lowerVisibleText.includes(indicator.toLowerCase())) {
+                return true;
+            }
+        }
+        
+        const loginPromptElements = document.querySelectorAll("[class*='login'], [class*='signin'], [class*='auth'], [id*='login'], [id*='signin']");
+        for (const el of loginPromptElements) {
+            const text = el.innerText.toLowerCase();
+            for (const indicator of notLoggedInIndicators) {
+                if (text.includes(indicator.toLowerCase())) return true;
+            }
         }
         
         return false;
@@ -625,6 +731,13 @@ async def detect_login_success(session_id: str, browser: ChromeBrowser, original
             }
         }
         
+        const notLoggedInIndicators = ['您当前未登录', '当前未登录', '未登录', '请先登录', '请登录后查看', '需要登录后', 'not logged in'];
+        for (const indicator of notLoggedInIndicators) {
+            if (bodyText.includes(indicator.toLowerCase())) {
+                return false;
+            }
+        }
+        
         return false;
     })()
     """
@@ -661,13 +774,22 @@ async def wait_for_login_completion(
     max_wait = max_wait_ms / 1000
     interval = check_interval_ms / 1000
     
+    consecutive_success_count = 0
+    required_success_count = 3
+    
     while time.time() - start_time < max_wait:
         try:
-            success = await detect_login_success(session_id, browser, original_url)
-            if success:
-                if on_status:
-                    on_status("Login detected as successful")
-                return True
+            is_login_page = await detect_login_page(session_id, browser)
+            
+            if not is_login_page:
+                consecutive_success_count += 1
+                if consecutive_success_count >= required_success_count:
+                    if on_status:
+                        on_status("Login detected as successful")
+                    return True
+            else:
+                consecutive_success_count = 0
+                
         except Exception:
             pass
         
@@ -679,9 +801,10 @@ async def wait_for_login_completion(
     return False
 
 
-CONTENT_EXTRACTION_SCRIPT = """
+CONTENT_EXTRACTION_SCRIPT = r"""
 (function() {
     const baseUrl = document.baseURI || location.href;
+    const isTabbitChat = window.location.href.includes('tabbitbrowser.com/chat');
     
     function toAbsolute(url) {
         if (!url) return url;
@@ -811,13 +934,30 @@ CONTENT_EXTRACTION_SCRIPT = """
         getMeta(["article:published_time", "datePublished", "publishdate", "date"]) ||
         (typeof jsonLd.published === "string" ? jsonLd.published : undefined);
     
+    // For Tabbit chat pages, extract all text content directly
+    let textContent = "";
+    if (isTabbitChat) {
+        // Get all text from body
+        const body = document.body;
+        if (body) {
+            // Remove script and style elements
+            const scriptsAndStyles = body.querySelectorAll('script, style, noscript');
+            scriptsAndStyles.forEach(el => el.remove());
+            
+            // Get all text content
+            textContent = body.innerText || body.textContent || "";
+        }
+    }
+    
     return {
         title,
         description,
         author,
         published,
         html: document.documentElement.outerHTML,
-        url: window.location.href
+        url: window.location.href,
+        is_tabbit_chat: isTabbitChat,
+        text_content: textContent
     };
 })()
 """
@@ -867,12 +1007,23 @@ async def capture_page(
         
         _, session_id = await browser.get_page_session()
         
+        if getattr(browser, '_connected_to_existing', False):
+            if on_status:
+                on_status("Connected to existing Tabbit instance, navigating to URL...")
+            await browser.evaluate_script(session_id, f"window.location.href = '{url}'")
+            await asyncio.sleep(2)
+        
         if on_status:
             on_status("Waiting for page to load...")
         
-        await browser.wait_for_page_load(session_id, 15000)
+        await browser.wait_for_page_load(session_id, 30000)
         await browser.wait_for_network_idle(session_id)
-        await asyncio.sleep(POST_LOAD_DELAY_MS / 1000)
+        await asyncio.sleep(3)
+        
+        if on_status:
+            on_status("Waiting for dynamic content to load...")
+        
+        await asyncio.sleep(5)
         
         is_login_page = await detect_login_page(session_id, browser)
         
@@ -889,14 +1040,30 @@ async def capture_page(
             )
             
             if login_success:
+                if on_status:
+                    on_status("Reconnecting after login...")
+                await asyncio.sleep(2)
+                _, session_id = await browser.get_page_session()
+                await browser.wait_for_page_load(session_id, 15000)
                 await browser.wait_for_network_idle(session_id)
-                await asyncio.sleep(POST_LOAD_DELAY_MS / 1000)
+                await asyncio.sleep(3)
+                if on_status:
+                    on_status("Waiting for content after login...")
+                await asyncio.sleep(5)
         
         if on_status:
             on_status("Scrolling to trigger lazy-loaded content...")
         
-        await browser.auto_scroll(session_id)
-        await asyncio.sleep(POST_LOAD_DELAY_MS / 1000)
+        await browser.auto_scroll(session_id, steps=15, wait_ms=800)
+        await asyncio.sleep(2)
+        
+        # Reconnect to get a new session ID after scrolling
+        _, session_id = await browser.get_page_session()
+        
+        if on_status:
+            on_status("Waiting for final content to load...")
+        
+        await asyncio.sleep(3)
         
         if on_status:
             on_status("Extracting page content...")

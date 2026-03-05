@@ -37,10 +37,14 @@ def cmd_convert(args, config: ConfigManager) -> int:
     if args.output:
         output_path = Path(args.output)
         if not output_path.is_absolute():
-            vault_path = config.get_vault_path()
+            vault_path = config.get_vault_path_with_auto_detect()
             if vault_path:
                 subfolder = args.subfolder or config.get('output.subfolder', 'web-clippings')
                 output_path = vault_path / subfolder / output_path
+            else:
+                print("Error: Could not determine valid Obsidian vault path for relative output.")
+                print("Please configure a valid vault path using: web2obs config set-vault <path>")
+                return 1
     
     tags = None
     if args.tags:
@@ -62,6 +66,7 @@ def cmd_convert(args, config: ConfigManager) -> int:
         config_manager=config,
         download_assets=download_assets,
         use_wikilink=use_wikilink,
+        subfolder=args.subfolder,
         on_status=print_status
     )
     
@@ -95,7 +100,7 @@ def cmd_format(args, config: ConfigManager) -> int:
     elif args.in_place:
         output_path = input_path
     else:
-        vault_path = config.get_vault_path()
+        vault_path = config.get_vault_path_with_auto_detect()
         if vault_path:
             subfolder = config.get('output.subfolder', 'web-clippings')
             output_dir = vault_path / subfolder
@@ -105,7 +110,7 @@ def cmd_format(args, config: ConfigManager) -> int:
             filename = generate_filename(title)
             output_path = output_dir / filename
         else:
-            print("Error: No output path specified and vault path not configured")
+            print("Error: No output path specified and vault path not configured (or invalid)")
             return 1
     
     tags = None

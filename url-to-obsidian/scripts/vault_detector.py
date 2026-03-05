@@ -1,5 +1,6 @@
 import json
 import platform
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -8,7 +9,11 @@ def get_obsidian_config_path() -> Path:
     system = platform.system()
 
     if system == "Windows":
-        config_path = Path.home() / "AppData" / "Roaming" / "obsidian" / "obsidian.json"
+        app_data = os.environ.get("APPDATA")
+        if app_data:
+            config_path = Path(app_data) / "obsidian" / "obsidian.json"
+        else:
+            config_path = Path.home() / "AppData" / "Roaming" / "obsidian" / "obsidian.json"
     elif system == "Darwin":
         config_path = Path.home() / "Library" / "Application Support" / "obsidian" / "obsidian.json"
     else:
@@ -19,6 +24,13 @@ def get_obsidian_config_path() -> Path:
 
 def read_obsidian_config() -> dict:
     config_path = get_obsidian_config_path()
+
+    if not config_path.exists():
+        # Fallback for Windows if APPDATA is weird
+        if platform.system() == "Windows":
+             fallback = Path.home() / "AppData" / "Roaming" / "obsidian" / "obsidian.json"
+             if fallback.exists():
+                 config_path = fallback
 
     if not config_path.exists():
         raise FileNotFoundError(f"Obsidian config file not found: {config_path}")
@@ -32,7 +44,7 @@ def read_obsidian_config() -> dict:
 def detect_vault_path() -> Optional[Path]:
     try:
         config = read_obsidian_config()
-    except (FileNotFoundError, json.JSONDecodeError):
+    except (FileNotFoundError, json.JSONDecodeError, IOError):
         return None
 
     vaults = config.get("vaults", {})
@@ -40,14 +52,7 @@ def detect_vault_path() -> Optional[Path]:
     if not vaults:
         return None
 
-    if len(vaults) == 1:
-        vault_id = list(vaults.keys())[0]
-        vault_info = vaults[vault_id]
-        vault_path = vault_info.get("path")
-        if vault_path:
-            return Path(vault_path)
-        return None
-
+    # Priority 1: Currently open vault
     open_vaults = [
         (vault_id, vault_info)
         for vault_id, vault_info in vaults.items()
@@ -57,18 +62,24 @@ def detect_vault_path() -> Optional[Path]:
     if open_vaults:
         selected_vault = open_vaults[0]
     else:
+        # Priority 2: Most recently used vault
         sorted_vaults = sorted(
             vaults.items(),
             key=lambda x: x[1].get("ts", 0),
             reverse=True
         )
+        if not sorted_vaults:
+            return None
         selected_vault = sorted_vaults[0]
 
     vault_info = selected_vault[1]
-    vault_path = vault_info.get("path")
+    vault_path_str = vault_info.get("path")
 
-    if vault_path:
-        return Path(vault_path)
+    if vault_path_str:
+        vault_path = Path(vault_path_str)
+        if vault_path.exists() and vault_path.is_dir():
+             return vault_path
+    
     return None
 
 
