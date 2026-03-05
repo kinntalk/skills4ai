@@ -207,29 +207,59 @@ def check_updates():
 
 import shutil
 import time
+import stat
+import os
 
-def safe_rmtree(path, retries=5, delay=0.5):
+def safe_rmtree(path, retries=3, delay=0.5):
     """
-    Safely remove a directory tree with retries for Windows file locking issues.
+    Safely remove a directory tree with retries and permission handling for Windows.
+    
+    Handles:
+    - Windows file locking issues (retries with delay)
+    - Read-only files (common in .git/objects/pack/)
+    - Permission denied errors
+    
+    Args:
+        path: Path to directory to remove
+        retries: Number of retry attempts (default 3)
+        delay: Delay between retries in seconds (default 0.5)
+    
+    Returns:
+        True if successfully removed, False otherwise
     """
     path = Path(path)
     if not path.exists():
         return True
-        
-    for i in range(retries):
+    
+    def on_rm_error(func, p, exc_info):
+        """Error handler for shutil.rmtree - fixes permissions and retries."""
         try:
-            shutil.rmtree(path)
-            return True
+            os.chmod(p, stat.S_IWRITE | stat.S_IREAD)
+            func(p)
+        except Exception:
+            pass
+    
+    for attempt in range(retries):
+        try:
+            shutil.rmtree(path, onerror=on_rm_error)
+            if not path.exists():
+                return True
         except Exception as e:
-            if i < retries - 1:
+            if attempt < retries - 1:
                 time.sleep(delay)
             else:
                 print(MSG_DELETE_LOCKED.format(path=path))
+                logger.error(f"Failed to remove {path} after {retries} attempts: {e}")
                 return False
-    return False
+    
+    return not path.exists()
 
 def uninstall_skill(name, auto_confirm=True):
-    """Uninstall a skill by removing its directory and updating registries.
+    """Uninstall a skill by removing its directory.
+    
+    Note: This function only removes the skill directory.
+    Registry synchronization (skills.json, skill_map.json, AGENTS.md) 
+    should be handled by skills-registry-sync skill after uninstallation.
     
     Args:
         name: Name of the skill to uninstall
@@ -249,18 +279,8 @@ def uninstall_skill(name, auto_confirm=True):
     print(f"Removing skill directory: {skill_path}")
     if safe_rmtree(skill_path):
         print(f"Successfully removed directory: {skill_path}")
-        
-        # Run sync to update registries
-        print("Syncing registries...")
-        try:
-            # Import sync_registry from sync_skills.py
-            # Assuming sync_skills.py is in the same directory
-            from sync_skills import sync_registry
-            sync_registry()
-        except ImportError:
-            print("Warning: Could not import sync_registry. Please run 'python sync_skills.py' manually.")
-            
         print(f"Skill '{name}' uninstalled successfully.")
+        print(f"Note: Run skills-registry-sync to update registry files.")
     else:
         print(f"Failed to remove skill directory: {skill_path}")
 

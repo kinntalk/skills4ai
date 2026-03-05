@@ -122,8 +122,16 @@ def normalize_source_url(source):
     return source
 
 def scan_skills():
-    """Scan all installed skills"""
+    """Scan all installed skills - only includes skills with existing directories"""
     skills = {}
+    
+    existing_registry = {}
+    try:
+        if REGISTRY_FILE.exists():
+            content = REGISTRY_FILE.read_text(encoding='utf-8')
+            existing_registry = json.loads(content).get('skills', {})
+    except Exception:
+        pass
     
     for skill_dir in SKILLS_DIR.iterdir():
         if not skill_dir.is_dir() or skill_dir.name.startswith('.'):
@@ -134,18 +142,12 @@ def scan_skills():
         source = "local"
         subdir = ""
         
-        try:
-            if REGISTRY_FILE.exists():
-                content = REGISTRY_FILE.read_text(encoding='utf-8')
-                existing = json.loads(content)
-                if skill_name in existing.get('skills', {}):
-                    existing_info = existing['skills'][skill_name]
-                    source = existing_info.get('source', source)
-                    source = normalize_source_url(source)
-                    subdir = existing_info.get('subdir', subdir)
-                    version = existing_info.get('version', version)
-        except Exception:
-            pass
+        if skill_name in existing_registry:
+            existing_info = existing_registry[skill_name]
+            source = existing_info.get('source', source)
+            source = normalize_source_url(source)
+            subdir = existing_info.get('subdir', subdir)
+            version = existing_info.get('version', version)
         
         try:
             git_dir = skill_dir / '.git'

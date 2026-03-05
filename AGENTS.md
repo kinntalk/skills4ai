@@ -2,7 +2,7 @@
 
 **Version:** 1.0.0  
 **Last Updated:** 2026-03-05  
-**Total Skills:** 36
+**Total Skills:** 20
 
 ---
 
@@ -18,11 +18,10 @@ This document provides a comprehensive registry of all available skills in the `
 |-----------|--------|---------|
 | Core Skills | 5 | image-generation, pdf-generation, planning-with-files, powershell-windows, proxy-manager |
 | Tool Skills | 4 | skill-auditor, skill-creator, skill-installer, skills-registry-sync |
-| Superpowers | 13 | sp-dispatching-parallel-agents, sp-executing-plans, sp-finishing-a-development-branch, sp-receiving-code-review, sp-requesting-code-review, sp-subagent-driven-development, sp-systematic-debugging, sp-test-driven-development, sp-using-git-worktrees, sp-using-superpowers, sp-verification-before-completion, sp-writing-plans, sp-writing-skills |
 | Python Skills | 5 | async-python-patterns, python-design-patterns, python-packaging, python-performance-optimization, python-testing-patterns |
-| Obsidian Skills | 2 | obsidian-skills, url-to-obsidian |
-| Other Skills | 7 | agent-browser, agentskills, bak-skill-creator, brainstorming, browser-use, find-skills, web-design-guidelines |
-| **Total** | **36** | |
+| Obsidian Skills | 1 | url-to-obsidian |
+| Other Skills | 5 | agent-browser, agentskills, brainstorming, find-skills, web-design-guidelines |
+| **Total** | **20** | |
 
 ---
 
@@ -88,7 +87,7 @@ This document provides a comprehensive registry of all available skills in the `
 
 ### skill-installer
 
-**Description:** No description available
+**Description:** Install and manage skills from Git repositories into .trae/skills directory. Supports subdirectories, catalog browsing, dependency management, license verification, health checks, version rollback, encoding detection, and encoding conversion. Note: Registry synchronization (skills.json, skill_map.json, AGENTS.md) is handled by skills-registry-sync skill.
 
 **Path:** `skill-installer/`
 
@@ -99,112 +98,6 @@ This document provides a comprehensive registry of all available skills in the `
 **Description:** Automatically check, update, and maintain consistency of skills registry files (skills.json, skill_map.json, AGENTS.md). Use when skills are installed/uninstalled, when registry files need synchronization, or for periodic maintenance to ensure all registration information is accurate and up-to-date.
 
 **Path:** `skills-registry-sync/`
-
----
-
-## Superpowers
-
-### sp-dispatching-parallel-agents
-
-**Description:** Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies
-
-**Path:** `sp-dispatching-parallel-agents/`
-
----
-
-### sp-executing-plans
-
-**Description:** Use when you have a written implementation plan to execute in a separate session with review checkpoints
-
-**Path:** `sp-executing-plans/`
-
----
-
-### sp-finishing-a-development-branch
-
-**Description:** Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup
-
-**Path:** `sp-finishing-a-development-branch/`
-
----
-
-### sp-receiving-code-review
-
-**Description:** Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation
-
-**Path:** `sp-receiving-code-review/`
-
----
-
-### sp-requesting-code-review
-
-**Description:** Use when completing tasks, implementing major features, or before merging to verify work meets requirements
-
-**Path:** `sp-requesting-code-review/`
-
----
-
-### sp-subagent-driven-development
-
-**Description:** Use when executing implementation plans with independent tasks in the current session
-
-**Path:** `sp-subagent-driven-development/`
-
----
-
-### sp-systematic-debugging
-
-**Description:** Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes
-
-**Path:** `sp-systematic-debugging/`
-
----
-
-### sp-test-driven-development
-
-**Description:** Use when implementing any feature or bugfix, before writing implementation code
-
-**Path:** `sp-test-driven-development/`
-
----
-
-### sp-using-git-worktrees
-
-**Description:** Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification
-
-**Path:** `sp-using-git-worktrees/`
-
----
-
-### sp-using-superpowers
-
-**Description:** Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions
-
-**Path:** `sp-using-superpowers/`
-
----
-
-### sp-verification-before-completion
-
-**Description:** Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always
-
-**Path:** `sp-verification-before-completion/`
-
----
-
-### sp-writing-plans
-
-**Description:** Use when you have a spec or requirements for a multi-step task, before touching code
-
-**Path:** `sp-writing-plans/`
-
----
-
-### sp-writing-skills
-
-**Description:** Use when creating new skills, editing existing skills, or verifying skills work before deployment
-
-**Path:** `sp-writing-skills/`
 
 ---
 
@@ -252,14 +145,6 @@ This document provides a comprehensive registry of all available skills in the `
 
 ## Obsidian Skills
 
-### obsidian-skills
-
-**Description:** Skill collection containing multiple sub-skills
-
-**Path:** `obsidian-skills/`
-
----
-
 ### url-to-obsidian
 
 **Description:** Convert web pages to Obsidian Flavored Markdown and save to your Obsidian vault. Supports login-required pages, automatic vault detection, and asset downloading.
@@ -286,27 +171,11 @@ This document provides a comprehensive registry of all available skills in the `
 
 ---
 
-### bak-skill-creator
-
-**Description:** Guide for creating effective skills that extend Claude's capabilities with specialized knowledge, workflows, or tool integrations. Use when creating new skills, updating existing skills, or asking about skill development best practices.
-
-**Path:** `bak-skill-creator/`
-
----
-
 ### brainstorming
 
 **Description:** You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.
 
 **Path:** `brainstorming/`
-
----
-
-### browser-use
-
-**Description:** Skill collection containing multiple sub-skills
-
-**Path:** `browser-use/`
 
 ---
 
@@ -333,13 +202,12 @@ This document provides a comprehensive registry of all available skills in the `
 
 | Category | Count | Percentage |
 |----------|--------|------------|
-| Core Skills | 5 | 13.9% |
-| Tool Skills | 4 | 11.1% |
-| Superpowers | 13 | 36.1% |
-| Python Skills | 5 | 13.9% |
-| Obsidian Skills | 2 | 5.6% |
-| Other Skills | 7 | 19.4% |
-| **Total** | **36** | **100%** |
+| Core Skills | 5 | 25.0% |
+| Tool Skills | 4 | 20.0% |
+| Python Skills | 5 | 25.0% |
+| Obsidian Skills | 1 | 5.0% |
+| Other Skills | 5 | 25.0% |
+| **Total** | **20** | **100%** |
 
 ---
 

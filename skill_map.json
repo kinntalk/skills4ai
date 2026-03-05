@@ -32,9 +32,13 @@
     },
     "skill-installer": {
       "name": "skill-installer",
-      "description": "",
+      "description": "Install and manage skills from Git repositories into .trae/skills directory. Supports subdirectories, catalog browsing, dependency management, license verification, health checks, version rollback, encoding detection, and encoding conversion. Note: Registry synchronization (skills.json, skill_map.json, AGENTS.md) is handled by skills-registry-sync skill.",
       "keywords": [
-        "skill-installer"
+        "skill-installer",
+        "install",
+        "manage",
+        "skills",
+        "repositories"
       ],
       "aliases": [
         "skill-installer"
@@ -94,20 +98,6 @@
         "async-python-patterns"
       ]
     },
-    "bak-skill-creator": {
-      "name": "bak-skill-creator",
-      "description": "Guide for creating effective skills that extend Claude's capabilities with specialized knowledge, workflows, or tool integrations. Use when creating new skills, updating existing skills, or asking about skill development best practices.",
-      "keywords": [
-        "bak-skill-creator",
-        "guide",
-        "creating",
-        "effective",
-        "skills"
-      ],
-      "aliases": [
-        "bak-skill-creator"
-      ]
-    },
     "brainstorming": {
       "name": "brainstorming",
       "description": "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.",
@@ -120,21 +110,6 @@
       ],
       "aliases": [
         "brainstorming"
-      ]
-    },
-    "browser-use": {
-      "name": "browser-use",
-      "description": "Skill collection containing multiple sub-skills",
-      "keywords": [
-        "browser-use",
-        "skill",
-        "collection",
-        "containing",
-        "multiple",
-        "skills"
-      ],
-      "aliases": [
-        "browser-use"
       ]
     },
     "image-generation": {
@@ -150,21 +125,6 @@
       ],
       "aliases": [
         "image-generation"
-      ]
-    },
-    "obsidian-skills": {
-      "name": "obsidian-skills",
-      "description": "Skill collection containing multiple sub-skills",
-      "keywords": [
-        "obsidian-skills",
-        "skill",
-        "collection",
-        "containing",
-        "multiple",
-        "skills"
-      ],
-      "aliases": [
-        "obsidian-skills"
       ]
     },
     "pdf-generation": {
@@ -194,21 +154,6 @@
       ],
       "aliases": [
         "planning-with-files"
-      ]
-    },
-    "powershell-windows": {
-      "name": "powershell-windows",
-      "description": "PowerShell Windows patterns. Critical pitfalls, operator syntax, error handling.",
-      "keywords": [
-        "powershell-windows",
-        "powershell",
-        "windows",
-        "patterns",
-        "critical",
-        "pitfalls"
-      ],
-      "aliases": [
-        "powershell-windows"
       ]
     },
     "proxy-manager": {
@@ -295,182 +240,6 @@
         "skills-registry-sync"
       ]
     },
-    "sp-dispatching-parallel-agents": {
-      "name": "sp-dispatching-parallel-agents",
-      "description": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies",
-      "keywords": [
-        "sp-dispatching-parallel-agents",
-        "facing",
-        "independent",
-        "tasks"
-      ],
-      "aliases": [
-        "sp-dispatching-parallel-agents"
-      ]
-    },
-    "sp-executing-plans": {
-      "name": "sp-executing-plans",
-      "description": "Use when you have a written implementation plan to execute in a separate session with review checkpoints",
-      "keywords": [
-        "sp-executing-plans",
-        "written",
-        "implementation",
-        "plan"
-      ],
-      "aliases": [
-        "sp-executing-plans"
-      ]
-    },
-    "sp-finishing-a-development-branch": {
-      "name": "sp-finishing-a-development-branch",
-      "description": "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup",
-      "keywords": [
-        "sp-finishing-a-development-branch",
-        "implementation",
-        "complete",
-        "tests",
-        "pass"
-      ],
-      "aliases": [
-        "sp-finishing-a-development-branch"
-      ]
-    },
-    "sp-receiving-code-review": {
-      "name": "sp-receiving-code-review",
-      "description": "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation",
-      "keywords": [
-        "sp-receiving-code-review",
-        "receiving",
-        "code",
-        "review",
-        "feedback"
-      ],
-      "aliases": [
-        "sp-receiving-code-review"
-      ]
-    },
-    "sp-requesting-code-review": {
-      "name": "sp-requesting-code-review",
-      "description": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements",
-      "keywords": [
-        "sp-requesting-code-review",
-        "completing",
-        "tasks",
-        "implementing",
-        "major"
-      ],
-      "aliases": [
-        "sp-requesting-code-review"
-      ]
-    },
-    "sp-subagent-driven-development": {
-      "name": "sp-subagent-driven-development",
-      "description": "Use when executing implementation plans with independent tasks in the current session",
-      "keywords": [
-        "sp-subagent-driven-development",
-        "executing",
-        "implementation",
-        "plans"
-      ],
-      "aliases": [
-        "sp-subagent-driven-development"
-      ]
-    },
-    "sp-systematic-debugging": {
-      "name": "sp-systematic-debugging",
-      "description": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
-      "keywords": [
-        "sp-systematic-debugging",
-        "encountering",
-        "test",
-        "failure",
-        "unexpected"
-      ],
-      "aliases": [
-        "sp-systematic-debugging"
-      ]
-    },
-    "sp-test-driven-development": {
-      "name": "sp-test-driven-development",
-      "description": "Use when implementing any feature or bugfix, before writing implementation code",
-      "keywords": [
-        "sp-test-driven-development",
-        "implementing",
-        "feature",
-        "bugfix",
-        "before"
-      ],
-      "aliases": [
-        "sp-test-driven-development"
-      ]
-    },
-    "sp-using-git-worktrees": {
-      "name": "sp-using-git-worktrees",
-      "description": "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification",
-      "keywords": [
-        "sp-using-git-worktrees",
-        "starting",
-        "feature",
-        "work"
-      ],
-      "aliases": [
-        "sp-using-git-worktrees"
-      ]
-    },
-    "sp-using-superpowers": {
-      "name": "sp-using-superpowers",
-      "description": "Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions",
-      "keywords": [
-        "sp-using-superpowers",
-        "starting",
-        "conversation",
-        "establishes",
-        "find"
-      ],
-      "aliases": [
-        "sp-using-superpowers"
-      ]
-    },
-    "sp-verification-before-completion": {
-      "name": "sp-verification-before-completion",
-      "description": "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always",
-      "keywords": [
-        "sp-verification-before-completion",
-        "claim",
-        "work",
-        "complete"
-      ],
-      "aliases": [
-        "sp-verification-before-completion"
-      ]
-    },
-    "sp-writing-plans": {
-      "name": "sp-writing-plans",
-      "description": "Use when you have a spec or requirements for a multi-step task, before touching code",
-      "keywords": [
-        "sp-writing-plans",
-        "spec",
-        "requirements",
-        "multi"
-      ],
-      "aliases": [
-        "sp-writing-plans"
-      ]
-    },
-    "sp-writing-skills": {
-      "name": "sp-writing-skills",
-      "description": "Use when creating new skills, editing existing skills, or verifying skills work before deployment",
-      "keywords": [
-        "sp-writing-skills",
-        "creating",
-        "skills",
-        "editing",
-        "existing"
-      ],
-      "aliases": [
-        "sp-writing-skills"
-      ]
-    },
     "url-to-obsidian": {
       "name": "url-to-obsidian",
       "description": "Convert web pages to Obsidian Flavored Markdown and save to your Obsidian vault. Supports login-required pages, automatic vault detection, and asset downloading.",
@@ -500,6 +269,21 @@
       "aliases": [
         "web-design-guidelines"
       ]
+    },
+    "powershell-windows": {
+      "name": "powershell-windows",
+      "description": "PowerShell Windows patterns. Critical pitfalls, operator syntax, error handling.",
+      "keywords": [
+        "powershell-windows",
+        "powershell",
+        "windows",
+        "patterns",
+        "critical",
+        "pitfalls"
+      ],
+      "aliases": [
+        "powershell-windows"
+      ]
     }
   },
   "detection_rules": {
@@ -510,20 +294,6 @@
       "skill-auditor",
       "image-generation",
       "pdf-generation",
-      "sp-writing-plans",
-      "sp-executing-plans",
-      "sp-systematic-debugging",
-      "sp-test-driven-development",
-      "sp-subagent-driven-development",
-      "sp-dispatching-parallel-agents",
-      "sp-finishing-a-development-branch",
-      "sp-receiving-code-review",
-      "sp-requesting-code-review",
-      "sp-using-superpowers",
-      "sp-verification-before-completion",
-      "sp-using-git-worktrees",
-      "sp-writing-skills",
-      "obsidian-skills",
       "python-performance-optimization",
       "python-testing-patterns",
       "async-python-patterns",
@@ -531,15 +301,13 @@
       "python-design-patterns",
       "proxy-manager",
       "skills-registry-sync",
-      "powershell-windows",
-      "browser-use",
       "url-to-obsidian",
-      "bak-skill-creator",
       "agent-browser",
       "web-design-guidelines",
       "brainstorming",
       "agentskills",
-      "planning-with-files"
+      "planning-with-files",
+      "powershell-windows"
     ],
     "exact_match": {
       "image generation": "image-generation",
