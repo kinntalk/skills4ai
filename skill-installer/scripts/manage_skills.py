@@ -279,8 +279,7 @@ def uninstall_skill(name, auto_confirm=True):
     print(f"Removing skill directory: {skill_path}")
     if safe_rmtree(skill_path):
         print(f"Successfully removed directory: {skill_path}")
-        print(f"Skill '{name}' uninstalled successfully.")
-        print(f"Note: Run skills-registry-sync to update registry files.")
+        print(MSG_REGISTRY_SYNC_REQUIRED_UNINSTALL)
     else:
         print(f"Failed to remove skill directory: {skill_path}")
 

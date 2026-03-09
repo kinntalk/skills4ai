@@ -8,6 +8,7 @@ import socket
 import ipaddress
 import re
 import sys
+import subprocess
 from urllib.parse import urlparse
 from typing import Optional, List, Tuple
 
@@ -153,6 +154,7 @@ def is_local_address(host: str) -> bool:
 def can_direct_connect(url: str, timeout: float = 2.0) -> Tuple[bool, str]:
     """
     测试是否可以直接连接到目标 URL（不使用代理）
+    使用 HTTP HEAD 请求检测，比单纯的 TCP 连接更准确
     
     Args:
         url: 目标 URL
@@ -174,6 +176,47 @@ def can_direct_connect(url: str, timeout: float = 2.0) -> Tuple[bool, str]:
             port = 80
     
     try:
+        import urllib.request
+        test_url = f"{parsed.scheme}://{parsed.netloc}" if parsed.netloc else url
+        
+        request = urllib.request.Request(test_url, method='HEAD')
+        request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
+        request.add_header('Accept', '*/*')
+        
+        old_proxy = {}
+        for key in ['http_proxy', 'https_proxy', 'HTTP_PROXY', 'HTTPS_PROXY']:
+            if key in os.environ:
+                old_proxy[key] = os.environ[key]
+                del os.environ[key]
+        
+        try:
+            response = urllib.request.urlopen(request, timeout=timeout)
+            return True, f"HTTP {response.status}"
+        finally:
+            for key, value in old_proxy.items():
+                os.environ[key] = value
+                
+    except urllib.error.HTTPError as e:
+        return True, f"HTTP {e.code} (server responded)"
+    except urllib.error.URLError as e:
+        return False, f"URL Error: {e.reason}"
+    except Exception as e:
+        return False, f"Connection error: {e}"
+
+
+def is_proxy_server_available(host: str = '127.0.0.1', port: int = 10808, timeout: float = 1.0) -> Tuple[bool, str]:
+    """
+    检测代理服务器是否可用（端口是否有服务监听）
+    
+    Args:
+        host: 代理服务器地址
+        port: 代理服务器端口
+        timeout: 连接超时时间（秒）
+    
+    Returns:
+        (是否可用, 错误信息)
+    """
+    try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
         result = sock.connect_ex((host, port))
@@ -182,13 +225,13 @@ def can_direct_connect(url: str, timeout: float = 2.0) -> Tuple[bool, str]:
         if result == 0:
             return True, ""
         else:
-            return False, f"Connection refused (code: {result})"
+            return False, f"Proxy server not listening on {host}:{port}"
     except socket.timeout:
-        return False, "Connection timeout"
+        return False, f"Connection timeout to proxy server {host}:{port}"
     except socket.gaierror as e:
-        return False, f"DNS resolution failed: {e}"
+        return False, f"DNS resolution failed for proxy server: {e}"
     except OSError as e:
-        return False, f"Connection error: {e}"
+        return False, f"Connection error to proxy server: {e}"
 
 
 def should_use_proxy(url: str, proxy_config: dict, timeout: float = 2.0) -> Tuple[bool, str]:
@@ -227,6 +270,16 @@ def should_use_proxy(url: str, proxy_config: dict, timeout: float = 2.0) -> Tupl
                     return False, f"Matched NO_PROXY pattern: {pattern}"
             elif host == pattern:
                 return False, f"Matched NO_PROXY: {pattern}"
+    
+    proxy_host = proxy_config.get('host', '127.0.0.1')
+    proxy_port = proxy_config.get('port', 10808)
+    proxy_available, proxy_error = is_proxy_server_available(proxy_host, proxy_port)
+    
+    if not proxy_available:
+        can_connect, error = can_direct_connect(url, timeout)
+        if can_connect:
+            return False, f"Proxy unavailable ({proxy_error}), direct connection available"
+        return False, f"Proxy unavailable ({proxy_error}), direct connection also failed: {error}"
     
     can_connect, error = can_direct_connect(url, timeout)
     if can_connect:
@@ -269,6 +322,96 @@ def get_proxy_for_url(url: str, proxy_config: dict) -> Optional[dict]:
     }
 
 
+def get_windows_proxy_status() -> dict:
+    """
+    获取 Windows 系统代理状态
+    
+    Returns:
+        {'enabled': bool, 'server': str, 'override': str}
+    """
+    try:
+        result = subprocess.run(
+            ['powershell', '-Command', 
+             "Get-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings' | Select-Object ProxyEnable, ProxyServer, ProxyOverride | ConvertTo-Json"],
+            capture_output=True, text=True, timeout=5
+        )
+        if result.returncode == 0:
+            import json
+            data = json.loads(result.stdout)
+            return {
+                'enabled': bool(data.get('ProxyEnable', 0)),
+                'server': data.get('ProxyServer', ''),
+                'override': data.get('ProxyOverride', '')
+            }
+    except Exception as e:
+        pass
+    return {'enabled': False, 'server': '', 'override': ''}
+
+
+def get_git_proxy_status() -> dict:
+    """
+    获取 Git 全局代理配置
+    
+    Returns:
+        {'http_proxy': str, 'https_proxy': str}
+    """
+    result = {'http_proxy': None, 'https_proxy': None}
+    try:
+        r = subprocess.run(['git', 'config', '--global', '--get', 'http.proxy'], 
+                          capture_output=True, text=True, timeout=5)
+        if r.returncode == 0:
+            result['http_proxy'] = r.stdout.strip()
+    except Exception:
+        pass
+    
+    try:
+        r = subprocess.run(['git', 'config', '--global', '--get', 'https.proxy'], 
+                          capture_output=True, text=True, timeout=5)
+        if r.returncode == 0:
+            result['https_proxy'] = r.stdout.strip()
+    except Exception:
+        pass
+    
+    return result
+
+
+def clear_windows_proxy() -> bool:
+    """
+    清除 Windows 系统代理设置
+    
+    Returns:
+        是否成功
+    """
+    try:
+        subprocess.run(
+            ['powershell', '-Command', 
+             "Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings' -Name ProxyEnable -Value 0"],
+            check=True, timeout=10
+        )
+        return True
+    except Exception as e:
+        print(f"清除 Windows 系统代理失败: {e}")
+        return False
+
+
+def clear_git_proxy() -> bool:
+    """
+    清除 Git 全局代理配置
+    
+    Returns:
+        是否成功
+    """
+    try:
+        subprocess.run(['git', 'config', '--global', '--unset', 'http.proxy'], 
+                      capture_output=True, timeout=5)
+        subprocess.run(['git', 'config', '--global', '--unset', 'https.proxy'], 
+                      capture_output=True, timeout=5)
+        return True
+    except Exception as e:
+        print(f"清除 Git 代理配置失败: {e}")
+        return False
+
+
 if __name__ == '__main__':
     print("智能代理工具模块")
     print("=" * 50)
@@ -279,6 +422,20 @@ if __name__ == '__main__':
     
     print("\n自动生成的 NO_PROXY:")
     print(f"  {get_auto_no_proxy()}")
+    
+    print("\n代理服务器状态检测:")
+    available, error = is_proxy_server_available('127.0.0.1', 10808)
+    print(f"  127.0.0.1:10808: {'可用' if available else f'不可用 ({error})'}")
+    
+    print("\nWindows 系统代理状态:")
+    win_proxy = get_windows_proxy_status()
+    print(f"  启用: {win_proxy['enabled']}")
+    print(f"  服务器: {win_proxy['server']}")
+    
+    print("\nGit 全局代理状态:")
+    git_proxy = get_git_proxy_status()
+    print(f"  HTTP: {git_proxy['http_proxy']}")
+    print(f"  HTTPS: {git_proxy['https_proxy']}")
     
     print("\n测试地址检测:")
     test_hosts = [

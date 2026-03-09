@@ -39,9 +39,6 @@ MSG_FORCE_OVERWRITE = f"{COLOR_YELLOW}Force mode enabled. Overwriting...{COLOR_R
 MSG_OVERWRITE_PROMPT = "Overwrite? (y/N): "
 MSG_INSTALL_ABORTED = "Installation aborted."
 MSG_INSTALLED_SUCCESS = f"{COLOR_GREEN}{ICON_SUCCESS} Installed '{{name}}' to {{path}}{COLOR_RESET}"
-MSG_REGISTRY_UPDATED = f"{ICON_MEMO} Updated skills registry at {{path}}"
-MSG_REGISTRY_WRITE_ERROR = f"{COLOR_RED}Error writing to skills.json: {{error}}{COLOR_RESET}"
-MSG_REGISTRY_READ_ERROR = f"{COLOR_YELLOW}Warning: Could not read existing skills.json: {{error}}. Creating new one.{COLOR_RESET}"
 MSG_AUDIT_RUNNING = f"\n{ICON_SEARCH} Running skill-auditor..."
 MSG_AUDIT_FAILED = f"{COLOR_YELLOW}Warning: Audit failed: {{error}}{COLOR_RESET}"
 MSG_AUDIT_SKIPPED = f"{COLOR_YELLOW}Warning: skill-auditor not found. Skipping audit.{COLOR_RESET}"
@@ -347,13 +344,36 @@ MSG_LICENSE_WARNING = f"   {COLOR_YELLOW}⚠ {{message}}{COLOR_RESET}"
 MSG_LICENSE_INCOMPATIBLE = f"   {COLOR_RED}✗ Incompatible{COLOR_RESET}"
 MSG_LICENSE_CONFIRM_INCOMPATIBLE = "   Install anyway? (y/N): "
 
-# Registry Sync Reminder
-MSG_REGISTRY_SYNC_REMINDER = f"""
-{COLOR_CYAN}{ICON_MEMO} Registry synchronization is handled by skills-registry-sync skill.{COLOR_RESET}
-{COLOR_YELLOW}Run the following command to sync registry files:{COLOR_RESET}
-   python .trae/skills/skills-registry-sync/scripts/sync_registry.py
-{COLOR_YELLOW}This will update:{COLOR_RESET}
+# Registry Sync Reminder for Installation
+MSG_REGISTRY_SYNC_REQUIRED = f"""
+{COLOR_GREEN}{ICON_SUCCESS} Installation completed successfully.{COLOR_RESET}
+
+{COLOR_CYAN}╔════════════════════════════════════════════════════════════════╗{COLOR_RESET}
+{COLOR_CYAN}║  [REQUIRED ACTION] Invoke skills-registry-sync skill NOW      ║{COLOR_RESET}
+{COLOR_CYAN}╚════════════════════════════════════════════════════════════════╝{COLOR_RESET}
+
+{COLOR_YELLOW}AI Assistant: You MUST invoke the 'skills-registry-sync' skill using the Skill tool.{COLOR_RESET}
+{COLOR_YELLOW}Do NOT run scripts directly. Use: Skill tool with name='skills-registry-sync'{COLOR_RESET}
+
+{COLOR_CYAN}This will synchronize:{COLOR_RESET}
    - skills.json (source, version, health status)
    - skill_map.json (description, keywords, aliases)
    - AGENTS.md (skill documentation)
+"""
+
+# Registry Sync Reminder for Uninstallation
+MSG_REGISTRY_SYNC_REQUIRED_UNINSTALL = f"""
+{COLOR_GREEN}{ICON_SUCCESS} Uninstallation completed successfully.{COLOR_RESET}
+
+{COLOR_CYAN}╔════════════════════════════════════════════════════════════════╗{COLOR_RESET}
+{COLOR_CYAN}║  [REQUIRED ACTION] Invoke skills-registry-sync skill NOW      ║{COLOR_RESET}
+{COLOR_CYAN}╚════════════════════════════════════════════════════════════════╝{COLOR_RESET}
+
+{COLOR_YELLOW}AI Assistant: You MUST invoke the 'skills-registry-sync' skill using the Skill tool.{COLOR_RESET}
+{COLOR_YELLOW}Do NOT run scripts directly. Use: Skill tool with name='skills-registry-sync'{COLOR_RESET}
+
+{COLOR_CYAN}This will synchronize:{COLOR_RESET}
+   - skills.json (remove uninstalled skill entry)
+   - skill_map.json (remove skill metadata)
+   - AGENTS.md (remove skill documentation)
 """

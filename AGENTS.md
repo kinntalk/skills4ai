@@ -1,8 +1,8 @@
 # AGENTS.md - Skills Registry
 
 **Version:** 1.0.0  
-**Last Updated:** 2026-03-05  
-**Total Skills:** 20
+**Last Updated:** 2026-03-09  
+**Total Skills:** 33
 
 ---
 
@@ -19,9 +19,9 @@ This document provides a comprehensive registry of all available skills in the `
 | Core Skills | 5 | image-generation, pdf-generation, planning-with-files, powershell-windows, proxy-manager |
 | Tool Skills | 4 | skill-auditor, skill-creator, skill-installer, skills-registry-sync |
 | Python Skills | 5 | async-python-patterns, python-design-patterns, python-packaging, python-performance-optimization, python-testing-patterns |
-| Obsidian Skills | 1 | url-to-obsidian |
-| Other Skills | 5 | agent-browser, agentskills, brainstorming, find-skills, web-design-guidelines |
-| **Total** | **20** | |
+| Obsidian Skills | 4 | obsidian-bases, obsidian-cli, obsidian-markdown, url-to-obsidian |
+| Other Skills | 15 | agent-browser, agentskills, brainstorming, dispatching-parallel-agents, executing-plans, find-skills, finishing-a-development-branch, receiving-code-review, requesting-code-review, skills, subagent-driven-development, test-driven-development, using-git-worktrees, using-superpowers, web-design-guidelines |
+| **Total** | **33** | |
 
 ---
 
@@ -145,6 +145,30 @@ This document provides a comprehensive registry of all available skills in the `
 
 ## Obsidian Skills
 
+### obsidian-bases
+
+**Description:** Create and edit Obsidian Bases (.base files) with views, filters, formulas, and summaries. Use when working with .base files, creating database-like views of notes, or when the user mentions Bases, table views, card views, filters, or formulas in Obsidian.
+
+**Path:** `obsidian-bases/`
+
+---
+
+### obsidian-cli
+
+**Description:** Interact with Obsidian vaults using the Obsidian CLI to read, create, search, and manage notes, tasks, properties, and more. Also supports plugin and theme development with commands to reload plugins, run JavaScript, capture errors, take screenshots, and inspect the DOM. Use when the user asks to interact with their Obsidian vault, manage notes, search vault content, perform vault operations from the command line, or develop and debug Obsidian plugins and themes.
+
+**Path:** `obsidian-cli/`
+
+---
+
+### obsidian-markdown
+
+**Description:** Create and edit Obsidian Flavored Markdown with wikilinks, embeds, callouts, properties, and other Obsidian-specific syntax. Use when working with .md files in Obsidian, or when the user mentions wikilinks, callouts, frontmatter, tags, embeds, or Obsidian notes.
+
+**Path:** `obsidian-markdown/`
+
+---
+
 ### url-to-obsidian
 
 **Description:** Convert web pages to Obsidian Flavored Markdown and save to your Obsidian vault. Supports login-required pages, automatic vault detection, and asset downloading.
@@ -179,11 +203,91 @@ This document provides a comprehensive registry of all available skills in the `
 
 ---
 
+### dispatching-parallel-agents
+
+**Description:** Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies
+
+**Path:** `dispatching-parallel-agents/`
+
+---
+
+### executing-plans
+
+**Description:** Use when you have a written implementation plan to execute in a separate session with review checkpoints
+
+**Path:** `executing-plans/`
+
+---
+
 ### find-skills
 
 **Description:** Helps users discover and install agent skills when they ask questions like "how do I do X", "find a skill for X", "is there a skill that can...", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.
 
 **Path:** `find-skills/`
+
+---
+
+### finishing-a-development-branch
+
+**Description:** Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup
+
+**Path:** `finishing-a-development-branch/`
+
+---
+
+### receiving-code-review
+
+**Description:** Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation
+
+**Path:** `receiving-code-review/`
+
+---
+
+### requesting-code-review
+
+**Description:** Use when completing tasks, implementing major features, or before merging to verify work meets requirements
+
+**Path:** `requesting-code-review/`
+
+---
+
+### skills
+
+**Description:** No description available
+
+**Path:** `skills/`
+
+---
+
+### subagent-driven-development
+
+**Description:** Use when executing implementation plans with independent tasks in the current session
+
+**Path:** `subagent-driven-development/`
+
+---
+
+### test-driven-development
+
+**Description:** Use when implementing any feature or bugfix, before writing implementation code
+
+**Path:** `test-driven-development/`
+
+---
+
+### using-git-worktrees
+
+**Description:** Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification
+
+**Path:** `using-git-worktrees/`
+
+---
+
+### using-superpowers
+
+**Description:** Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions
+
+**Path:** `using-superpowers/`
 
 ---
 
@@ -202,12 +306,12 @@ This document provides a comprehensive registry of all available skills in the `
 
 | Category | Count | Percentage |
 |----------|--------|------------|
-| Core Skills | 5 | 25.0% |
-| Tool Skills | 4 | 20.0% |
-| Python Skills | 5 | 25.0% |
-| Obsidian Skills | 1 | 5.0% |
-| Other Skills | 5 | 25.0% |
-| **Total** | **20** | **100%** |
+| Core Skills | 5 | 15.2% |
+| Tool Skills | 4 | 12.1% |
+| Python Skills | 5 | 15.2% |
+| Obsidian Skills | 4 | 12.1% |
+| Other Skills | 15 | 45.5% |
+| **Total** | **33** | **100%** |
 
 ---
 
