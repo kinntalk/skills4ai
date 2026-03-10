@@ -451,14 +451,19 @@
         "obsidian-markdown"
       ]
     },
-    "skills": {
-      "name": "skills",
-      "description": "",
+    "xhs-search": {
+      "name": "xhs-search",
+      "description": "Search Xiaohongshu (小红书) notes and comments, save results to Obsidian vault. Use when user wants to search xiaohongshu.com, extract notes, get comments, or save xiaohongshu content to Obsidian. Supports both Chinese and English keywords like \"搜索 英语学习\" or \"search Learning English\".",
       "keywords": [
-        "skills"
+        "xhs-search",
+        "search",
+        "xiaohongshu",
+        "notes",
+        "comments",
+        "save"
       ],
       "aliases": [
-        "skills"
+        "xhs-search"
       ]
     }
   },
@@ -496,7 +501,7 @@
       "obsidian-bases",
       "obsidian-cli",
       "obsidian-markdown",
-      "skills"
+      "xhs-search"
     ],
     "exact_match": {
       "image generation": "image-generation",

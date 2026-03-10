@@ -20,7 +20,7 @@ This document provides a comprehensive registry of all available skills in the `
 | Tool Skills | 4 | skill-auditor, skill-creator, skill-installer, skills-registry-sync |
 | Python Skills | 5 | async-python-patterns, python-design-patterns, python-packaging, python-performance-optimization, python-testing-patterns |
 | Obsidian Skills | 4 | obsidian-bases, obsidian-cli, obsidian-markdown, url-to-obsidian |
-| Other Skills | 15 | agent-browser, agentskills, brainstorming, dispatching-parallel-agents, executing-plans, find-skills, finishing-a-development-branch, receiving-code-review, requesting-code-review, skills, subagent-driven-development, test-driven-development, using-git-worktrees, using-superpowers, web-design-guidelines |
+| Other Skills | 15 | agent-browser, agentskills, brainstorming, dispatching-parallel-agents, executing-plans, find-skills, finishing-a-development-branch, receiving-code-review, requesting-code-review, subagent-driven-development, test-driven-development, using-git-worktrees, using-superpowers, web-design-guidelines, xhs-search |
 | **Total** | **33** | |
 
 ---
@@ -251,14 +251,6 @@ This document provides a comprehensive registry of all available skills in the `
 
 ---
 
-### skills
-
-**Description:** No description available
-
-**Path:** `skills/`
-
----
-
 ### subagent-driven-development
 
 **Description:** Use when executing implementation plans with independent tasks in the current session
@@ -296,6 +288,14 @@ This document provides a comprehensive registry of all available skills in the `
 **Description:** Review UI code for Web Interface Guidelines compliance. Use when asked to "review my UI", "check accessibility", "audit design", "review UX", or "check my site against best practices".
 
 **Path:** `web-design-guidelines/`
+
+---
+
+### xhs-search
+
+**Description:** Search Xiaohongshu (小红书) notes and comments, save results to Obsidian vault. Use when user wants to search xiaohongshu.com, extract notes, get comments, or save xiaohongshu content to Obsidian. Supports both Chinese and English keywords like "搜索 英语学习" or "search Learning English".
+
+**Path:** `xhs-search/`
 
 ---
 

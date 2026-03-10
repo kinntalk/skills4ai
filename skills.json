@@ -4,7 +4,7 @@
       "source": "https://github.com/anthropics/skills.git",
       "subdir": "skills/skill-creator",
       "version": "7029232b9212482c0476da354b83364bd28fab2f",
-      "updated_at": "2026-03-09T14:16:07.790358",
+      "updated_at": "2026-03-09T16:24:44.870419",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -16,7 +16,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.791117",
+      "updated_at": "2026-03-09T16:24:44.871085",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -28,7 +28,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.789424",
+      "updated_at": "2026-03-09T16:24:44.869784",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -40,7 +40,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.824432",
+      "updated_at": "2026-03-09T16:24:44.871723",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -52,7 +52,7 @@
       "source": "https://github.com/vercel-labs/agent-browser.git",
       "subdir": "skills/agent-browser",
       "version": "8f6ad817f10b151b647234882f2a0fef6d2b43d1",
-      "updated_at": "2026-03-09T14:16:07.742529",
+      "updated_at": "2026-03-09T16:24:44.821574",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -64,7 +64,7 @@
       "source": "local",
       "subdir": "",
       "version": "f019a02dbbb1302217c4b4a14557d6384d9ace9a",
-      "updated_at": "2026-03-09T14:16:07.775347",
+      "updated_at": "2026-03-09T16:24:44.854955",
       "health": {
         "is_valid": false,
         "validation_error": "SKILL.md file not found",
@@ -76,7 +76,7 @@
       "source": "https://github.com/wshobson/agents.git",
       "subdir": "plugins/python-development/skills/async-python-patterns",
       "version": "ade0c7a211d04fa1354d10359737cace5c6fc5b0",
-      "updated_at": "2026-03-09T14:16:07.776026",
+      "updated_at": "2026-03-09T16:24:44.855687",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -88,7 +88,7 @@
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/brainstorming",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
-      "updated_at": "2026-03-09T14:16:07.776516",
+      "updated_at": "2026-03-09T16:24:44.856218",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -100,7 +100,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.776938",
+      "updated_at": "2026-03-09T16:24:44.856763",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -112,7 +112,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.777334",
+      "updated_at": "2026-03-09T16:24:44.857408",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -124,7 +124,7 @@
       "source": "https://github.com/vercel-labs/skills.git",
       "subdir": "skills/find-skills",
       "version": "7022ad39948c10024e451a56baba6fee62477df5",
-      "updated_at": "2026-03-09T14:16:07.777899",
+      "updated_at": "2026-03-09T16:24:44.858210",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -136,7 +136,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.778368",
+      "updated_at": "2026-03-09T16:24:44.858948",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -148,7 +148,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.778892",
+      "updated_at": "2026-03-09T16:24:44.859516",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -160,7 +160,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.779758",
+      "updated_at": "2026-03-09T16:24:44.860110",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -172,7 +172,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.780811",
+      "updated_at": "2026-03-09T16:24:44.860866",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -184,7 +184,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.781378",
+      "updated_at": "2026-03-09T16:24:44.861932",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -196,7 +196,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.781998",
+      "updated_at": "2026-03-09T16:24:44.862644",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -208,7 +208,7 @@
       "source": "https://github.com/OthmanAdi/planning-with-files.git",
       "subdir": "skills/planning-with-files",
       "version": "24442f5c8cfc062ac5e9704a1b6bfda10d983c45",
-      "updated_at": "2026-03-09T14:16:07.784042",
+      "updated_at": "2026-03-09T16:24:44.864736",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -220,7 +220,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.784686",
+      "updated_at": "2026-03-09T16:24:44.865311",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -232,7 +232,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.785648",
+      "updated_at": "2026-03-09T16:24:44.866282",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -244,7 +244,7 @@
       "source": "https://github.com/wshobson/agents.git",
       "subdir": "plugins/python-development/skills/python-design-patterns",
       "version": "ade0c7a211d04fa1354d10359737cace5c6fc5b0",
-      "updated_at": "2026-03-09T14:16:07.786170",
+      "updated_at": "2026-03-09T16:24:44.866810",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -256,7 +256,7 @@
       "source": "https://github.com/wshobson/agents.git",
       "subdir": "plugins/python-development/skills/python-packaging",
       "version": "ade0c7a211d04fa1354d10359737cace5c6fc5b0",
-      "updated_at": "2026-03-09T14:16:07.786682",
+      "updated_at": "2026-03-09T16:24:44.867291",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -268,7 +268,7 @@
       "source": "https://github.com/wshobson/agents.git",
       "subdir": "plugins/python-development/skills/python-performance-optimization",
       "version": "ade0c7a211d04fa1354d10359737cace5c6fc5b0",
-      "updated_at": "2026-03-09T14:16:07.787156",
+      "updated_at": "2026-03-09T16:24:44.867770",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -280,7 +280,7 @@
       "source": "https://github.com/wshobson/agents.git",
       "subdir": "plugins/python-development/skills/python-testing-patterns",
       "version": "ade0c7a211d04fa1354d10359737cace5c6fc5b0",
-      "updated_at": "2026-03-09T14:16:07.787635",
+      "updated_at": "2026-03-09T16:24:44.868246",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -292,7 +292,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.788213",
+      "updated_at": "2026-03-09T16:24:44.868755",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -304,22 +304,10 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.788642",
+      "updated_at": "2026-03-09T16:24:44.869146",
       "health": {
         "is_valid": true,
         "validation_error": null,
-        "missing_deps": [],
-        "satisfied_deps": []
-      }
-    },
-    "skills": {
-      "source": "local",
-      "subdir": "",
-      "version": "5ad042257e8ee1354fa792049b34fc58214e5790",
-      "updated_at": "2026-03-09T14:16:07.823792",
-      "health": {
-        "is_valid": false,
-        "validation_error": "SKILL.md file not found",
         "missing_deps": [],
         "satisfied_deps": []
       }
@@ -328,7 +316,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.824901",
+      "updated_at": "2026-03-09T16:24:44.872198",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -340,7 +328,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.825296",
+      "updated_at": "2026-03-09T16:24:44.872630",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -352,7 +340,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.825731",
+      "updated_at": "2026-03-09T16:24:44.873207",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -364,7 +352,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.826199",
+      "updated_at": "2026-03-09T16:24:44.873776",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -376,7 +364,7 @@
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "updated_at": "2026-03-09T14:16:07.826709",
+      "updated_at": "2026-03-09T16:24:44.874384",
       "health": {
         "is_valid": true,
         "validation_error": null,
@@ -388,7 +376,19 @@
       "source": "https://github.com/vercel-labs/agent-skills.git",
       "subdir": "skills/web-design-guidelines",
       "version": "cc8bd7a5b51e41270f20b43466ffa4149c18cc01",
-      "updated_at": "2026-03-09T14:16:07.827431",
+      "updated_at": "2026-03-09T16:24:44.876215",
+      "health": {
+        "is_valid": true,
+        "validation_error": null,
+        "missing_deps": [],
+        "satisfied_deps": []
+      }
+    },
+    "xhs-search": {
+      "source": "local",
+      "subdir": "",
+      "version": "unknown",
+      "updated_at": "2026-03-09T16:24:44.876984",
       "health": {
         "is_valid": true,
         "validation_error": null,
