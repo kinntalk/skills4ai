@@ -465,6 +465,23 @@
       "aliases": [
         "xhs-search"
       ]
+    },
+    "x-file-manager": {
+      "name": "x-file-manager",
+      "description": "Local file perception and retrieval tool for AI Agents. Use when user wants to search files by name, type, size, hash, find duplicates, scan large files, or analyze local file system. Supports both Chinese and English queries like \"查找大文件\" or \"find large files\".",
+      "keywords": [
+        "x-file-manager",
+        "file",
+        "search",
+        "duplicate",
+        "hash",
+        "scanner"
+      ],
+      "aliases": [
+        "x-file-manager",
+        "file-manager",
+        "file-scanner"
+      ]
     }
   },
   "detection_rules": {
@@ -501,14 +518,19 @@
       "obsidian-bases",
       "obsidian-cli",
       "obsidian-markdown",
-      "xhs-search"
+      "xhs-search",
+      "x-file-manager"
     ],
     "exact_match": {
       "image generation": "image-generation",
       "pdf generation": "pdf-generation",
       "skill auditor": "skill-auditor",
       "skill creator": "skill-creator",
-      "skill installer": "skill-installer"
+      "skill installer": "skill-installer",
+      "file scanner": "x-file-manager",
+      "local file scanner": "x-file-manager",
+      "x file manager": "x-file-manager",
+      "file manager": "x-file-manager"
     },
     "partial_match": {
       "install": [
@@ -550,7 +572,15 @@
         "skill-installer"
       ],
       "remote": "skill-installer",
-      "skill installer": "skill-installer"
+      "skill installer": "skill-installer",
+      "file": "x-file-manager",
+      "duplicate": "x-file-manager",
+      "hash": "x-file-manager",
+      "large files": "x-file-manager",
+      "大文件": "x-file-manager",
+      "重复文件": "x-file-manager",
+      "查找文件": "x-file-manager",
+      "文件哈希": "x-file-manager"
     }
   }
 }

@@ -13,42 +13,14 @@ import argparse
 import datetime
 import ast
 from pathlib import Path
+from colorama import init as colorama_init, Fore, Style
 
-# Import specialized checkers
+colorama_init()
+
 from errors_replace_check import check_errors_replace
 from encoding_check import check_encoding_parameter
 from exception_handling_check import check_exception_handling
 
-# Initialize ANSI color support
-def init_color_support():
-    """Initialize color output support based on terminal capabilities."""
-    # Check if we're on Windows and if ANSI colors are supported
-    if sys.platform == 'win32':
-        # Windows 10+ supports ANSI colors in modern terminals
-        # Enable for Windows if not already enabled
-        try:
-            import ctypes
-            kernel32 = ctypes.windll.kernel32
-            # Enable ANSI colors on Windows console
-            kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
-            return True
-        except:
-            # Fallback: assume no color support
-            return False
-    return True
-
-# Global color support flag
-COLOR_SUPPORT = init_color_support()
-
-# ANSI colors for output (only used if supported)
-GREEN = "\033[92m"
-RED = "\033[91m"
-YELLOW = "\033[93m"
-BLUE = "\033[94m"
-MAGENTA = "\033[95m"
-RESET = "\033[0m"
-
-# Text labels for terminals without color support
 PASS_TEXT = "[PASS]"
 FAIL_TEXT = "[FAIL]"
 WARN_TEXT = "[WARN]"
@@ -56,26 +28,17 @@ WARN_TEXT = "[WARN]"
 def print_pass(msg, json_output=False):
     if json_output:
         return
-    if COLOR_SUPPORT:
-        print(f"{GREEN}{PASS_TEXT}{RESET} {msg}")
-    else:
-        print(f"{PASS_TEXT} {msg}")
+    print(f"{Fore.GREEN}{PASS_TEXT}{Style.RESET_ALL} {msg}")
 
 def print_fail(msg, json_output=False):
     if json_output:
         return
-    if COLOR_SUPPORT:
-        print(f"{RED}{FAIL_TEXT}{RESET} {msg}")
-    else:
-        print(f"{FAIL_TEXT} {msg}")
+    print(f"{Fore.RED}{FAIL_TEXT}{Style.RESET_ALL} {msg}")
 
 def print_warn(msg, json_output=False):
     if json_output:
         return
-    if COLOR_SUPPORT:
-        print(f"{YELLOW}{WARN_TEXT}{RESET} {msg}")
-    else:
-        print(f"{WARN_TEXT} {msg}")
+    print(f"{Fore.YELLOW}{WARN_TEXT}{Style.RESET_ALL} {msg}")
 
 def print_info(msg, json_output=False):
     if json_output:
@@ -87,18 +50,17 @@ def print_verbose(msg, verbose=False):
         print(f"  {msg}")
 
 def print_severity(severity, json_output=False):
-    """Print severity level with appropriate color."""
     if json_output:
         return
     severity_colors = {
-        'CRITICAL': RED,
-        'HIGH': RED,
-        'MEDIUM': YELLOW,
-        'LOW': BLUE
+        'CRITICAL': Fore.RED,
+        'HIGH': Fore.RED,
+        'MEDIUM': Fore.YELLOW,
+        'LOW': Fore.BLUE
     }
     color = severity_colors.get(severity, '')
-    if COLOR_SUPPORT and color:
-        print(f"{color}[{severity}]{RESET}")
+    if color:
+        print(f"{color}[{severity}]{Style.RESET_ALL}")
     else:
         print(f"[{severity}]")
 
@@ -128,23 +90,25 @@ def check_dependencies(skill_path):
 
     for py_file in py_files:
         try:
-            content = py_file.read_text(encoding='utf-8')
-            # Regex for 'import X' or 'from X import Y'
+            content = py_file.read_text(encoding='utf-8', errors='replace')
             imports = re.findall(r'^\s*(?:import|from)\s+([a-zA-Z0-9_]+)', content, re.MULTILINE)
             for module in imports:
                 if module not in std_lib and module != 'scripts':
                     imported_modules.add(module)
+        except FileNotFoundError:
+            print(f"Warning: File not found: {py_file.name}")
+        except PermissionError:
+            print(f"Warning: Permission denied: {py_file.name}")
         except UnicodeDecodeError as e:
             print(f"Warning: Could not decode {py_file.name}: {e}")
-        except Exception as e:
-            print(f"Warning: Could not read {py_file.name}: {e}")
 
-    # Read requirements
     try:
-        req_content = req_file.read_text(encoding='utf-8').lower()
+        req_content = req_file.read_text(encoding='utf-8', errors='replace').lower()
         declared_deps = set(line.split('==')[0].split('>=')[0].strip() for line in req_content.splitlines() if line.strip() and not line.startswith('#'))
-    except Exception:
-        return False, "Could not read requirements.txt"
+    except FileNotFoundError:
+        return False, "requirements.txt not found"
+    except PermissionError:
+        return False, "Permission denied reading requirements.txt"
 
     # Mapping common imports to package names (incomplete but helpful)
     pkg_map = {
@@ -323,7 +287,7 @@ def check_encoding_safety(skill_path):
         if py_file.name == 'audit_skill.py':
             continue
         try:
-            content = py_file.read_text(encoding='utf-8')
+            content = py_file.read_text(encoding='utf-8', errors='replace')
             source_lines = content.splitlines()
             
             try:
@@ -334,8 +298,10 @@ def check_encoding_safety(skill_path):
                 issues.extend(checker.issues)
             except SyntaxError as e:
                 issues.append(f"{py_file.name}: Syntax error - {e}")
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
     
     if issues:
         return False, issues
@@ -475,7 +441,7 @@ def check_path_consistency(skill_path):
         if py_file.name == 'audit_skill.py':
             continue
         try:
-            content = py_file.read_text(encoding='utf-8')
+            content = py_file.read_text(encoding='utf-8', errors='replace')
             source_lines = content.splitlines()
             
             try:
@@ -486,8 +452,10 @@ def check_path_consistency(skill_path):
                 issues.extend(checker.issues)
             except SyntaxError as e:
                 issues.append(f"{py_file.name}: Syntax error - {e}")
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
     
     for file_path in skill_path.glob('**/*'):
         if not file_path.is_file():
@@ -500,14 +468,16 @@ def check_path_consistency(skill_path):
             continue
             
         try:
-            content = file_path.read_text(encoding='utf-8', errors='ignore')
+            content = file_path.read_text(encoding='utf-8', errors='replace')
             if '.codebuddy' in content:
                 try:
                     rel_path = file_path.relative_to(skill_path)
                 except ValueError:
                     rel_path = file_path.name
                 issues.append(f"{rel_path}: Contains reference to '.codebuddy'")
-        except Exception:
+        except FileNotFoundError:
+            pass
+        except PermissionError:
             pass
             
     if issues:
@@ -529,7 +499,7 @@ def check_skill_name_consistency(skill_path):
         return True, "SKILL.md not found (skipping name check)"
     
     try:
-        content = skill_md.read_text(encoding='utf-8')
+        content = skill_md.read_text(encoding='utf-8', errors='replace')
         match = re.match(r'^---\n(.*?)\n---', content, re.DOTALL)
         if not match:
             return True, "SKILL.md frontmatter not found (skipping name check)"
@@ -546,8 +516,12 @@ def check_skill_name_consistency(skill_path):
             return False, f"Name mismatch: SKILL.md has '{skill_name_from_md}' but directory is '{skill_name_from_dir}'"
         
         return True, "SKILL.md name matches directory name"
-    except Exception as e:
-        return False, f"Error checking skill name consistency: {e}"
+    except FileNotFoundError:
+        return False, "SKILL.md not found"
+    except PermissionError:
+        return False, "Permission denied reading SKILL.md"
+    except yaml.YAMLError as e:
+        return False, f"YAML parsing error in SKILL.md: {e}"
 
 def check_directory_structure(skill_path):
     """
@@ -602,12 +576,13 @@ def check_directory_structure(skill_path):
         for item in skill_path.iterdir():
             if item.is_file():
                 if item.name not in allowed_files:
-                    # Check if it matches reference documentation patterns
                     is_ref_doc = any(re.match(pattern, item.name) for pattern in ref_doc_patterns)
                     if not is_ref_doc:
                         unexpected_files.append(item.name)
-    except Exception as e:
-        return False, f"Could not scan directory: {e}"
+    except FileNotFoundError:
+        return False, "Skill directory not found"
+    except PermissionError:
+        return False, "Permission denied scanning directory"
     
     issues = []
     if unexpected_files:
@@ -624,26 +599,23 @@ def check_packaging_logic(skill_path):
         return True, "No package_skill.py found (skipped)"
         
     try:
-        content = package_script.read_text(encoding='utf-8')
+        content = package_script.read_text(encoding='utf-8', errors='replace')
         
-        # Check 1: Relative path logic
-        # Bad: relative_to(skill_path.parent)
-        # Good: relative_to(skill_path)
         if 'relative_to(skill_path.parent)' in content:
             return False, "package_skill.py uses 'skill_path.parent' (creates nested zip structure)"
         
-        # Accept either relative_to(skill_path) or arcname = file_path.name (flat structure)
         if 'relative_to(skill_path)' not in content and 'arcname = file_path.name' not in content:
             return False, "package_skill.py does not seem to use correct flat structure logic"
             
-        # Check 2: Pycache filtering
         if '__pycache__' not in content and '.pyc' not in content:
             return False, "package_skill.py does not appear to filter __pycache__ or .pyc files"
             
         return True, "Packaging logic looks correct"
         
-    except Exception as e:
-        return False, f"Error checking package script: {e}"
+    except FileNotFoundError:
+        return False, "package_skill.py not found"
+    except PermissionError:
+        return False, "Permission denied reading package_skill.py"
 
 def validate_frontmatter(skill_path):
     """Basic SKILL.md validation"""
@@ -673,8 +645,12 @@ def validate_frontmatter(skill_path):
             return False, "Missing 'description'"
             
         return True, "SKILL.md frontmatter is valid"
-    except Exception as e:
-        return False, f"Frontmatter validation error: {e}"
+    except FileNotFoundError:
+        return False, "SKILL.md not found"
+    except PermissionError:
+        return False, "Permission denied reading SKILL.md"
+    except yaml.YAMLError as e:
+        return False, f"YAML parsing error in SKILL.md: {e}"
 
 def check_init_script_template(skill_path):
     """Check if init_skill.py contains valid YAML template (no [] list syntax)"""
@@ -699,8 +675,10 @@ def check_init_script_template(skill_path):
         # But for now, we assume if it's not the bad one, it's pass
         return True, "Template description syntax looks safe"
         
-    except Exception as e:
-        return False, f"Error checking init script: {e}"
+    except FileNotFoundError:
+        return False, "init_skill.py not found"
+    except PermissionError:
+        return False, "Permission denied reading init_skill.py"
 
 def check_malicious_script_injection(skill_path):
     """
@@ -808,7 +786,7 @@ def check_malicious_script_injection(skill_path):
         if py_file.name == 'audit_skill.py':
             continue
         try:
-            content = py_file.read_text(encoding='utf-8')
+            content = py_file.read_text(encoding='utf-8', errors='replace')
             source_lines = content.splitlines()
 
             try:
@@ -819,8 +797,10 @@ def check_malicious_script_injection(skill_path):
                 issues.extend(checker.issues)
             except SyntaxError as e:
                 issues.append(f"{py_file.name}: Syntax error - {e}")
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
 
     if issues:
         return False, issues
@@ -915,7 +895,7 @@ def check_permission_abuse(skill_path):
         if py_file.name == 'audit_skill.py':
             continue
         try:
-            content = py_file.read_text(encoding='utf-8')
+            content = py_file.read_text(encoding='utf-8', errors='replace')
             source_lines = content.splitlines()
 
             try:
@@ -945,12 +925,14 @@ def check_permission_abuse(skill_path):
                 issues.extend(checker.issues)
             except SyntaxError as e:
                 issues.append(f"{py_file.name}: Syntax error - {e}")
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
 
     if issues:
         return False, issues
-    return True, "No permission abuse risks detected"
+    return True, "No permission abuse patterns detected"
 
 def check_prompt_injection(skill_path):
     """
@@ -1071,7 +1053,7 @@ def check_prompt_injection(skill_path):
         if py_file.name == 'audit_skill.py':
             continue
         try:
-            content = py_file.read_text(encoding='utf-8')
+            content = py_file.read_text(encoding='utf-8', errors='replace')
             source_lines = content.splitlines()
 
             try:
@@ -1082,8 +1064,10 @@ def check_prompt_injection(skill_path):
                 issues.extend(checker.issues)
             except SyntaxError as e:
                 issues.append(f"{py_file.name}: Syntax error - {e}")
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
 
     if issues:
         return False, issues
@@ -1185,8 +1169,10 @@ def check_code_execution_safety(skill_path):
                 issues.extend(checker.issues)
             except SyntaxError as e:
                 issues.append(f"{py_file.name}: Syntax error - {e}")
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
 
     if issues:
         return False, issues
@@ -1291,7 +1277,7 @@ def check_filesystem_security(skill_path):
         if py_file.name == 'audit_skill.py':
             continue
         try:
-            content = py_file.read_text(encoding='utf-8')
+            content = py_file.read_text(encoding='utf-8', errors='replace')
             source_lines = content.splitlines()
 
             try:
@@ -1302,8 +1288,10 @@ def check_filesystem_security(skill_path):
                 issues.extend(checker.issues)
             except SyntaxError as e:
                 issues.append(f"{py_file.name}: Syntax error - {e}")
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
 
     if issues:
         return False, issues
@@ -1411,7 +1399,7 @@ def check_network_security(skill_path):
         if py_file.name == 'audit_skill.py':
             continue
         try:
-            content = py_file.read_text(encoding='utf-8')
+            content = py_file.read_text(encoding='utf-8', errors='replace')
             source_lines = content.splitlines()
 
             try:
@@ -1422,8 +1410,10 @@ def check_network_security(skill_path):
                 issues.extend(checker.issues)
             except SyntaxError as e:
                 issues.append(f"{py_file.name}: Syntax error - {e}")
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
 
     if issues:
         return False, issues
@@ -1488,7 +1478,7 @@ def check_data_masking(skill_path):
 
     for py_file in skill_path.glob('**/*.py'):
         try:
-            content = py_file.read_text(encoding='utf-8')
+            content = py_file.read_text(encoding='utf-8', errors='replace')
             source_lines = content.splitlines()
 
             try:
@@ -1520,8 +1510,10 @@ def check_data_masking(skill_path):
                             if not any(placeholder in value.lower() for placeholder in ['todo', 'xxx', 'none', 'null', 'example', 'test']):
                                 issues.append(f"{py_file.name}:{i}: Potential hardcoded PII: {value[:50]}...")
 
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
 
     if issues:
         return False, issues
@@ -1598,7 +1590,7 @@ def check_infinite_loops(skill_path):
 
     for py_file in skill_path.glob('**/*.py'):
         try:
-            content = py_file.read_text(encoding='utf-8')
+            content = py_file.read_text(encoding='utf-8', errors='replace')
             source_lines = content.splitlines()
 
             try:
@@ -1609,8 +1601,10 @@ def check_infinite_loops(skill_path):
             except SyntaxError:
                 pass
 
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
 
     if issues:
         return False, issues
@@ -1704,18 +1698,22 @@ def check_token_optimization(skill_path):
                             f"{py_file.name}:{i}: Very long comment ({len(stripped)} chars). Consider shortening or moving to documentation."
                         )
 
-        except Exception as e:
-            suggestions.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            suggestions.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            suggestions.append(f"Permission denied: {py_file.name}")
 
     skill_md = skill_path / 'SKILL.md'
     if skill_md.exists():
         try:
-            content = skill_md.read_text(encoding='utf-8')
+            content = skill_md.read_text(encoding='utf-8', errors='replace')
             if len(content) > 10000:
                 suggestions.append(
                     f"SKILL.md is very long ({len(content)} chars). Consider condensing descriptions for better token efficiency."
                 )
-        except Exception:
+        except FileNotFoundError:
+            pass
+        except PermissionError:
             pass
 
     if suggestions:
@@ -1786,12 +1784,14 @@ def check_ai_execution_effectiveness(skill_path):
                             f"SKILL.md:{i}: Vague instruction detected. Be more specific for better AI execution."
                         )
 
-        except Exception as e:
-            issues.append(f"Could not read SKILL.md: {e}")
+        except FileNotFoundError:
+            issues.append("SKILL.md not found")
+        except PermissionError:
+            issues.append("Permission denied reading SKILL.md")
 
     for py_file in skill_path.glob('**/*.py'):
         try:
-            content = py_file.read_text(encoding='utf-8')
+            content = py_file.read_text(encoding='utf-8', errors='replace')
             source_lines = content.splitlines()
 
             print_count = 0
@@ -1805,8 +1805,10 @@ def check_ai_execution_effectiveness(skill_path):
                     f"{py_file.name}: High number of print statements ({print_count}). Consider reducing verbose output for better AI execution efficiency."
                 )
 
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
 
     if issues:
         return False, issues
@@ -1894,8 +1896,10 @@ def check_verbose_output(skill_path):
                 else:
                     consecutive_prints = 0
 
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
 
     if issues:
         return False, issues
@@ -2005,8 +2009,10 @@ def check_redundant_code(skill_path):
             except SyntaxError:
                 pass
 
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
 
     if issues:
         return False, issues
@@ -2580,13 +2586,13 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
     audit_warnings = has_warnings or (medium_issues > 0) or (low_issues > 0)
     
     if audit_failed:
-        print(f"{RED}[!] Audit completed with errors. Please fix issues above.{RESET}")
+        print(f"{Fore.RED}[!] Audit completed with errors. Please fix issues above.{Style.RESET_ALL}")
         return False
     elif audit_warnings:
-        print(f"{YELLOW}[!] Audit completed with warnings. Review issues above.{RESET}")
+        print(f"{Fore.YELLOW}[!] Audit completed with warnings. Review issues above.{Style.RESET_ALL}")
         return True
     else:
-        print(f"{GREEN}[*] Skill passed all standard checks!{RESET}")
+        print(f"{Fore.GREEN}[*] Skill passed all standard checks!{Style.RESET_ALL}")
         return True
 
 def check_risky_path_ops(skill_path):
@@ -2756,7 +2762,7 @@ def check_risky_path_ops(skill_path):
         if py_file.name == 'audit_skill.py':
             continue
         try:
-            content = py_file.read_text(encoding='utf-8')
+            content = py_file.read_text(encoding='utf-8', errors='replace')
             source_lines = content.splitlines()
             
             try:
@@ -2767,8 +2773,10 @@ def check_risky_path_ops(skill_path):
                 issues.extend(checker.issues)
             except SyntaxError as e:
                 issues.append(f"{py_file.name}: Syntax error - {e}")
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
     
     if issues:
         return False, issues
@@ -2953,7 +2961,7 @@ def check_subprocess_robustness(skill_path):
         if py_file.name == 'audit_skill.py':
             continue
         try:
-            content = py_file.read_text(encoding='utf-8')
+            content = py_file.read_text(encoding='utf-8', errors='replace')
             source_lines = content.splitlines()
             
             try:
@@ -2964,8 +2972,10 @@ def check_subprocess_robustness(skill_path):
                 issues.extend(checker.issues)
             except SyntaxError as e:
                 issues.append(f"{py_file.name}: Syntax error - {e}")
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
             
     if issues:
         return False, issues
@@ -3159,7 +3169,7 @@ def check_cross_platform_compatibility(skill_path):
         if py_file.name == 'audit_skill.py':
             continue
         try:
-            content = py_file.read_text(encoding='utf-8')
+            content = py_file.read_text(encoding='utf-8', errors='replace')
             source_lines = content.splitlines()
             
             try:
@@ -3170,8 +3180,10 @@ def check_cross_platform_compatibility(skill_path):
                 issues.extend(checker.issues)
             except SyntaxError as e:
                 issues.append(f"{py_file.name}: Syntax error - {e}")
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
     
     if issues:
         return False, issues
@@ -3199,19 +3211,18 @@ def check_i18n_support(skill_path):
     skill_md = skill_path / 'SKILL.md'
     if skill_md.exists():
         try:
-            content = skill_md.read_text(encoding='utf-8')
+            content = skill_md.read_text(encoding='utf-8', errors='replace')
             
-            # Check for both English and Chinese keywords
             has_english = any(word in content.lower() for word in ['description:', 'name:', 'usage:', 'example'])
             has_chinese = any(ord(char) > 127 for char in content)
             
-            # This is just a suggestion, not a requirement
-            # Note: encoding='utf-8' is recommended for Chinese files but not mandatory
             if not has_chinese and not has_english:
                 issues.append("Suggestion: Consider adding both English and Chinese keywords in SKILL.md for better discoverability.")
                 
-        except Exception as e:
-            issues.append(f"Could not read SKILL.md: {e}")
+        except FileNotFoundError:
+            issues.append("SKILL.md not found")
+        except PermissionError:
+            issues.append("Permission denied reading SKILL.md")
     
     # AST-based check for emoji in print statements
     class EmojiChecker(ast.NodeVisitor):
@@ -3308,8 +3319,10 @@ def check_i18n_support(skill_path):
                 if message_count > 20:
                     issues.append(f"Suggestion: {py_file.name} has {message_count} print statements. Consider using a message dictionary for better i18n support when applicable.")
                     
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
             
     if issues:
         return False, issues
@@ -3461,8 +3474,10 @@ def check_absolute_references(skill_path):
                     if re.search(r'=\s*["\']/[a-z]+/', line):
                         issues.append(f"{py_file.name}:{i}: Hardcoded Unix absolute path detected.")
                     
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
     
     # Check for absolute paths in config files
     for config_file in skill_path.glob('**/*.json'):
@@ -3475,8 +3490,10 @@ def check_absolute_references(skill_path):
             # Check for parent directory references in JSON
             if '../' in content or '..\\' in content:
                 issues.append(f"{config_file.relative_to(skill_path)}: Contains parent directory reference. This can cause path traversal issues.")
-        except Exception as e:
-            issues.append(f"Could not read {config_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {config_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {config_file.name}")
             
     if issues:
         return False, issues
@@ -3737,7 +3754,7 @@ def check_error_handling_patterns(skill_path):
         if py_file.name == 'audit_skill.py':
             continue
         try:
-            content = py_file.read_text(encoding='utf-8')
+            content = py_file.read_text(encoding='utf-8', errors='replace')
             try:
                 tree = ast.parse(content, filename=str(py_file))
                 checker = ErrorHandlingChecker(py_file.name)
@@ -3745,8 +3762,10 @@ def check_error_handling_patterns(skill_path):
                 issues.extend(checker.issues)
             except SyntaxError:
                 pass
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
 
     if issues:
         return False, issues
@@ -3807,8 +3826,10 @@ def check_logging_practices(skill_path):
                 issues.extend(checker.issues)
             except SyntaxError:
                 pass
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
 
     if issues:
         return False, issues
@@ -3870,8 +3891,10 @@ def check_input_validation(skill_path):
                     )
             except SyntaxError:
                 pass
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
 
     if issues:
         return False, issues
@@ -3916,7 +3939,7 @@ def check_output_sanitization(skill_path):
         if py_file.name == 'audit_skill.py':
             continue
         try:
-            content = py_file.read_text(encoding='utf-8')
+            content = py_file.read_text(encoding='utf-8', errors='replace')
             source_lines = content.splitlines()
             try:
                 tree = ast.parse(content, filename=str(py_file))
@@ -3925,8 +3948,10 @@ def check_output_sanitization(skill_path):
                 issues.extend(checker.issues)
             except SyntaxError:
                 pass
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except FileNotFoundError:
+            issues.append(f"File not found: {py_file.name}")
+        except PermissionError:
+            issues.append(f"Permission denied: {py_file.name}")
 
     if issues:
         return False, issues
@@ -3985,8 +4010,10 @@ def check_dependency_security(skill_path):
                 "Review if all dependencies are necessary."
             )
 
-    except Exception as e:
-        return False, f"Error checking dependency security: {e}"
+    except FileNotFoundError:
+        return False, "requirements.txt not found"
+    except PermissionError:
+        return False, "Permission denied reading requirements.txt"
 
     if issues:
         return False, issues

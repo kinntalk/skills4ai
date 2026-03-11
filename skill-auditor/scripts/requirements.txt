@@ -1,1 +1,3 @@
 PyYAML
+charset_normalizer
+colorama

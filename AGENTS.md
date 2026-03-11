@@ -1,8 +1,8 @@
 # AGENTS.md - Skills Registry
 
 **Version:** 1.0.0  
-**Last Updated:** 2026-03-09  
-**Total Skills:** 33
+**Last Updated:** 2026-03-10  
+**Total Skills:** 34
 
 ---
 
@@ -16,12 +16,12 @@ This document provides a comprehensive registry of all available skills in the `
 
 | Category | Count | Skills |
 |-----------|--------|---------|
-| Core Skills | 5 | image-generation, pdf-generation, planning-with-files, powershell-windows, proxy-manager |
+| Core Skills | 6 | image-generation, x-file-manager, pdf-generation, planning-with-files, powershell-windows, proxy-manager |
 | Tool Skills | 4 | skill-auditor, skill-creator, skill-installer, skills-registry-sync |
 | Python Skills | 5 | async-python-patterns, python-design-patterns, python-packaging, python-performance-optimization, python-testing-patterns |
 | Obsidian Skills | 4 | obsidian-bases, obsidian-cli, obsidian-markdown, url-to-obsidian |
 | Other Skills | 15 | agent-browser, agentskills, brainstorming, dispatching-parallel-agents, executing-plans, find-skills, finishing-a-development-branch, receiving-code-review, requesting-code-review, subagent-driven-development, test-driven-development, using-git-worktrees, using-superpowers, web-design-guidelines, xhs-search |
-| **Total** | **33** | |
+| **Total** | **34** | |
 
 ---
 
@@ -32,6 +32,14 @@ This document provides a comprehensive registry of all available skills in the `
 **Description:** Converts Markdown documents to high-quality images (PNG/JPG) using Python and headless browser rendering. Ideal for creating social media posts, documentation screenshots, and sharing rich text content as images.
 
 **Path:** `image-generation/`
+
+---
+
+### x-file-manager
+
+**Description:** Local file perception and retrieval tool for AI Agents. Use when user wants to search files by name, type, size, hash, find duplicates, scan large files, or analyze local file system. Supports both Chinese and English queries like "查找大文件" or "find large files".
+
+**Path:** `x-file-manager/`
 
 ---
 
@@ -306,12 +314,12 @@ This document provides a comprehensive registry of all available skills in the `
 
 | Category | Count | Percentage |
 |----------|--------|------------|
-| Core Skills | 5 | 15.2% |
-| Tool Skills | 4 | 12.1% |
-| Python Skills | 5 | 15.2% |
-| Obsidian Skills | 4 | 12.1% |
-| Other Skills | 15 | 45.5% |
-| **Total** | **33** | **100%** |
+| Core Skills | 6 | 17.6% |
+| Tool Skills | 4 | 11.8% |
+| Python Skills | 5 | 14.7% |
+| Obsidian Skills | 4 | 11.8% |
+| Other Skills | 15 | 44.1% |
+| **Total** | **34** | **100%** |
 
 ---
 

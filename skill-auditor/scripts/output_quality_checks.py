@@ -5,10 +5,20 @@ Additional quality check functions for data masking, infinite loops, token optim
 """
 
 import sys
-import os
 import re
 import ast
 from pathlib import Path
+import logging
+
+try:
+    from file_utils import read_text_file
+except ImportError:
+    from pathlib import Path
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent))
+    from file_utils import read_text_file
+
+logger = logging.getLogger(__name__)
 
 
 def check_data_masking(skill_path):
@@ -29,7 +39,6 @@ def check_data_masking(skill_path):
     """
     issues = []
 
-    # Patterns for sensitive data
     sensitive_patterns = [
         r'password\s*=\s*["\'][^"\']+["\']',
         r'api_key\s*=\s*["\'][^"\']+["\']',
@@ -45,7 +54,6 @@ def check_data_masking(skill_path):
         r'bearer\s+["\'][^"\']+["\']',
     ]
 
-    # Patterns for personal information
     pii_patterns = [
         r'email\s*=\s*["\'][^"\']+@[^"\']+["\']',
         r'phone\s*=\s*["\'][\d\s\-\(\)]+["\']',
@@ -53,7 +61,6 @@ def check_data_masking(skill_path):
         r'credit_card\s*=\s*["\'][\d\s\-]+["\']',
     ]
 
-    # AST-based checker for logging sensitive data
     class DataMaskingChecker(ast.NodeVisitor):
         def __init__(self, filename, source_lines):
             self.filename = filename
@@ -61,66 +68,55 @@ def check_data_masking(skill_path):
             self.issues = []
 
         def visit_Call(self, node):
-            # Check for logging/printing sensitive data
             if isinstance(node.func, ast.Name) and node.func.id in ['print', 'log', 'logger', 'logging']:
                 for arg in node.args:
                     if isinstance(arg, ast.Name):
                         var_name = arg.id
-                        # Check if variable name suggests sensitive data
                         if any(keyword in var_name.lower() for keyword in ['password', 'secret', 'token', 'key', 'credential', 'auth']):
                             self.issues.append(
                                 f"{self.filename}:{node.lineno}: Potential sensitive data exposure: logging variable '{var_name}'"
                             )
             self.generic_visit(node)
 
-    # Check Python files
     for py_file in skill_path.glob('**/*.py'):
+        success, content = read_text_file(py_file)
+        if not success:
+            issues.append(f"Could not read {py_file.name}: {content}")
+            continue
+            
+        source_lines = content.splitlines()
+
         try:
-            content = py_file.read_text(encoding='utf-8')
-            source_lines = content.splitlines()
+            tree = ast.parse(content, filename=str(py_file))
+            checker = DataMaskingChecker(py_file.name, source_lines)
+            checker.visit(tree)
+            issues.extend(checker.issues)
+        except SyntaxError:
+            pass
 
-            # AST-based check
-            try:
-                tree = ast.parse(content, filename=str(py_file))
-                checker = DataMaskingChecker(py_file.name, source_lines)
-                checker.visit(tree)
-                issues.extend(checker.issues)
-            except SyntaxError:
-                pass
+        for i, line in enumerate(source_lines, 1):
+            stripped = line.strip()
+            if stripped.startswith('#'):
+                continue
 
-            # Pattern-based check for hardcoded sensitive data
-            for i, line in enumerate(source_lines, 1):
-                # Skip comment lines
-                stripped = line.strip()
-                if stripped.startswith('#'):
-                    continue
+            if stripped.startswith('import') or stripped.startswith('from'):
+                continue
 
-                # Skip import lines
-                if stripped.startswith('import') or stripped.startswith('from'):
-                    continue
+            for pattern in sensitive_patterns:
+                if re.search(pattern, line, re.IGNORECASE):
+                    match = re.search(pattern, line, re.IGNORECASE)
+                    if match:
+                        value = match.group(0)
+                        if not any(placeholder in value.lower() for placeholder in ['todo', 'xxx', 'none', 'null', 'example', 'test']):
+                            issues.append(f"{py_file.name}:{i}: Potential hardcoded sensitive data: {value[:50]}...")
 
-                # Check for sensitive patterns
-                for pattern in sensitive_patterns:
-                    if re.search(pattern, line, re.IGNORECASE):
-                        # Extract the sensitive value (masked)
-                        match = re.search(pattern, line, re.IGNORECASE)
-                        if match:
-                            value = match.group(0)
-                            # Check if it's not a placeholder
-                            if not any(placeholder in value.lower() for placeholder in ['todo', 'xxx', 'none', 'null', 'example', 'test']):
-                                issues.append(f"{py_file.name}:{i}: Potential hardcoded sensitive data: {value[:50]}...")
-
-                # Check for PII patterns
-                for pattern in pii_patterns:
-                    if re.search(pattern, line, re.IGNORECASE):
-                        match = re.search(pattern, line, re.IGNORECASE)
-                        if match:
-                            value = match.group(0)
-                            if not any(placeholder in value.lower() for placeholder in ['todo', 'xxx', 'none', 'null', 'example', 'test']):
-                                issues.append(f"{py_file.name}:{i}: Potential hardcoded PII: {value[:50]}...")
-
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+            for pattern in pii_patterns:
+                if re.search(pattern, line, re.IGNORECASE):
+                    match = re.search(pattern, line, re.IGNORECASE)
+                    if match:
+                        value = match.group(0)
+                        if not any(placeholder in value.lower() for placeholder in ['todo', 'xxx', 'none', 'null', 'example', 'test']):
+                            issues.append(f"{py_file.name}:{i}: Potential hardcoded PII: {value[:50]}...")
 
     if issues:
         return False, issues
@@ -145,7 +141,6 @@ def check_infinite_loops(skill_path):
     """
     issues = []
 
-    # AST-based checker for infinite loops
     class InfiniteLoopChecker(ast.NodeVisitor):
         def __init__(self, filename, source_lines):
             self.filename = filename
@@ -164,9 +159,7 @@ def check_infinite_loops(skill_path):
             self.function_stack.pop()
 
         def visit_While(self, node):
-            # Check if while loop has a proper exit condition
             if isinstance(node.test, ast.Constant) and node.test.value is True:
-                # Check if there's a break statement
                 has_break = False
                 for child in ast.walk(node):
                     if isinstance(child, ast.Break):
@@ -181,9 +174,7 @@ def check_infinite_loops(skill_path):
             self.generic_visit(node)
 
         def visit_For(self, node):
-            # Check for potentially unbounded iteration
             if isinstance(node.iter, ast.Call):
-                # Check if iterating over range with no bounds
                 if isinstance(node.iter.func, ast.Name) and node.iter.func.id == 'range':
                     if len(node.iter.args) == 0:
                         self.issues.append(
@@ -193,34 +184,29 @@ def check_infinite_loops(skill_path):
             self.generic_visit(node)
 
         def visit_Call(self, node):
-            # Check for recursive calls
             if isinstance(node.func, ast.Name) and self.function_stack:
                 if node.func.id == self.function_stack[-1]:
-                    # This is a recursive call, check for base case
-                    # We can't easily verify base case exists, so we flag it
                     self.issues.append(
                         f"{self.filename}:{node.lineno}: Recursive function '{node.func.id}' detected - ensure proper base case exists"
                     )
 
             self.generic_visit(node)
 
-    # Check Python files
     for py_file in skill_path.glob('**/*.py'):
+        success, content = read_text_file(py_file)
+        if not success:
+            issues.append(f"Could not read {py_file.name}: {content}")
+            continue
+            
+        source_lines = content.splitlines()
+
         try:
-            content = py_file.read_text(encoding='utf-8')
-            source_lines = content.splitlines()
-
-            # AST-based check
-            try:
-                tree = ast.parse(content, filename=str(py_file))
-                checker = InfiniteLoopChecker(py_file.name, source_lines)
-                checker.visit(tree)
-                issues.extend(checker.issues)
-            except SyntaxError:
-                pass
-
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+            tree = ast.parse(content, filename=str(py_file))
+            checker = InfiniteLoopChecker(py_file.name, source_lines)
+            checker.visit(tree)
+            issues.extend(checker.issues)
+        except SyntaxError:
+            pass
 
     if issues:
         return False, issues
@@ -245,7 +231,6 @@ def check_token_optimization(skill_path):
     """
     suggestions = []
 
-    # AST-based checker for token optimization
     class TokenOptimizationChecker(ast.NodeVisitor):
         def __init__(self, filename, source_lines):
             self.filename = filename
@@ -254,13 +239,11 @@ def check_token_optimization(skill_path):
             self.function_lines = {}
 
         def visit_FunctionDef(self, node):
-            # Track function length
             start_line = node.lineno
             end_line = node.end_lineno if hasattr(node, 'end_lineno') else start_line
             func_length = end_line - start_line + 1
             self.function_lines[node.name] = func_length
 
-            # Check for very long functions (>50 lines)
             if func_length > 50:
                 self.suggestions.append(
                     f"{self.filename}:{start_line}: Function '{node.name}' is {func_length} lines long. Consider splitting into smaller functions for better token efficiency."
@@ -282,7 +265,6 @@ def check_token_optimization(skill_path):
             self.generic_visit(node)
 
         def visit_If(self, node):
-            # Check for nested if statements (deep nesting)
             depth = self._get_nesting_depth(node)
             if depth > 4:
                 self.suggestions.append(
@@ -298,45 +280,37 @@ def check_token_optimization(skill_path):
                     max_depth = max(max_depth, child_depth)
             return max_depth
 
-    # Check Python files
     for py_file in skill_path.glob('**/*.py'):
+        success, content = read_text_file(py_file)
+        if not success:
+            suggestions.append(f"Could not read {py_file.name}: {content}")
+            continue
+            
+        source_lines = content.splitlines()
+
         try:
-            content = py_file.read_text(encoding='utf-8')
-            source_lines = content.splitlines()
+            tree = ast.parse(content, filename=str(py_file))
+            checker = TokenOptimizationChecker(py_file.name, source_lines)
+            checker.visit(tree)
+            suggestions.extend(checker.suggestions)
+        except SyntaxError:
+            pass
 
-            # AST-based check
-            try:
-                tree = ast.parse(content, filename=str(py_file))
-                checker = TokenOptimizationChecker(py_file.name, source_lines)
-                checker.visit(tree)
-                suggestions.extend(checker.suggestions)
-            except SyntaxError:
-                pass
+        for i, line in enumerate(source_lines, 1):
+            stripped = line.strip()
+            if stripped.startswith('#'):
+                if len(stripped) > 200:
+                    suggestions.append(
+                        f"{py_file.name}:{i}: Very long comment ({len(stripped)} chars). Consider shortening or moving to documentation."
+                    )
 
-            # Check for verbose comments
-            for i, line in enumerate(source_lines, 1):
-                stripped = line.strip()
-                if stripped.startswith('#'):
-                    # Check for very long comments
-                    if len(stripped) > 200:
-                        suggestions.append(
-                            f"{py_file.name}:{i}: Very long comment ({len(stripped)} chars). Consider shortening or moving to documentation."
-                        )
-
-        except Exception as e:
-            suggestions.append(f"Could not read {py_file.name}: {e}")
-
-    # Check SKILL.md for verbose descriptions
     skill_md = skill_path / 'SKILL.md'
     if skill_md.exists():
-        try:
-            content = skill_md.read_text(encoding='utf-8')
-            if len(content) > 10000:
-                suggestions.append(
-                    f"SKILL.md is very long ({len(content)} chars). Consider condensing descriptions for better token efficiency."
-                )
-        except Exception:
-            pass
+        success, content = read_text_file(skill_md)
+        if success and len(content) > 10000:
+            suggestions.append(
+                f"SKILL.md is very long ({len(content)} chars). Consider condensing descriptions for better token efficiency."
+            )
 
     if suggestions:
         return False, suggestions
@@ -361,14 +335,12 @@ def check_ai_execution_effectiveness(skill_path):
     """
     issues = []
 
-    # Check SKILL.md
     skill_md = skill_path / 'SKILL.md'
     if skill_md.exists():
-        try:
-            content = skill_md.read_text(encoding='utf-8')
+        success, content = read_text_file(skill_md)
+        if success:
             lines = content.splitlines()
 
-            # Check for very long paragraphs
             current_paragraph = []
             for i, line in enumerate(lines, 1):
                 if line.strip():
@@ -382,7 +354,6 @@ def check_ai_execution_effectiveness(skill_path):
                             )
                     current_paragraph = []
 
-            # Check for redundant phrases
             redundant_phrases = [
                 'please note that',
                 'it is important to',
@@ -398,7 +369,6 @@ def check_ai_execution_effectiveness(skill_path):
                             f"SKILL.md:{i}: Redundant phrase '{phrase}' detected. Remove for more concise instructions."
                         )
 
-            # Check for vague instructions
             vague_patterns = [
                 r'\b(do it|make it|fix it|handle it)\b',
                 r'\b(appropriate|suitable|proper|correct)\s+(way|manner|method)',
@@ -411,29 +381,23 @@ def check_ai_execution_effectiveness(skill_path):
                             f"SKILL.md:{i}: Vague instruction detected. Be more specific for better AI execution."
                         )
 
-        except Exception as e:
-            issues.append(f"Could not read SKILL.md: {e}")
-
-    # Check Python code for verbose output
     for py_file in skill_path.glob('**/*.py'):
-        try:
-            content = py_file.read_text(encoding='utf-8')
-            source_lines = content.splitlines()
+        success, content = read_text_file(py_file)
+        if not success:
+            continue
+            
+        source_lines = content.splitlines()
 
-            # Count print statements
-            print_count = 0
-            for line in source_lines:
-                stripped = line.strip()
-                if stripped.startswith('print('):
-                    print_count += 1
+        print_count = 0
+        for line in source_lines:
+            stripped = line.strip()
+            if stripped.startswith('print('):
+                print_count += 1
 
-            if print_count > 30:
-                issues.append(
-                    f"{py_file.name}: High number of print statements ({print_count}). Consider reducing verbose output for better AI execution efficiency."
-                )
-
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        if print_count > 30:
+            issues.append(
+                f"{py_file.name}: High number of print statements ({print_count}). Consider reducing verbose output for better AI execution efficiency."
+            )
 
     if issues:
         return False, issues
@@ -458,7 +422,6 @@ def check_verbose_output(skill_path):
     """
     issues = []
 
-    # AST-based checker for verbose output
     class VerboseOutputChecker(ast.NodeVisitor):
         def __init__(self, filename, source_lines):
             self.filename = filename
@@ -469,11 +432,9 @@ def check_verbose_output(skill_path):
             self.debug_prints = []
 
         def visit_Call(self, node):
-            # Check for print statements
             if isinstance(node.func, ast.Name) and node.func.id == 'print':
                 self.print_count += 1
 
-                # Check for debug-like prints
                 for arg in node.args:
                     if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
                         if any(keyword in arg.value.lower() for keyword in ['debug', 'test', 'xxx', 'todo', 'fixme']):
@@ -481,59 +442,52 @@ def check_verbose_output(skill_path):
                                 f"{self.filename}:{node.lineno}: Debug print statement detected: '{arg.value[:50]}...'"
                             )
 
-            # Check for logging statements
             if isinstance(node.func, ast.Attribute):
                 if node.func.attr in ['debug', 'info', 'warning', 'error', 'critical']:
                     self.log_count += 1
 
             self.generic_visit(node)
 
-    # Check Python files
     for py_file in skill_path.glob('**/*.py'):
+        success, content = read_text_file(py_file)
+        if not success:
+            issues.append(f"Could not read {py_file.name}: {content}")
+            continue
+            
+        source_lines = content.splitlines()
+
         try:
-            content = py_file.read_text(encoding='utf-8')
-            source_lines = content.splitlines()
+            tree = ast.parse(content, filename=str(py_file))
+            checker = VerboseOutputChecker(py_file.name, source_lines)
+            checker.visit(tree)
 
-            # AST-based check
-            try:
-                tree = ast.parse(content, filename=str(py_file))
-                checker = VerboseOutputChecker(py_file.name, source_lines)
-                checker.visit(tree)
+            if checker.print_count > 20:
+                issues.append(
+                    f"{py_file.name}: Excessive print statements ({checker.print_count}). Consider consolidating output or using logging levels."
+                )
 
-                # Report excessive prints
-                if checker.print_count > 20:
+            if checker.log_count > 30:
+                issues.append(
+                    f"{py_file.name}: Excessive logging statements ({checker.log_count}). Consider reducing log verbosity."
+                )
+
+            issues.extend(checker.debug_prints)
+
+        except SyntaxError:
+            pass
+
+        consecutive_prints = 0
+        for line in source_lines:
+            stripped = line.strip()
+            if stripped.startswith('print('):
+                consecutive_prints += 1
+                if consecutive_prints > 5:
                     issues.append(
-                        f"{py_file.name}: Excessive print statements ({checker.print_count}). Consider consolidating output or using logging levels."
+                        f"{py_file.name}: Consecutive print statements detected. Consider consolidating into a single output."
                     )
-
-                # Report excessive logging
-                if checker.log_count > 30:
-                    issues.append(
-                        f"{py_file.name}: Excessive logging statements ({checker.log_count}). Consider reducing log verbosity."
-                    )
-
-                # Report debug prints
-                issues.extend(checker.debug_prints)
-
-            except SyntaxError:
-                pass
-
-            # Check for consecutive print statements
-            consecutive_prints = 0
-            for line in source_lines:
-                stripped = line.strip()
-                if stripped.startswith('print('):
-                    consecutive_prints += 1
-                    if consecutive_prints > 5:
-                        issues.append(
-                            f"{py_file.name}: Consecutive print statements detected. Consider consolidating into a single output."
-                        )
-                        break
-                else:
-                    consecutive_prints = 0
-
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+                    break
+            else:
+                consecutive_prints = 0
 
     if issues:
         return False, issues
@@ -558,7 +512,6 @@ def check_redundant_code(skill_path):
     """
     issues = []
 
-    # AST-based checker for redundant code
     class RedundantCodeChecker(ast.NodeVisitor):
         def __init__(self, filename, source_lines):
             self.filename = filename
@@ -583,10 +536,8 @@ def check_redundant_code(skill_path):
             self.generic_visit(node)
 
         def visit_FunctionDef(self, node):
-            # Track function definitions
             self.function_defs[node.name] = node.lineno
 
-            # Check for empty functions
             if not node.body:
                 issues.append(f"{self.filename}:{node.lineno}: Empty function '{node.name}' detected. Remove or implement.")
             elif len(node.body) == 1 and isinstance(node.body[0], ast.Pass):
@@ -605,7 +556,6 @@ def check_redundant_code(skill_path):
             self.generic_visit(node)
 
         def visit_ClassDef(self, node):
-            # Check for empty classes
             if not node.body:
                 issues.append(f"{self.filename}:{node.lineno}: Empty class '{node.name}' detected. Remove or implement.")
             elif len(node.body) == 1 and isinstance(node.body[0], ast.Pass):
@@ -613,48 +563,43 @@ def check_redundant_code(skill_path):
 
             self.generic_visit(node)
 
-    # Check Python files
     for py_file in skill_path.glob('**/*.py'):
+        success, content = read_text_file(py_file)
+        if not success:
+            issues.append(f"Could not read {py_file.name}: {content}")
+            continue
+            
+        source_lines = content.splitlines()
+
         try:
-            content = py_file.read_text(encoding='utf-8')
-            source_lines = content.splitlines()
+            tree = ast.parse(content, filename=str(py_file))
+            checker = RedundantCodeChecker(py_file.name, source_lines)
+            checker.visit(tree)
 
-            # AST-based check
-            try:
-                tree = ast.parse(content, filename=str(py_file))
-                checker = RedundantCodeChecker(py_file.name, source_lines)
-                checker.visit(tree)
+            for imp in checker.imports:
+                if '.' in imp:
+                    base_name = imp.split('.')[-1]
+                else:
+                    base_name = imp
 
-                # Check for unused imports
-                for imp in checker.imports:
-                    # Handle 'from X import Y' style imports
-                    if '.' in imp:
-                        base_name = imp.split('.')[-1]
-                    else:
-                        base_name = imp
+                if base_name not in checker.used_names:
+                    issues.append(
+                        f"{py_file.name}: Unused import '{imp}' detected. Remove to reduce code size."
+                    )
 
-                    if base_name not in checker.used_names:
+            code_blocks = {}
+            for i in range(0, len(source_lines) - 2, 3):
+                block = '\n'.join(source_lines[i:i+3])
+                if len(block) > 50:
+                    if block in code_blocks:
                         issues.append(
-                            f"{py_file.name}: Unused import '{imp}' detected. Remove to reduce code size."
+                            f"{py_file.name}: Potential duplicate code block detected around line {i+1} (similar to line {code_blocks[block]+1}). Consider consolidating."
                         )
+                    else:
+                        code_blocks[block] = i
 
-                # Check for duplicate code blocks (simple heuristic)
-                code_blocks = {}
-                for i in range(0, len(source_lines) - 2, 3):
-                    block = '\n'.join(source_lines[i:i+3])
-                    if len(block) > 50:  # Only check non-trivial blocks
-                        if block in code_blocks:
-                            issues.append(
-                                f"{py_file.name}: Potential duplicate code block detected around line {i+1} (similar to line {code_blocks[block]+1}). Consider consolidating."
-                            )
-                        else:
-                            code_blocks[block] = i
-
-            except SyntaxError:
-                pass
-
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        except SyntaxError:
+            pass
 
     if issues:
         return False, issues

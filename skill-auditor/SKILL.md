@@ -421,12 +421,150 @@ except json.JSONDecodeError as e:
     raise ValueError(f"Invalid JSON in config file: {e}")
 ```
 
+## Best Practices / 最佳实践
+
+### File Reading / 文件读取最佳实践
+
+For AI Agent skills, use the following progressive fallback strategy for robust file reading:
+
+对于 AI Agent skills，使用以下渐进式回退策略以实现健壮的文件读取：
+
+```python
+import logging
+from pathlib import Path
+
+try:
+    import charset_normalizer
+except ImportError:
+    charset_normalizer = None
+
+logger = logging.getLogger(__name__)
+
+def read_text_file(file_path: Path, encoding: str = None) -> tuple[bool, str]:
+    """
+    Read text file with robust encoding handling.
+    
+    Progressive fallback strategy:
+    1. Try specified encoding (or UTF-8) with strict mode
+    2. If fails, try charset_normalizer for auto-detection
+    3. Try fallback encodings (GB18030, GBK, latin-1)
+    4. Finally use errors='replace' as last resort
+    """
+    target_encoding = encoding or 'utf-8'
+    
+    try:
+        content = file_path.read_text(encoding=target_encoding, errors='strict')
+        return True, content
+        
+    except FileNotFoundError:
+        return False, f"File not found: {file_path}"
+        
+    except PermissionError:
+        return False, f"Permission denied: {file_path}"
+        
+    except UnicodeDecodeError as e:
+        logger.debug(f"UTF-8 decode failed for {file_path}: {e}")
+        
+        if charset_normalizer is not None and encoding is None:
+            try:
+                raw_data = file_path.read_bytes()
+                detected = charset_normalizer.detect(raw_data)
+                guessed_encoding = detected.get('encoding')
+                
+                if guessed_encoding and guessed_encoding.lower() not in ['utf-8', 'utf8', 'utf_8']:
+                    try:
+                        content = raw_data.decode(guessed_encoding, errors='strict')
+                        logger.debug(f"Auto-detected encoding {guessed_encoding} for {file_path}")
+                        return True, content
+                    except (UnicodeDecodeError, LookupError):
+                        pass
+            except Exception as detect_e:
+                logger.debug(f"Encoding detection failed: {detect_e}")
+        
+        fallback_encodings = ['gb18030', 'gbk', 'latin-1']
+        for enc in fallback_encodings:
+            if enc == target_encoding:
+                continue
+            try:
+                content = file_path.read_text(encoding=enc, errors='strict')
+                logger.debug(f"Used fallback encoding {enc} for {file_path}")
+                return True, content
+            except (UnicodeDecodeError, LookupError):
+                continue
+        
+        try:
+            content = file_path.read_text(encoding='utf-8', errors='replace')
+            return True, content
+        except Exception as final_e:
+            return False, f"Failed to read file {file_path}: {final_e}"
+```
+
+### Exception Handling / 异常处理最佳实践
+
+Follow the "from specific to generic" exception handling pattern:
+
+遵循"从具体到通用"的异常处理模式：
+
+```python
+def process_file(file_path: str) -> str:
+    """
+    Process file with specific exception handling.
+    
+    Priority order:
+    1. Most specific exceptions first (FileNotFoundError, PermissionError)
+    2. Medium specificity (UnicodeDecodeError, ValueError)
+    3. Generic Exception as final fallback
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
+            return f.read()
+            
+    except FileNotFoundError:
+        return f"技能执行失败：找不到文件路径 '{file_path}'。请检查路径是否拼写正确，或使用搜索工具确认文件是否存在。"
+        
+    except PermissionError:
+        return f"技能执行失败：没有权限读取文件 '{file_path}'。请尝试读取其他目录下的文件。"
+        
+    except UnicodeDecodeError:
+        return f"技能执行失败：文件 '{file_path}' 不是 UTF-8 编码的文本文件。请确认文件类型是否正确。"
+        
+    except ValueError as e:
+        return f"技能执行失败：处理文件内容时发生值错误: {e}"
+        
+    except Exception as e:
+        logger.error(f"处理文件时发生未预期的系统错误: {e}", exc_info=True)
+        return f"技能执行失败：发生未知系统错误 ({type(e).__name__}: {str(e)})。请尝试使用其他工具或调整参数后重试。"
+```
+
+### Key Principles / 核心原则
+
+1. **Encoding Parameter / 编码参数**
+   - Always specify `encoding='utf-8'` for text mode operations
+   - For Chinese text files, `encoding='utf-8'` is recommended but not mandatory
+   - Match encoding to actual file content when known
+
+2. **Errors Parameter / 错误参数**
+   - Always specify `errors='replace'` for robust error handling
+   - Prevents crashes on non-UTF8 content
+   - Use `errors='strict'` only when you want to fail on encoding errors
+
+3. **Exception Specificity / 异常特异性**
+   - Catch specific exceptions first (FileNotFoundError, PermissionError, etc.)
+   - Use generic `Exception` only as final fallback
+   - Provide helpful error messages for AI Agent self-correction
+
+4. **Progressive Fallback / 渐进式回退**
+   - Try strict mode first for best quality
+   - Fall back to encoding detection for unknown files
+   - Use `errors='replace'` as last resort to prevent crashes
+
 ## Resources
 
 ### scripts/
 - `audit_skill.py`: The main executable script that performs all checks.
+- `file_utils.py`: Utility functions for robust file reading with encoding fallback.
 - `errors_replace_check.py`: Specialized checker for errors='replace' parameter in file operations.
 - `encoding_check.py`: Specialized checker for encoding parameter in file operations.
 - `exception_handling_check.py`: Specialized checker for specific exception types instead of generic Exception.
 - `output_quality_checks.py`: Additional quality check functions for data masking, infinite loops, token optimization, etc.
-- `requirements.txt`: Dependencies for the audit script (requires `PyYAML`).
+- `requirements.txt`: Dependencies for the audit script (requires `PyYAML`, `charset_normalizer`).

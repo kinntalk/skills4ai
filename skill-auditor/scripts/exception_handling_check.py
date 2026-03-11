@@ -6,6 +6,17 @@ Specialized checker for specific exception types instead of generic Exception.
 
 import ast
 from pathlib import Path
+import logging
+
+try:
+    from file_utils import read_text_file
+except ImportError:
+    from pathlib import Path
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent))
+    from file_utils import read_text_file
+
+logger = logging.getLogger(__name__)
 
 
 def check_exception_handling(skill_path):
@@ -45,7 +56,7 @@ def check_exception_handling(skill_path):
             risky_funcs = {
                 'open': 'FileNotFoundError, PermissionError, OSError',
                 'Path.open': 'FileNotFoundError, PermissionError, OSError',
-                'read_text': 'FileNotFoundError, PermissionError, OSError',
+                'read_text': 'FileNotFoundError, PermissionError, OSError, UnicodeDecodeError',
                 'write_text': 'FileNotFoundError, PermissionError, OSError',
                 'json.load': 'FileNotFoundError, json.JSONDecodeError, ValueError',
                 'json.loads': 'json.JSONDecodeError, ValueError',
@@ -103,19 +114,20 @@ def check_exception_handling(skill_path):
     for py_file in skill_path.glob('**/*.py'):
         if py_file.name == 'exception_handling_check.py':
             continue
-        try:
-            content = py_file.read_text(encoding='utf-8')
-            source_lines = content.splitlines()
+        success, content = read_text_file(py_file)
+        if not success:
+            issues.append(f"Could not read {py_file.name}: {content}")
+            continue
+            
+        source_lines = content.splitlines()
 
-            try:
-                tree = ast.parse(content, filename=str(py_file))
-                checker = ExceptionHandlingChecker(py_file.name, source_lines)
-                checker.visit(tree)
-                issues.extend(checker.issues)
-            except SyntaxError as e:
-                issues.append(f"{py_file.name}: Syntax error - {e}")
-        except Exception as e:
-            issues.append(f"Could not read {py_file.name}: {e}")
+        try:
+            tree = ast.parse(content, filename=str(py_file))
+            checker = ExceptionHandlingChecker(py_file.name, source_lines)
+            checker.visit(tree)
+            issues.extend(checker.issues)
+        except SyntaxError as e:
+            issues.append(f"{py_file.name}: Syntax error - {e}")
 
     if issues:
         return False, issues
