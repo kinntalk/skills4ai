@@ -1,8 +1,8 @@
 # AGENTS.md - Skills Registry
 
 **Version:** 1.0.0  
-**Last Updated:** 2026-03-10  
-**Total Skills:** 34
+**Last Updated:** 2026-03-11  
+**Total Skills:** 35
 
 ---
 
@@ -16,12 +16,12 @@ This document provides a comprehensive registry of all available skills in the `
 
 | Category | Count | Skills |
 |-----------|--------|---------|
-| Core Skills | 6 | image-generation, x-file-manager, pdf-generation, planning-with-files, powershell-windows, proxy-manager |
+| Core Skills | 5 | image-generation, pdf-generation, planning-with-files, powershell-windows, proxy-manager |
 | Tool Skills | 4 | skill-auditor, skill-creator, skill-installer, skills-registry-sync |
 | Python Skills | 5 | async-python-patterns, python-design-patterns, python-packaging, python-performance-optimization, python-testing-patterns |
 | Obsidian Skills | 4 | obsidian-bases, obsidian-cli, obsidian-markdown, url-to-obsidian |
-| Other Skills | 15 | agent-browser, agentskills, brainstorming, dispatching-parallel-agents, executing-plans, find-skills, finishing-a-development-branch, receiving-code-review, requesting-code-review, subagent-driven-development, test-driven-development, using-git-worktrees, using-superpowers, web-design-guidelines, xhs-search |
-| **Total** | **34** | |
+| Other Skills | 17 | agent-browser, agentskills, brainstorming, dispatching-parallel-agents, executing-plans, find-skills, finishing-a-development-branch, receiving-code-review, requesting-code-review, subagent-driven-development, test-driven-development, using-git-worktrees, using-superpowers, web-design-guidelines, windows-app-manager, x-file-manager, xhs-search |
+| **Total** | **35** | |
 
 ---
 
@@ -32,14 +32,6 @@ This document provides a comprehensive registry of all available skills in the `
 **Description:** Converts Markdown documents to high-quality images (PNG/JPG) using Python and headless browser rendering. Ideal for creating social media posts, documentation screenshots, and sharing rich text content as images.
 
 **Path:** `image-generation/`
-
----
-
-### x-file-manager
-
-**Description:** Local file perception and retrieval tool for AI Agents. Use when user wants to search files by name, type, size, hash, find duplicates, scan large files, or analyze local file system. Supports both Chinese and English queries like "查找大文件" or "find large files".
-
-**Path:** `x-file-manager/`
 
 ---
 
@@ -87,7 +79,7 @@ This document provides a comprehensive registry of all available skills in the `
 
 ### skill-creator
 
-**Description:** Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, update or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.
+**Description:** Create, update, and optimize skills with evaluation and benchmarking support. **MUST invoke for all skill development requests** — creation (e.g., "创建技能", "create skill"), update (e.g., "更新技能", "update skill"), or optimization (e.g., "优化技能", "improve skill").
 
 **Path:** `skill-creator/`
 
@@ -299,6 +291,22 @@ This document provides a comprehensive registry of all available skills in the `
 
 ---
 
+### windows-app-manager
+
+**Description:** Windows Desktop Application Manager - Automatically start, stop, and manage Windows applications with intelligent path finding and process management
+
+**Path:** `windows-app-manager/`
+
+---
+
+### x-file-manager
+
+**Description:** Local file perception and retrieval tool for AI Agents. Use when user wants to search files by name, type, size, hash, find duplicates, scan large files, or analyze local file system. Supports both Chinese and English queries like "查找大文件" or "find large files".
+
+**Path:** `x-file-manager/`
+
+---
+
 ### xhs-search
 
 **Description:** Search Xiaohongshu (小红书) notes and comments, save results to Obsidian vault. Use when user wants to search xiaohongshu.com, extract notes, get comments, or save xiaohongshu content to Obsidian. Supports both Chinese and English keywords like "搜索 英语学习" or "search Learning English".
@@ -314,12 +322,12 @@ This document provides a comprehensive registry of all available skills in the `
 
 | Category | Count | Percentage |
 |----------|--------|------------|
-| Core Skills | 6 | 17.6% |
-| Tool Skills | 4 | 11.8% |
-| Python Skills | 5 | 14.7% |
-| Obsidian Skills | 4 | 11.8% |
-| Other Skills | 15 | 44.1% |
-| **Total** | **34** | **100%** |
+| Core Skills | 5 | 14.3% |
+| Tool Skills | 4 | 11.4% |
+| Python Skills | 5 | 14.3% |
+| Obsidian Skills | 4 | 11.4% |
+| Other Skills | 17 | 48.6% |
+| **Total** | **35** | **100%** |
 
 ---
 

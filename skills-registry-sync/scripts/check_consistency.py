@@ -140,8 +140,8 @@ def check_skills_json(installed_skills):
         if 'version' not in info:
             issues.append(("invalid", f"'{name}': missing 'version' field"))
         
-        if 'updated_at' not in info:
-            issues.append(("invalid", f"'{name}': missing 'updated_at' field"))
+        if 'last_update_time' not in info:
+            issues.append(("invalid", f"'{name}': missing 'last_update_time' field"))
     
     if not issues:
         print_status('PASS', "skills.json is consistent")

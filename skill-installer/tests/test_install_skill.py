@@ -201,12 +201,12 @@ def dest_root_with_registry():
                 "find-skills": {
                     "source": "https://github.com/example/find-skills",
                     "version": "abc123",
-                    "updated_at": "2024-01-01T00:00:00"
+                    "last_update_time": "2024-01-01T00:00:00"
                 },
                 "skill-installer": {
                     "source": "https://github.com/example/skill-installer",
                     "version": "def456",
-                    "updated_at": "2024-01-02T00:00:00"
+                    "last_update_time": "2024-01-02T00:00:00"
                 }
             }
         }

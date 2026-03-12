@@ -471,16 +471,29 @@
       "description": "Local file perception and retrieval tool for AI Agents. Use when user wants to search files by name, type, size, hash, find duplicates, scan large files, or analyze local file system. Supports both Chinese and English queries like \"查找大文件\" or \"find large files\".",
       "keywords": [
         "x-file-manager",
+        "local",
         "file",
-        "search",
-        "duplicate",
-        "hash",
-        "scanner"
+        "perception",
+        "retrieval",
+        "tool"
       ],
       "aliases": [
-        "x-file-manager",
-        "file-manager",
-        "file-scanner"
+        "x-file-manager"
+      ]
+    },
+    "windows-app-manager": {
+      "name": "windows-app-manager",
+      "description": "Windows Desktop Application Manager - Automatically start, stop, and manage Windows applications with intelligent path finding and process management",
+      "keywords": [
+        "windows-app-manager",
+        "windows",
+        "desktop",
+        "application",
+        "manager",
+        "automatically"
+      ],
+      "aliases": [
+        "windows-app-manager"
       ]
     }
   },
@@ -519,7 +532,8 @@
       "obsidian-cli",
       "obsidian-markdown",
       "xhs-search",
-      "x-file-manager"
+      "x-file-manager",
+      "windows-app-manager"
     ],
     "exact_match": {
       "image generation": "image-generation",

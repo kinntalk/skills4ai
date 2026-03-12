@@ -29,17 +29,23 @@ description_zh: Trae skills 标准合规性检查工具。检查依赖完整性�
    - Use `pathlib.Path()` instead of `os.path` / 使用 `pathlib.Path()` 而非 `os.path`
    - Avoid platform-specific commands like `dir`, `ls` / 避免平台特定命令如 `dir`, `ls`
 
+6. **i18n Message Dictionary / 国际化消息字典**
+   - All user-facing output text must use a message dictionary
+   - 所有面向用户的输出文本必须使用消息字典
+   - Support at least English (`en`) and Chinese (`zh`)
+   - 至少支持英文 (`en`) 和中文 (`zh`)
+   - Use environment variable for language switching (e.g., `SKILL_LANG`)
+   - 使用环境变量进行语言切换（如 `SKILL_LANG`）
+   - See `references/i18n-best-practices.md` for implementation details
+   - 实现细节请参阅 `references/i18n-best-practices.md`
+
 ### Recommended Best Practices / 推荐最佳实践
 
 1. **Multi-Language Support / 多语言支持**
    - Include both English and Chinese in SKILL.md (suggested)
    - 在 SKILL.md 中包含英文和中文（建议）
 
-2. **Message Dictionary for i18n / 使用消息字典实现国际化**
-   - Use message dictionaries for skills with extensive user-facing output
-   - 对于有大量面向用户输出的 skill，使用消息字典
-
-3. **Reference Documentation / 参考文档**
+2. **Reference Documentation / 参考文档**
    - Provide documentation in `references/` directory
    - 在 `references/` 目录中提供文档
 
@@ -51,7 +57,7 @@ The auditor performs checks across multiple dimensions:
 - **Basic Standards**: Structure, dependencies, encoding, and packaging
 - **Security Analysis**: Malicious script injection, permission abuse, prompt injection, code execution safety, filesystem security, and network security
 - **Quality Checks**: Technical standards including error handling, logging practices, input validation, output sanitization, and dependency security
-- **Output Quality**: Data masking, infinite loops, token optimization, AI execution effectiveness, verbose output, and redundant code detection
+- **Output Quality**: Data masking, token optimization, AI execution effectiveness, verbose output, and redundant code detection
 
 ## Standard Audit Process
 
@@ -247,11 +253,6 @@ This skill enforces a comprehensive 9-point standard check that every production
 - **Why:** Sensitive data exposure can lead to security breaches and privacy violations.
 - **Severity:** CRITICAL
 
-#### 12.2 Infinite Loops
-- **Check:** Detects potential infinite loops and unbounded recursion including while loops without proper exit conditions, recursive functions without base cases, unbounded iteration patterns, and potential infinite recursion.
-- **Why:** Infinite loops can cause resource exhaustion and system hangs.
-- **Severity:** HIGH
-
 #### 12.3 Token Optimization
 - **Check:** Analyzes code for token optimization opportunities including redundant code elimination, verbose output reduction, efficient algorithm alternatives, and token usage optimization tips.
 - **Why:** Optimized code reduces token usage and improves efficiency.
@@ -361,7 +362,7 @@ The auditor performs checks in 12 sections:
 9. **Registry & Map Consistency** - skills.json and skill_map.json validation
 10. **Security Analysis** - Malicious script injection, permission abuse, prompt injection, code execution safety, filesystem security, and network security
 11. **Quality Checks** - Error handling patterns, exception handling specificity, logging practices, input validation, output sanitization, dependency security, and technical standards
-12. **Output Quality** - Data masking, infinite loops, token optimization, AI execution effectiveness, verbose output, and redundant code detection
+12. **Output Quality** - Data masking, token optimization, AI execution effectiveness, verbose output, and redundant code detection
 
 ### Severity Levels
 

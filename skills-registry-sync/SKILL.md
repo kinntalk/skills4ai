@@ -88,6 +88,10 @@ The sync process reports:
 > - "创建一个新的 skill" → After creation completes, invoke skills-registry-sync
 > - "create my-custom skill" → After creation completes, invoke skills-registry-sync
 
+## Reference Files
+
+- `references/description-guide.md` — Guidelines for writing skill descriptions in AGENTS.md
+
 ## Integration
 
 This skill integrates with:

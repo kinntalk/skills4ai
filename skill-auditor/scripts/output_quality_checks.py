@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Output Quality Checks for skill-auditor
-Additional quality check functions for data masking, infinite loops, token optimization, etc.
+Additional quality check functions for data masking, token optimization, etc.
 """
 
 import sys
@@ -121,96 +121,6 @@ def check_data_masking(skill_path):
     if issues:
         return False, issues
     return True, "No data masking issues found"
-
-
-def check_infinite_loops(skill_path):
-    """
-    Check for potential infinite loops and unbounded recursion.
-
-    Detects:
-    1. While loops without proper exit conditions
-    2. Recursive functions without base cases
-    3. Unbounded iteration patterns
-    4. Potential infinite recursion
-
-    Args:
-        skill_path: Path to the skill directory to scan.
-
-    Returns:
-        tuple: (success: bool, message: str | list[str])
-    """
-    issues = []
-
-    class InfiniteLoopChecker(ast.NodeVisitor):
-        def __init__(self, filename, source_lines):
-            self.filename = filename
-            self.source_lines = source_lines
-            self.issues = []
-            self.function_stack = []
-
-        def visit_FunctionDef(self, node):
-            self.function_stack.append(node.name)
-            self.generic_visit(node)
-            self.function_stack.pop()
-
-        def visit_AsyncFunctionDef(self, node):
-            self.function_stack.append(node.name)
-            self.generic_visit(node)
-            self.function_stack.pop()
-
-        def visit_While(self, node):
-            if isinstance(node.test, ast.Constant) and node.test.value is True:
-                has_break = False
-                for child in ast.walk(node):
-                    if isinstance(child, ast.Break):
-                        has_break = True
-                        break
-
-                if not has_break:
-                    self.issues.append(
-                        f"{self.filename}:{node.lineno}: While loop with constant True condition and no break statement detected"
-                    )
-
-            self.generic_visit(node)
-
-        def visit_For(self, node):
-            if isinstance(node.iter, ast.Call):
-                if isinstance(node.iter.func, ast.Name) and node.iter.func.id == 'range':
-                    if len(node.iter.args) == 0:
-                        self.issues.append(
-                            f"{self.filename}:{node.lineno}: For loop with range() - potential infinite loop"
-                        )
-
-            self.generic_visit(node)
-
-        def visit_Call(self, node):
-            if isinstance(node.func, ast.Name) and self.function_stack:
-                if node.func.id == self.function_stack[-1]:
-                    self.issues.append(
-                        f"{self.filename}:{node.lineno}: Recursive function '{node.func.id}' detected - ensure proper base case exists"
-                    )
-
-            self.generic_visit(node)
-
-    for py_file in skill_path.glob('**/*.py'):
-        success, content = read_text_file(py_file)
-        if not success:
-            issues.append(f"Could not read {py_file.name}: {content}")
-            continue
-            
-        source_lines = content.splitlines()
-
-        try:
-            tree = ast.parse(content, filename=str(py_file))
-            checker = InfiniteLoopChecker(py_file.name, source_lines)
-            checker.visit(tree)
-            issues.extend(checker.issues)
-        except SyntaxError:
-            pass
-
-    if issues:
-        return False, issues
-    return True, "No infinite loop patterns detected"
 
 
 def check_token_optimization(skill_path):

@@ -183,7 +183,7 @@ def scan_skills():
             "source": source,
             "subdir": subdir,
             "version": version,
-            "updated_at": datetime.datetime.now().isoformat(),
+            "last_update_time": datetime.datetime.now().isoformat(),
             "health": {
                 "is_valid": is_valid,
                 "validation_error": validation_error,
@@ -212,7 +212,7 @@ def update_skills_json(skills):
             "source": normalized_source,
             "subdir": info["subdir"],
             "version": info["version"],
-            "updated_at": info["updated_at"],
+            "last_update_time": info["last_update_time"],
             "health": info["health"]
         }
     

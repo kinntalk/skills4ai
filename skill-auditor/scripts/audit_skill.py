@@ -20,10 +20,11 @@ colorama_init()
 from errors_replace_check import check_errors_replace
 from encoding_check import check_encoding_parameter
 from exception_handling_check import check_exception_handling
+from messages import get_message, get_lang, set_lang, get_available_languages
 
-PASS_TEXT = "[PASS]"
-FAIL_TEXT = "[FAIL]"
-WARN_TEXT = "[WARN]"
+PASS_TEXT = get_message('status.pass')
+FAIL_TEXT = get_message('status.fail')
+WARN_TEXT = get_message('status.warn')
 
 def print_pass(msg, json_output=False):
     if json_output:
@@ -48,6 +49,22 @@ def print_info(msg, json_output=False):
 def print_verbose(msg, verbose=False):
     if verbose:
         print(f"  {msg}")
+
+def print_issues(issues, json_output=False):
+    """Print a list of issues with indentation."""
+    if json_output:
+        return
+    if isinstance(issues, list):
+        for issue in issues:
+            print(f"      - {issue}")
+    else:
+        print(f"      - {issues}")
+
+def print_severity_issue(severity, issue, json_output=False):
+    """Print an issue with severity level."""
+    if json_output:
+        return
+    print(f"      - [{severity}] {issue}")
 
 def print_severity(severity, json_output=False):
     if json_output:
@@ -96,11 +113,11 @@ def check_dependencies(skill_path):
                 if module not in std_lib and module != 'scripts':
                     imported_modules.add(module)
         except FileNotFoundError:
-            print(f"Warning: File not found: {py_file.name}")
+            print(get_message('warnings.file_not_found', file=py_file.name))
         except PermissionError:
-            print(f"Warning: Permission denied: {py_file.name}")
+            print(get_message('warnings.permission_denied', file=py_file.name))
         except UnicodeDecodeError as e:
-            print(f"Warning: Could not decode {py_file.name}: {e}")
+            print(get_message('warnings.decode_error', file=py_file.name, error=e))
 
     try:
         req_content = req_file.read_text(encoding='utf-8', errors='replace').lower()
@@ -1519,97 +1536,6 @@ def check_data_masking(skill_path):
         return False, issues
     return True, "No data masking issues found"
 
-def check_infinite_loops(skill_path):
-    """
-    Check for potential infinite loops and unbounded recursion.
-
-    Detects:
-    1. While loops without proper exit conditions
-    2. Recursive functions without base cases
-    3. Unbounded iteration patterns
-    4. Potential infinite recursion
-
-    Args:
-        skill_path: Path to the skill directory to scan.
-
-    Returns:
-        tuple: (success: bool, message: str | list[str])
-    """
-    issues = []
-
-    class InfiniteLoopChecker(ast.NodeVisitor):
-        def __init__(self, filename, source_lines):
-            self.filename = filename
-            self.source_lines = source_lines
-            self.issues = []
-            self.function_stack = []
-
-        def visit_FunctionDef(self, node):
-            self.function_stack.append(node.name)
-            self.generic_visit(node)
-            self.function_stack.pop()
-
-        def visit_AsyncFunctionDef(self, node):
-            self.function_stack.append(node.name)
-            self.generic_visit(node)
-            self.function_stack.pop()
-
-        def visit_While(self, node):
-            if isinstance(node.test, ast.Constant) and node.test.value is True:
-                has_break = False
-                for child in ast.walk(node):
-                    if isinstance(child, ast.Break):
-                        has_break = True
-                        break
-
-                if not has_break:
-                    self.issues.append(
-                        f"{self.filename}:{node.lineno}: While loop with constant True condition and no break statement detected"
-                    )
-
-            self.generic_visit(node)
-
-        def visit_For(self, node):
-            if isinstance(node.iter, ast.Call):
-                if isinstance(node.iter.func, ast.Name) and node.iter.func.id == 'range':
-                    if len(node.iter.args) == 0:
-                        self.issues.append(
-                            f"{self.filename}:{node.lineno}: For loop with range() - potential infinite loop"
-                        )
-
-            self.generic_visit(node)
-
-        def visit_Call(self, node):
-            if isinstance(node.func, ast.Name) and self.function_stack:
-                if node.func.id == self.function_stack[-1]:
-                    self.issues.append(
-                        f"{self.filename}:{node.lineno}: Recursive function '{node.func.id}' detected - ensure proper base case exists"
-                    )
-
-            self.generic_visit(node)
-
-    for py_file in skill_path.glob('**/*.py'):
-        try:
-            content = py_file.read_text(encoding='utf-8', errors='replace')
-            source_lines = content.splitlines()
-
-            try:
-                tree = ast.parse(content, filename=str(py_file))
-                checker = InfiniteLoopChecker(py_file.name, source_lines)
-                checker.visit(tree)
-                issues.extend(checker.issues)
-            except SyntaxError:
-                pass
-
-        except FileNotFoundError:
-            issues.append(f"File not found: {py_file.name}")
-        except PermissionError:
-            issues.append(f"Permission denied: {py_file.name}")
-
-    if issues:
-        return False, issues
-    return True, "No infinite loop patterns detected"
-
 def check_token_optimization(skill_path):
     """
     Analyze code for token optimization opportunities.
@@ -2036,8 +1962,8 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
     if skills_dir is None:
         skills_dir = skill_path.parent
     
-    print(f"[*] Auditing Skill: {skill_path.name}")
-    print(f"   Path: {skill_path}\n")
+    print(get_message('audit.title', name=skill_path.name))
+    print(get_message('audit.path', path=skill_path) + '\n')
     
     has_errors = False
     has_warnings = False
@@ -2072,7 +1998,7 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
     i18n_as_error = (check_level == "strict")
     
     # Section 1: Basic Structure
-    print_info("=== Basic Structure ===", json_output)
+    print_info(get_message('sections.basic_structure'), json_output)
     
     ok, msg = validate_frontmatter(skill_path)
     if ok: print_pass(msg, json_output)
@@ -2085,30 +2011,26 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
     ok, msg = check_directory_structure(skill_path)
     if ok: print_pass(msg, json_output)
     else: 
-        print_fail("Directory structure issues:", json_output)
-        if isinstance(msg, list):
-            for issue in msg: print(f"      - {issue}")
-        else:
-            print(f"      - {msg}")
+        print_fail(get_message('issues.dir_structure'), json_output)
+        print_issues(msg, json_output)
         has_errors = True
     
     # Section 2: Dependencies
-    print_info("\n=== Dependencies ===", json_output)
+    print_info("\n" + get_message('sections.dependencies'), json_output)
     
     ok, msg = check_dependencies(skill_path)
     if ok: print_pass(msg, json_output)
     else: print_fail(msg, json_output); has_errors = True
     
     # Section 3: Encoding & Path Safety
-    print_info("\n=== Encoding & Path Safety ===", json_output)
+    print_info("\n" + get_message('sections.encoding_path_safety'), json_output)
     
     ok, msg = check_encoding_safety(skill_path)
     if ok:
         print_pass(msg, json_output)
     else:
-        print_fail("Found potential encoding issues:", json_output)
-        for issue in msg:
-            print(f"      - {issue}")
+        print_fail(get_message('issues.encoding_issues'), json_output)
+        print_issues(msg, json_output)
         has_errors = True
     
     # New specialized checks
@@ -2116,32 +2038,29 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
     if ok:
         print_pass(msg, json_output)
     else:
-        print_fail("Found file operations without errors='replace':", json_output)
-        for issue in msg:
-            print(f"      - {issue}")
+        print_fail(get_message('issues.errors_replace'), json_output)
+        print_issues(msg, json_output)
         has_errors = True
     
     ok, msg = check_encoding_parameter(skill_path)
     if ok:
         print_pass(msg, json_output)
     else:
-        print_fail("Found file operations without encoding parameter:", json_output)
-        for issue in msg:
-            print(f"      - {issue}")
+        print_fail(get_message('issues.encoding_param'), json_output)
+        print_issues(msg, json_output)
         has_errors = True
         
     ok, msg = check_path_consistency(skill_path)
     if ok:
         print_pass(msg, json_output)
     else:
-        print_fail("Found path inconsistencies:", json_output)
-        for issue in msg:
-            print(f"      - {issue}")
+        print_fail(get_message('issues.path_inconsistencies'), json_output)
+        print_issues(msg, json_output)
         has_errors = True
     
     # Section 4: Packaging
     if run_packaging_checks:
-        print_info("\n=== Packaging ===", json_output)
+        print_info("\n" + get_message('sections.packaging'), json_output)
         
         ok, msg = check_packaging_logic(skill_path)
         if ok: print_pass(msg, json_output)
@@ -2153,24 +2072,22 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
     
     # Section 5: Subprocess & Path Operations
     if run_subprocess_checks:
-        print_info("\n=== Subprocess & Path Operations ===", json_output)
+        print_info("\n" + get_message('sections.subprocess_path'), json_output)
         
         ok, msg = check_subprocess_robustness(skill_path)
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Found potential subprocess robustness issues:", json_output)
-            for issue in msg:
-                print(f"      - {issue}")
+            print_fail(get_message('issues.subprocess_issues'), json_output)
+            print_issues(msg, json_output)
             has_errors = True
         
         ok, msg = check_risky_path_ops(skill_path)
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Found potential risky path operations:", json_output)
-            for issue in msg:
-                print(f"      - {issue}")
+            print_fail(get_message('issues.risky_ops'), json_output)
+            print_issues(msg, json_output)
             has_errors = True
     
     # Cross-Platform Compatibility
@@ -2179,14 +2096,13 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Found cross-platform compatibility issues:", json_output)
-            for issue in msg:
-                print(f"      - {issue}")
+            print_fail(get_message('issues.cross_platform'), json_output)
+            print_issues(msg, json_output)
             has_errors = True
     
     # Section 7: Internationalization (i18n)
     if run_i18n_checks:
-        print_info("\n=== Internationalization (i18n) ===", json_output)
+        print_info("\n" + get_message('sections.i18n'), json_output)
         
         ok, msg = check_i18n_support(skill_path)
         if ok:
@@ -2196,62 +2112,54 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
             has_emoji_issue = any("Emoji found" in issue for issue in msg)
             
             if has_emoji_issue or i18n_as_error:
-                print_fail("Found i18n issues:", json_output)
+                print_fail(get_message('issues.i18n_issues'), json_output)
                 has_errors = True
             else:
-                print_warn("Found i18n issues (warnings):", json_output)
+                print_warn(get_message('issues.i18n_issues'), json_output)
                 has_warnings = True
-            for issue in msg:
-                print(f"      - {issue}")
+            print_issues(msg, json_output)
     
     # Section 8: Absolute References
     if run_absolute_ref_checks:
-        print_info("\n=== Absolute References ===", json_output)
+        print_info("\n" + get_message('sections.absolute_references'), json_output)
         
         ok, msg = check_absolute_references(skill_path)
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Found absolute references:", json_output)
-            for issue in msg:
-                print(f"      - {issue}")
+            print_fail(get_message('issues.absolute_refs'), json_output)
+            print_issues(msg, json_output)
             has_errors = True
     
     # Section 9: Registry & Map Consistency
     if run_registry_checks:
-        print_info("\n=== Registry & Map Consistency ===", json_output)
+        print_info("\n" + get_message('sections.registry_map'), json_output)
         
         ok, msg = check_registry_consistency(skill_path, skills_dir)
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Registry consistency issues:", json_output)
-            if isinstance(msg, list):
-                for issue in msg: print(f"      - {issue}")
-            else:
-                print(f"      - {msg}")
+            print_fail(get_message('issues.registry_issues'), json_output)
+            print_issues(msg, json_output)
             has_warnings = True
         
         ok, msg = check_skill_map_consistency(skill_path, skills_dir)
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Skill map consistency issues:", json_output)
-            if isinstance(msg, list):
-                for issue in msg: print(f"      - {issue}")
-            else:
-                print(f"      - {msg}")
+            print_fail(get_message('issues.skill_map_issues'), json_output)
+            print_issues(msg, json_output)
             has_warnings = True
     
     # Section 10: Security Analysis
     if run_security_checks:
-        print_info("\n=== Security Analysis ===", json_output)
+        print_info("\n" + get_message('sections.security'), json_output)
         
         ok, msg = check_malicious_script_injection(skill_path)
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Found malicious script injection patterns:", json_output)
+            print_fail(get_message('issues.security_injection'), json_output)
             if isinstance(msg, list):
                 for issue in msg: 
                     print(f"      - [CRITICAL] {issue}")
@@ -2267,7 +2175,7 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Found permission abuse risks:", json_output)
+            print_fail(get_message('issues.permission_abuse'), json_output)
             if isinstance(msg, list):
                 for issue in msg: 
                     print(f"      - [HIGH] {issue}")
@@ -2283,7 +2191,7 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Found prompt injection vectors:", json_output)
+            print_fail(get_message('issues.prompt_injection'), json_output)
             if isinstance(msg, list):
                 for issue in msg: 
                     print(f"      - [CRITICAL] {issue}")
@@ -2299,7 +2207,7 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Found code execution safety issues:", json_output)
+            print_fail(get_message('issues.code_exec_safety'), json_output)
             if isinstance(msg, list):
                 for issue in msg: 
                     print(f"      - [CRITICAL] {issue}")
@@ -2315,7 +2223,7 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Found filesystem security issues:", json_output)
+            print_fail(get_message('issues.filesystem_security'), json_output)
             if isinstance(msg, list):
                 for issue in msg: 
                     print(f"      - [HIGH] {issue}")
@@ -2331,7 +2239,7 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Found network security issues:", json_output)
+            print_fail(get_message('issues.network_security'), json_output)
             if isinstance(msg, list):
                 for issue in msg: 
                     print(f"      - [HIGH] {issue}")
@@ -2345,13 +2253,13 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
     
     # Section 11: Quality Checks
     if run_quality_checks:
-        print_info("\n=== Quality Checks ===", json_output)
+        print_info("\n" + get_message('sections.quality'), json_output)
         
         ok, msg = check_technical_standards(skill_path)
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Technical standards issues:", json_output)
+            print_fail(get_message('issues.tech_standards'), json_output)
             if isinstance(msg, list):
                 for issue in msg: 
                     print(f"      - [MEDIUM] {issue}")
@@ -2367,7 +2275,7 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Error handling pattern issues:", json_output)
+            print_fail(get_message('issues.error_handling'), json_output)
             if isinstance(msg, list):
                 for issue in msg: 
                     print(f"      - [HIGH] {issue}")
@@ -2383,7 +2291,7 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Exception handling specificity issues:", json_output)
+            print_fail(get_message('issues.exception_specificity'), json_output)
             if isinstance(msg, list):
                 for issue in msg: 
                     print(f"      - [HIGH] {issue}")
@@ -2415,7 +2323,7 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Input validation issues:", json_output)
+            print_fail(get_message('issues.input_validation'), json_output)
             if isinstance(msg, list):
                 for issue in msg: 
                     print(f"      - [HIGH] {issue}")
@@ -2431,7 +2339,7 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Output sanitization issues:", json_output)
+            print_fail(get_message('issues.output_sanitization'), json_output)
             if isinstance(msg, list):
                 for issue in msg: 
                     print(f"      - [HIGH] {issue}")
@@ -2461,13 +2369,13 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
     
     # Section 12: Output Quality Checks
     if run_output_quality_checks:
-        print_info("\n=== Output Quality Checks ===", json_output)
+        print_info("\n" + get_message('sections.output_quality'), json_output)
         
         ok, msg = check_data_masking(skill_path)
         if ok:
             print_pass(msg, json_output)
         else:
-            print_fail("Found data masking issues:", json_output)
+            print_fail(get_message('issues.data_masking'), json_output)
             if isinstance(msg, list):
                 for issue in msg: 
                     print(f"      - [CRITICAL] {issue}")
@@ -2477,22 +2385,6 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
                 print(f"      - [CRITICAL] {msg}")
                 output_quality_issues += 1
                 critical_issues += 1
-            has_errors = True
-        
-        ok, msg = check_infinite_loops(skill_path)
-        if ok:
-            print_pass(msg, json_output)
-        else:
-            print_fail("Found infinite loop patterns:", json_output)
-            if isinstance(msg, list):
-                for issue in msg: 
-                    print(f"      - [HIGH] {issue}")
-                    output_quality_issues += 1
-                    high_issues += 1
-            else:
-                print(f"      - [HIGH] {msg}")
-                output_quality_issues += 1
-                high_issues += 1
             has_errors = True
         
         ok, msg = check_token_optimization(skill_path)
@@ -2559,40 +2451,40 @@ def audit_skill(skill_path, skills_dir=None, verbose=False, json_output=False, c
                 low_issues += 1
             has_warnings = True
     
-    print("\n" + "="*40)
+    print(get_message('summary.separator'))
     
     # Print detailed summary
     total_issues = security_issues + quality_issues + output_quality_issues
     if total_issues > 0 or has_errors or has_warnings:
-        print(f"\nAudit Summary:")
-        print(f"  Security Issues: {security_issues}")
-        print(f"  Quality Issues: {quality_issues}")
-        print(f"  Output Quality Issues: {output_quality_issues}")
-        print(f"  Total Issues: {total_issues}")
+        print(f"\n{get_message('summary.title')}")
+        print(get_message('summary.security_issues', count=security_issues))
+        print(get_message('summary.quality_issues', count=quality_issues))
+        print(get_message('summary.output_quality_issues', count=output_quality_issues))
+        print(get_message('summary.total_issues', count=total_issues))
         
         if critical_issues > 0 or high_issues > 0 or medium_issues > 0 or low_issues > 0:
-            print(f"\nSeverity Breakdown:")
+            print(get_message('summary.severity_breakdown'))
             if critical_issues > 0:
-                print(f"  CRITICAL: {critical_issues}")
+                print(get_message('summary.critical', count=critical_issues))
             if high_issues > 0:
-                print(f"  HIGH: {high_issues}")
+                print(get_message('summary.high', count=high_issues))
             if medium_issues > 0:
-                print(f"  MEDIUM: {medium_issues}")
+                print(get_message('summary.medium', count=medium_issues))
             if low_issues > 0:
-                print(f"  LOW: {low_issues}")
+                print(get_message('summary.low', count=low_issues))
     
     # Determine audit result based on severity
     audit_failed = has_errors or (critical_issues > 0) or (high_issues > 0)
     audit_warnings = has_warnings or (medium_issues > 0) or (low_issues > 0)
     
     if audit_failed:
-        print(f"{Fore.RED}[!] Audit completed with errors. Please fix issues above.{Style.RESET_ALL}")
+        print(f"{Fore.RED}{get_message('results.errors')}{Style.RESET_ALL}")
         return False
     elif audit_warnings:
-        print(f"{Fore.YELLOW}[!] Audit completed with warnings. Review issues above.{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}{get_message('results.warnings')}{Style.RESET_ALL}")
         return True
     else:
-        print(f"{Fore.GREEN}[*] Skill passed all standard checks!{Style.RESET_ALL}")
+        print(f"{Fore.GREEN}{get_message('results.passed')}{Style.RESET_ALL}")
         return True
 
 def check_risky_path_ops(skill_path):
@@ -3587,22 +3479,22 @@ def check_registry_consistency(skill_path, skills_dir):
         if skill_info.get("source") not in ["local", "unknown"]:
             issues.append("Remote skill has 'unknown' version (should use commit hash)")
     
-    # Check updated_at field
-    if "updated_at" not in skill_info:
-        issues.append("Missing 'updated_at' field in registry")
+    # Check last_update_time field
+    if "last_update_time" not in skill_info:
+        issues.append("Missing 'last_update_time' field in registry")
     else:
         try:
-            updated_at = datetime.datetime.fromisoformat(skill_info["updated_at"])
+            last_update_time = datetime.datetime.fromisoformat(skill_info["last_update_time"])
             # Ensure both datetimes are timezone-aware or both are naive
             now = datetime.datetime.now(datetime.timezone.utc)
-            # If updated_at is naive, assume UTC
-            if updated_at.tzinfo is None:
-                updated_at = updated_at.replace(tzinfo=datetime.timezone.utc)
-            age = now - updated_at
+            # If last_update_time is naive, assume UTC
+            if last_update_time.tzinfo is None:
+                last_update_time = last_update_time.replace(tzinfo=datetime.timezone.utc)
+            age = now - last_update_time
             if age > datetime.timedelta(days=365):
                 issues.append(f"Registry entry is old ({age.days} days), consider updating")
         except ValueError:
-            issues.append(f"Invalid updated_at format: {skill_info['updated_at']}")
+            issues.append(f"Invalid last_update_time format: {skill_info['last_update_time']}")
     
     if issues:
         return False, issues
@@ -4080,9 +3972,19 @@ def parse_arguments():
         default="standard",
         help="Check level: strict (all checks), standard (recommended), relaxed (minimal)"
     )
-    
+
+    parser.add_argument(
+        "--lang",
+        choices=["en", "zh"],
+        default=None,
+        help="Language for output messages (en: English, zh: Chinese)"
+    )
+
     args = parser.parse_args()
-    
+
+    if args.lang:
+        set_lang(args.lang)
+
     return (
         args.skill_path,
         args.skills_dir,
@@ -4095,11 +3997,11 @@ if __name__ == "__main__":
     skill_path, skills_dir, verbose, json_output, check_level = parse_arguments()
     
     if not json_output:
-        print(f"[*] Auditing Skill: {Path(skill_path).name}")
-        print(f"   Path: {Path(skill_path)}")
+        print(get_message('audit.title', name=Path(skill_path).name))
+        print(get_message('audit.path', path=Path(skill_path)))
         if verbose:
-            print(f"   Level: {check_level}")
-            print(f"   Skills Dir: {skills_dir if skills_dir else 'N/A'}")
+            print(get_message('audit.level', level=check_level))
+            print(get_message('audit.skills_dir', dir=skills_dir if skills_dir else 'N/A'))
             print()
     
     success = audit_skill(

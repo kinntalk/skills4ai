@@ -378,7 +378,7 @@ def info_command(skill_name):
             version = version[:7]
         print(MSG_INFO_VERSION.format(version=version))
         
-        updated = skill_info.get('updated_at')
+        updated = skill_info.get('last_update_time')
         if updated:
             print(MSG_INFO_UPDATED.format(updated=updated))
         
