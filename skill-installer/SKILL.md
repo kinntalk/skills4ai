@@ -1,571 +1,210 @@
 ---
 name: skill-installer
-description: "Install and manage skills from Git repositories into .trae/skills directory. Supports subdirectories, catalog browsing, dependency management, license verification, health checks, version rollback, encoding detection, and encoding conversion. Note: Registry synchronization (skills.json, skill_map.json, AGENTS.md) is handled by skills-registry-sync skill."
+description: "Install and manage skills from Git repositories into .trae/skills directory. Use this skill whenever the user wants to install, uninstall, update, or manage skills. Triggers on phrases like 'install skill', '安装 skill', '从 GitHub 安装', 'uninstall skill', '卸载 skill', 'update skills', 'list skills', '列出已安装的 skills'. Also handles encoding detection and conversion for skill files. Note: Registry synchronization is handled by skills-registry-sync skill."
 ---
 
 # Skill Installer
 
-## Overview
+Install, manage, and maintain Trae skills from Git repositories.
 
-The `skill-installer` simplifies the process of adding new skills to your project. It fetches skills from Git repositories (like GitHub) and installs them into the standard `.trae/skills/` directory. It also automatically triggers `skill-auditor` to verify the quality of installed skills.
+## When to Use This Skill
 
-**Note:** For registry synchronization (skills.json, skill_map.json, AGENTS.md), use the `skills-registry-sync` skill after installation.
+Use this skill immediately when the user:
 
-## Features
+**Installation requests:**
+- Mentions installing a skill: "install xxx skill", "安装 xxx skill"
+- Wants to add from GitHub: "从 GitHub 安装", "clone and install"
+- Provides a Git URL or user/repo format
 
-- **Git Integration**: Installs directly from Git URLs.
-- **Subdirectory Support**: Can extract specific skills from monorepos (e.g., `user/repo/skill-name`).
-- **Auto-Audit**: Automatically runs `skill-auditor` on the installed skill to ensure compliance.
-- **Safe Install**: Uses temporary directories to prevent workspace pollution during download.
-- **Skill Catalog**: Browse and install skills from a curated catalog.
-- **Dependency Management**: Automatically detects and installs skill dependencies.
-- **License Verification**: Automatically detects and validates license compatibility.
-- **Health Checks**: Validate installed skills for proper structure and dependencies.
-- **Version Rollback**: Rollback to previous versions using git history.
-- **Encoding Detection**: Detect file encoding using chardet library for single files or directories.
-- **Encoding Conversion**: Convert files from one encoding to another (e.g., GBK to UTF-8) with auto-detection support.
+**Management requests:**
+- Wants to uninstall: "uninstall xxx", "卸载 xxx", "删除 xxx skill"
+- Wants to update: "update skills", "更新 skills"
+- Wants to list installed: "list skills", "列出已安装的 skills"
+- Wants skill info: "show info for xxx", "查看 xxx 信息"
 
-## Registry Synchronization
+**Encoding requests:**
+- Detect encoding: "检测文件编码", "detect encoding"
+- Convert encoding: "转换编码", "convert to UTF-8"
 
-**Important:** This skill does NOT automatically update registry files (skills.json, skill_map.json, AGENTS.md).
+**Do NOT use for:**
+- Finding/searching for skills → use `find-skills` skill instead
 
-After installing or uninstalling skills, run the `skills-registry-sync` skill to synchronize all registry files:
-
-```bash
-python .trae/skills/skills-registry-sync/scripts/sync_registry.py
-```
-
-This ensures:
-- `skills.json` is updated with source, version, and health status
-- `skill_map.json` is updated with skill metadata (description, keywords, aliases)
-- `AGENTS.md` is updated with skill documentation
-
-## Usage
+## Core Operations
 
 ### Install a Skill
-
-#### By Git URL or User/Repo Format
 
 ```bash
 python .trae/skills/skill-installer/scripts/install_skill.py <source>
 ```
 
+**Source formats:**
+- Full URL: `https://github.com/user/repo`
+- Short format: `user/repo`
+- With subdirectory: `user/repo/path/to/skill`
+- Skill name from catalog: `brainstorming`
+
+**Options:**
+- `--yes` or `-y`: Auto-confirm all prompts (overwrite, dependencies, license)
+- `--force`: Force overwrite existing installation
+- `--no-audit`: Skip skill-auditor check
+- `--path <dir>`: Custom destination directory
+
 **Examples:**
 ```bash
-# Install from full GitHub URL
-python scripts/install_skill.py https://github.com/user/my-skill-repo
+# Install from GitHub URL
+python scripts/install_skill.py https://github.com/user/my-skill
 
-# Install from user/repo format
-python scripts/install_skill.py user/my-skill-repo
+# Install with short format
+python scripts/install_skill.py user/my-skill
 
-# Install specific skill from collection (e.g., vercel-labs/agent-skills)
+# Install specific skill from monorepo
 python scripts/install_skill.py vercel-labs/agent-skills/skills/web-design-guidelines
-```
 
-#### By Skill Name
+# Batch install multiple skills
+python scripts/install_skill.py skill1 skill2 skill3
 
-Install skills directly from the catalog using the skill name:
-
-```bash
-python .trae/skills/skill-installer/scripts/install_skill.py <skill-name>
-```
-
-**Examples:**
-```bash
-# Install by skill name
-python scripts/install_skill.py brainstorming
-
-# Install with category prefix
-python scripts/install_skill.py curated/brainstorming
-
-# Install by alias
-python scripts/install_skill.py <alias>
-```
-
-#### Interactive Installation
-
-Browse the catalog and select skills interactively:
-
-```bash
-python .trae/skills/skill-installer/scripts/install_skill.py --interactive
-```
-
-This will display:
-1. List of available categories
-2. Skills in the selected category
-3. Skill details and confirmation prompt
-
-#### Batch Installation
-
-Install multiple skills at once:
-
-```bash
-python .trae/skills/skill-installer/scripts/install_skill.py skill1 skill2 skill3
-```
-
-**Example:**
-```bash
-python scripts/install_skill.py brainstorming planning-with-files systematic-debugging
-```
-
-#### Auto-Confirmation
-
-Use the `--yes` or `-y` flag to automatically confirm all prompts:
-
-```bash
-python .trae/skills/skill-installer/scripts/install_skill.py --yes <source>
-```
-
-This will:
-- Automatically overwrite existing skills
-- Auto-install all dependencies without prompting
-- Skip license confirmation prompts
-
-#### Custom Destination
-
-```bash
-python scripts/install_skill.py user/repo --path ./custom/skills
+# Auto-confirm everything
+python scripts/install_skill.py --yes brainstorming
 ```
 
 ### Manage Skills
 
-The `manage_skills.py` script provides a convenient way to list installed skills, check for updates, and upgrade them.
-
-**List Installed Skills:**
 ```bash
-python .trae/skills/skill-installer/scripts/manage_skills.py list
+python .trae/skills/skill-installer/scripts/manage_skills.py <command>
 ```
 
-**Check for Updates:**
-```bash
-python .trae/skills/skill-installer/scripts/manage_skills.py check
-```
+**Commands:**
 
-**Update a Skill:**
-```bash
-python .trae/skills/skill-installer/scripts/manage_skills.py update <skill-name>
-```
-
-**Update All Skills:**
-```bash
-python .trae/skills/skill-installer/scripts/manage_skills.py update-all
-```
-
-**Uninstall a Skill:**
-```bash
-python .trae/skills/skill-installer/scripts/manage_skills.py uninstall <skill-name>
-```
-
-### Search Skills
-
-Search for skills in the catalog by name, description, or aliases:
-
-```bash
-python .trae/skills/skill-installer/scripts/manage_skills.py search <query>
-```
+| Command | Description |
+|---------|-------------|
+| `list` | List all installed skills |
+| `check` | Check for available updates |
+| `update <name>` | Update a specific skill |
+| `update-all` | Update all skills |
+| `uninstall <name>` | Remove a skill |
+| `search <query>` | Search installed skills |
+| `info <name>` | Show skill details |
+| `health [name]` | Health check on skills |
+| `rollback <name>` | Rollback to previous version |
 
 **Examples:**
 ```bash
-# Search by name
+# List installed skills
+python scripts/manage_skills.py list
+
+# Check for updates
+python scripts/manage_skills.py check
+
+# Update a specific skill
+python scripts/manage_skills.py update brainstorming
+
+# Update with auto-confirm
+python scripts/manage_skills.py update brainstorming --yes
+
+# Uninstall a skill
+python scripts/manage_skills.py uninstall old-skill
+
+# Search for skills
 python scripts/manage_skills.py search pdf
 
-# Search by description keyword
-python scripts/manage_skills.py search debugging
+# Health check all skills
+python scripts/manage_skills.py health
 
-# Search by alias
-python scripts/manage_skills.py search <alias>
+# Rollback to previous version
+python scripts/manage_skills.py rollback brainstorming
 ```
 
-### View Skill Information
+### Encoding Operations
 
-Get detailed information about a skill:
-
+**Detect encoding:**
 ```bash
-python .trae/skills/skill-installer/scripts/manage_skills.py info <skill-name>
+python .trae/skills/skill-installer/scripts/detect_encoding.py <path>
+
+# Examples
+python scripts/detect_encoding.py file.txt
+python scripts/detect_encoding.py directory/ --recursive
+python scripts/detect_encoding.py directory/ --extensions .py .txt
 ```
 
-This displays:
-- Skill name and category
-- Description
-- Source URL
-- License type
-- Aliases
-- Dependencies (with installation status)
-- Installation status and version
-
-**Example:**
+**Convert encoding:**
 ```bash
-python scripts/manage_skills.py info brainstorming
+python .trae/skills/skill-installer/scripts/convert_encoding.py <path> --target <encoding>
+
+# Examples
+python scripts/convert_encoding.py file.txt --target utf-8
+python scripts/convert_encoding.py directory/ --target utf-8 --recursive
+python scripts/convert_encoding.py file.txt --source gbk --target utf-8 --overwrite
 ```
 
-### Browse Catalog
+## How Installation Works
 
-Browse all skills in the catalog, optionally filtered by category:
+1. **Clone**: Downloads the repository to a temporary directory
+2. **Detect**: Identifies skill name from SKILL.md or directory structure
+3. **Validate**: Checks for SKILL.md with proper YAML frontmatter
+4. **License**: Detects and validates license compatibility
+5. **Dependencies**: Checks and installs missing dependencies
+6. **Install**: Copies to `.trae/skills/<skill-name>/`
+7. **Audit**: Runs skill-auditor for compliance check
 
-```bash
-# Browse all categories and skills
-python .trae/skills/skill-installer/scripts/manage_skills.py catalog
+## Dependency Management
 
-# Browse specific category
-python .trae/skills/skill-installer/scripts/manage_skills.py catalog --category curated
-```
-
-### Health Check
-
-Perform health checks on installed skills:
-
-```bash
-# Check all installed skills
-python .trae/skills/skill-installer/scripts/manage_skills.py health
-
-# Check specific skill
-python .trae/skills/skill-installer/scripts/manage_skills.py health <skill-name>
-```
-
-The health check validates:
-- Skill directory exists
-- SKILL.md file exists
-- YAML frontmatter is valid
-- Required fields (name, description) are present
-- Skill name matches directory name
-- Dependencies are installed
-
-### Version Rollback
-
-Rollback a skill to a previous version:
-
-```bash
-# Show version history and select version
-python .trae/skills/skill-installer/scripts/manage_skills.py rollback <skill-name>
-
-# Rollback to specific version
-python .trae/skills/skill-installer/scripts/manage_skills.py rollback <skill-name> --version <commit-hash>
-```
-
-## Skill Catalog Format
-
-The skill catalog is stored in `skill_catalog.json` and follows this structure:
-
-```json
-{
-  "version": "1.0",
-  "categories": {
-    "category-name": {
-      "description": "Category description",
-      "skills": [
-        {
-          "name": "skill-name",
-          "description": "Skill description",
-          "source": "user/repo or https://github.com/user/repo",
-          "license": "MIT",
-          "aliases": ["alias1", "alias2"],
-          "dependencies": ["dep1", "dep2"]
-        }
-      ]
-    }
-  }
-}
-```
-
-**Fields:**
-- `version`: Catalog version (currently "1.0")
-- `categories`: Dictionary of categories
-  - `category-name`: Category identifier
-    - `description`: Category description
-    - `skills`: List of skills in this category
-      - `name`: Unique skill name
-      - `description`: Skill description
-      - `source`: Git URL or user/repo format, or "local" for built-in skills
-      - `license`: License type
-      - `aliases`: Optional list of alternative names
-      - `dependencies`: Optional list of required skills
-
-## Dependency Format in SKILL.md
-
-Skills declare dependencies in their SKILL.md file using YAML frontmatter:
+Skills can declare dependencies in SKILL.md frontmatter:
 
 ```yaml
 ---
 name: my-skill
-description: A skill that does something useful
+description: A skill that depends on others
 dependencies:
   - brainstorming
   - planning-with-files
 ---
-
-# My Skill
-
-Detailed documentation here...
 ```
 
-**Fields:**
-- `name`: Skill name (must match directory name)
-- `description`: Skill description
-- `dependencies`: List of required skill names (optional)
+When installing a skill with dependencies:
+- Missing dependencies are detected automatically
+- You're prompted to install them (or use `--yes` to auto-install)
+- Installation order is resolved via topological sort
+- Circular dependencies are detected and reported
 
-## Dependency Management
+## License Compatibility
 
-Skills can declare dependencies in their SKILL.md file. When installing a skill with dependencies:
+| Status | Licenses |
+|--------|----------|
+| ✅ Compatible | MIT, Apache-2.0, BSD, ISC, Public Domain, CC0, Unlicense |
+| ⚠️ Warning | LGPL-2.1, LGPL-3.0, MPL-2.0 |
+| ❌ Incompatible | GPL, GPL-2.0, GPL-3.0, AGPL |
 
-1. The installer checks which dependencies are already installed
-2. Missing dependencies are listed
-3. You're prompted to install missing dependencies (or use `--yes` to auto-install)
-4. Dependencies are installed in the correct order (topological sort)
-5. Circular dependencies are detected and reported
+## Registry Synchronization
 
-**Example:**
+After installing or uninstalling skills, run the `skills-registry-sync` skill to update:
+- `skills.json` - Source, version, health status
+- `skill_map.json` - Skill metadata
+- `AGENTS.md` - Skill documentation
+
 ```bash
-# Auto-install dependencies
-python scripts/install_skill.py --yes <skill-with-deps>
+python .trae/skills/skills-registry-sync/scripts/sync_registry.py
 ```
-
-## License Verification
-
-The installer automatically detects and validates license compatibility:
-
-- **Compatible licenses**: MIT, Apache-2.0, BSD, ISC, Public Domain, CC0, Unlicense
-- **Warning licenses**: LGPL-2.1, LGPL-3.0, MPL-2.0 (copyleft with restrictions)
-- **Incompatible licenses**: GPL, GPL-2.0, GPL-3.0, AGPL (strong copyleft)
-
-When a license is detected:
-- License type is displayed
-- Compatibility status is shown
-- For incompatible licenses, you're prompted to confirm (unless using `--yes`)
 
 ## Troubleshooting
 
-### Common Issues
+**Network errors:**
+- Installer retries up to 3 times automatically
+- Check internet connection or proxy settings
+- Use `manage_skills.py update` which backs up before updating
 
-1. **Network Errors (`Failed to connect`, `Connection reset`)**
-   - The installer automatically retries up to 3 times.
-   - If persistent, check your internet connection or proxy settings.
-   - Use `manage_skills.py update` which now safely backs up your existing skill before attempting an update, so you won't lose functionality if the network fails.
+**Subdirectory not found:**
+- Installer auto-detects common prefixes: `skills/`, `packages/`, `apps/`
+- Verify repository structure on GitHub
 
-2. **Subdirectory Not Found**
-   - The installer now attempts to auto-detect the correct path by checking common prefixes like `skills/`, `packages/`, or `apps/`.
-   - If it still fails, verify the repository structure on GitHub and provide the full path (e.g., `user/repo/custom/path/to/skill`).
+**Permission denied:**
+- Ensure write permissions to `.trae/skills`
+- On Windows, close any programs locking the files
 
-3. **Permission Denied**
-   - Ensure you have write permissions to the `.trae/skills` directory.
-   - On Windows, ensure no other process (like an open terminal or editor) is locking the files.
-
-4. **Skill Not Found in Catalog**
-   - Use the `search` command to find the correct skill name or alias.
-   - Check if the skill exists in the catalog using `catalog` command.
-   - Verify you're using the correct category prefix if needed.
-
-5. **Missing Dependencies**
-   - Use `--yes` flag to auto-install dependencies.
-   - Or manually install dependencies first, then install the main skill.
-   - Use `health` command to check dependency status.
-
-6. **Circular Dependencies**
-   - The installer detects circular dependencies and reports them.
-   - Review the dependencies in the affected skills and resolve the cycle.
-
-7. **License Incompatible**
-   - Review the license terms carefully.
-   - Use `--yes` flag to skip license confirmation (not recommended).
-   - Consider using an alternative skill with a compatible license.
-
-8. **Health Check Failures**
-   - Check that SKILL.md exists and has valid YAML frontmatter.
-   - Ensure required fields (name, description) are present.
-   - Verify the skill name matches the directory name.
-   - Install missing dependencies.
-
-### Examples
-
-**Install a full repo as a skill:**
-```bash
-python scripts/install_skill.py user/my-skill-repo
-```
-
-**Install a specific skill from a collection (e.g., vercel-labs/agent-skills):**
-```bash
-# syntax: user/repo/path/to/skill
-python scripts/install_skill.py vercel-labs/agent-skills/skills/web-design-guidelines
-```
-
-**Install by skill name from catalog:**
-```bash
-python scripts/install_skill.py brainstorming
-```
-
-**Install multiple skills at once:**
-```bash
-python scripts/install_skill.py brainstorming planning-with-files systematic-debugging
-```
-
-**Interactive installation:**
-```bash
-python scripts/install_skill.py --interactive
-```
-
-**Search for skills:**
-```bash
-python scripts/manage_skills.py search pdf
-```
-
-**View skill information:**
-```bash
-python scripts/manage_skills.py info brainstorming
-```
-
-**Browse catalog:**
-```bash
-python scripts/manage_skills.py catalog
-python scripts/manage_skills.py catalog --category curated
-```
-
-**Health check:**
-```bash
-python scripts/manage_skills.py health
-python scripts/manage_skills.py health brainstorming
-```
-
-**Rollback to previous version:**
-```bash
-python scripts/manage_skills.py rollback brainstorming
-python scripts/manage_skills.py rollback brainstorming --version abc1234
-```
-
-**Custom Destination:**
-```bash
-python scripts/install_skill.py user/repo --path ./custom/skills
-```
-
-**Auto-confirm all prompts:**
-```bash
-python scripts/install_skill.py --yes brainstorming
-```
-
-### Encoding Detection
-
-Detect file encoding using the `detect_encoding.py` script:
-
-```bash
-python .trae/skills/skill-installer/scripts/detect_encoding.py <path>
-```
-
-**Examples:**
-```bash
-# Detect encoding of a single file
-python scripts/detect_encoding.py file.txt
-
-# Detect encoding for all files in a directory
-python scripts/detect_encoding.py directory/
-
-# Detect encoding recursively in subdirectories
-python scripts/detect_encoding.py directory/ --recursive
-
-# Detect encoding for specific file extensions only
-python scripts/detect_encoding.py directory/ --extensions .py .txt .md
-
-# Show detailed information including language detection
-python scripts/detect_encoding.py file.txt --verbose
-
-# Output results in JSON format
-python scripts/detect_encoding.py directory/ --json
-
-# Save results to a JSON file
-python scripts/detect_encoding.py directory/ --recursive --output results.json
-```
-
-The detection script provides:
-- Detected encoding name (e.g., 'utf-8', 'gbk', 'gb2312')
-- Confidence level (0.0 to 1.0)
-- Detected language (optional)
-- Summary statistics for batch operations
-
-### Encoding Conversion
-
-Convert files from one encoding to another using the `convert_encoding.py` script:
-
-```bash
-python .trae/skills/skill-installer/scripts/convert_encoding.py <path> --target <encoding>
-```
-
-**Examples:**
-```bash
-# Convert a single file to UTF-8 (auto-detect source encoding)
-python scripts/convert_encoding.py file.txt --target utf-8
-
-# Convert with explicit source encoding
-python scripts/convert_encoding.py file.txt --source gbk --target utf-8
-
-# Convert all files in a directory to UTF-8
-python scripts/convert_encoding.py directory/ --target utf-8
-
-# Convert recursively in subdirectories
-python scripts/convert_encoding.py directory/ --target utf-8 --recursive
-
-# Convert specific file extensions only
-python scripts/convert_encoding.py directory/ --target utf-8 --extensions .py .txt
-
-# Overwrite original files (default: create new file with encoding suffix)
-python scripts/convert_encoding.py file.txt --target utf-8 --overwrite
-
-# Convert without creating backup files
-python scripts/convert_encoding.py file.txt --target utf-8 --no-backup
-
-# Use error handling strategy for problematic characters
-python scripts/convert_encoding.py file.txt --target utf-8 --errors replace
-
-# Dry run - show what would be converted without actually converting
-python scripts/convert_encoding.py directory/ --target utf-8 --dry-run
-```
-
-**Error handling strategies:**
-- `strict` (default): Raise an exception on encoding errors
-- `ignore`: Ignore characters that cannot be encoded/decoded
-- `replace`: Replace unencodable characters with a replacement marker
-- `surrogateescape`: Use surrogate escape for error handling
-
-The conversion script provides:
-- Automatic source encoding detection (if not specified)
-- Backup file creation (optional)
-- Batch conversion for directories
-- Recursive directory processing
-- File extension filtering
-- Summary statistics
-
-## Interaction Rules
-
-> **Important Rule for AI Assistants:**
->
-> **When to Use skill-installer:**
-> - If the user's request involves **installing** a skill (e.g., "安装 * skill", "install * skill", "从 GitHub 安装", "克隆并安装"), you **MUST** invoke `skill-installer` **IMMEDIATELY** without asking for confirmation.
-> - If the user's request involves **uninstalling** a skill (e.g., "卸载 * skill", "uninstall * skill", "删除 * skill", "移除 * skill"), you **MUST** invoke `skill-installer` **IMMEDIATELY** without asking for confirmation.
-> - The intent to install or uninstall is sufficient - explicit mention of `skill-installer` is **NOT required**.
->
-> **When NOT to Use skill-installer:**
-> - If the user's request only involves **finding** or **searching** for skills (e.g., "查找 * skill", "find * skill", "搜索 skill"), use the `find-skills` skill instead.
->
-> **Examples that REQUIRE skill-installer:**
-> - "安装 find-skills 这个 skill" → Use skill-installer
-> - "安装 find-skills" → Use skill-installer
-> - "install find-skills" → Use skill-installer
-> - "从 GitHub 安装 planning-with-files" → Use skill-installer
-> - "克隆并安装这个 skill" → Use skill-installer
-> - "卸载 find-skills" → Use skill-installer
-> - "uninstall find-skills" → Use skill-installer
-> - "删除 planning-with-files" → Use skill-installer
-> - "移除这个 skill" → Use skill-installer
->
-> **Examples that DO NOT require skill-installer:**
-> - "查找 pdf skill" → Use find-skills
-> - "find skill for debugging" → Use find-skills
-> - "搜索可用的 skills" → Use find-skills
+**Missing dependencies:**
+- Use `--yes` flag to auto-install
+- Or install dependencies first, then main skill
 
 ## Requirements
 
-- `git` must be installed and available in the system PATH.
-- `chardet` library is required for encoding detection and conversion features. Install with:
-  ```bash
-  pip install chardet
-  ```
-  Or install all dependencies from requirements.txt:
-  ```bash
-  pip install -r .trae/skills/skill-installer/scripts/requirements.txt
-  ```
+- `git` must be installed and in PATH
+- `chardet` library for encoding features: `pip install chardet`

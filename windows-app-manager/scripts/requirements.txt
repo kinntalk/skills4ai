@@ -1,0 +1,7 @@
+# Windows App Manager Skill Dependencies
+# This skill uses only Python standard library modules
+# No external dependencies required
+
+# Standard library modules used:
+# - os, sys, subprocess, json, time, re
+# - pathlib, typing

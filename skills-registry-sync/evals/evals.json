@@ -1,0 +1,35 @@
+{
+  "skill_name": "skills-registry-sync",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我刚刚安装了 find-skills 这个 skill，请帮我同步注册表文件",
+      "expected_output": "运行 sync_registry.py 脚本，更新 skills.json、skill_map.json 和 AGENTS.md，报告新增的 skill",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Check if my skills registry files are consistent after I uninstalled some skills",
+      "expected_output": "运行 check_consistency.py 脚本，检查三个注册表文件的一致性，生成报告指出不一致项",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "同步 skills 注册表",
+      "expected_output": "识别用户意图为同步注册表，运行 sync_registry.py 脚本完成同步",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "安装完成 xhs-search skill 后自动同步注册表",
+      "expected_output": "在安装操作完成后自动触发 skills-registry-sync，更新所有注册表文件",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "检查 skills.json 和 skill_map.json 是否一致",
+      "expected_output": "运行一致性检查，比较两个文件中的 skill 列表，报告差异",
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "skill_name": "x-login-pw",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Capture QR code from Feishu",
+      "expected_output": "Successfully captures Feishu login QR code image",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "List all supported applications",
+      "expected_output": "Returns list of supported applications (feishu, wechat, dingtalk)",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Capture QR code from WeChat",
+      "expected_output": "Successfully captures WeChat login QR code image",
+      "files": []
+    }
+  ]
+}

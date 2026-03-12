@@ -1,0 +1,35 @@
+{
+  "skill_name": "skill-installer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "列出当前已安装的所有 skills",
+      "expected_output": "显示已安装 skills 列表，包含名称、版本和来源",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "安装 brainstorming skill",
+      "expected_output": "从 GitHub 克隆并安装 brainstorming skill 到 .trae/skills 目录",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "uninstall the test-skill",
+      "expected_output": "删除 test-skill 目录并提示需要同步注册表",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "查看 planning-with-files 这个 skill 的详细信息",
+      "expected_output": "显示 skill 名称、描述、来源、版本等详细信息",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "检测 .trae/skills/skill-installer 目录下所有文件的编码",
+      "expected_output": "列出目录中文件的编码检测结果",
+      "files": []
+    }
+  ]
+}

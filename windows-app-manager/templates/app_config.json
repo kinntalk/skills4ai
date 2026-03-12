@@ -1,0 +1,27 @@
+{
+  "apps": {
+    "dingtalk": {
+      "name": "dingtalk",
+      "path": "D:\\install\\DingDing\\DingtalkLauncher.exe",
+      "process_name": "DingtalkLauncher",
+      "description": ""
+    },
+    "feishu": {
+      "name": "feishu",
+      "path": "D:\\install\\Feishu\\Feishu.exe",
+      "process_name": "Feishu",
+      "description": ""
+    },
+    "wechat": {
+      "name": "wechat",
+      "path": "D:\\install\\Weixin\\Weixin.exe",
+      "process_name": "Weixin",
+      "description": ""
+    }
+  },
+  "settings": {
+    "auto_verify": true,
+    "max_startup_wait": 5,
+    "search_drives": []
+  }
+}

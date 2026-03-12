@@ -1,18 +1,11 @@
 ---
 name: skills-registry-sync
-description: Automatically check, update, and maintain consistency of skills registry files (skills.json, skill_map.json, AGENTS.md). Use when skills are installed/uninstalled, when registry files need synchronization, or for periodic maintenance to ensure all registration information is accurate and up-to-date.
+description: Synchronize skills registry files (skills.json, skill_map.json, AGENTS.md) after skill operations. **MUST invoke after completing** install/uninstall/create operations, or when explicitly requesting registry sync/consistency checks (e.g., "同步注册表", "sync registry", "check consistency").
 ---
 
 # Skills Registry Sync
 
-This skill maintains consistency across all skills registry files, ensuring accurate tracking of installed skills.
-
-## When to Use
-
-- After installing or uninstalling skills
-- When registry files (skills.json, skill_map.json, AGENTS.md) are out of sync
-- For periodic maintenance to ensure consistency
-- When detecting and fixing registry inconsistencies
+This skill maintains consistency across all skills registry files by synchronizing skills.json, skill_map.json, and AGENTS.md with the actual installed skills.
 
 ## Core Files
 
@@ -22,78 +15,114 @@ This skill maintains consistency across all skills registry files, ensuring accu
 | `skill_map.json` | Maps skill names to descriptions, keywords, aliases for detection |
 | `AGENTS.md` | Human-readable registry with skill documentation |
 
-## Usage
+## Decision Flow
 
-### Sync All Registries
+First determine what the user needs:
+
+1. **User just completed install/uninstall/create** → Run `sync_registry.py`
+2. **User explicitly requests sync** → Run `sync_registry.py`
+3. **User wants to check consistency** → Run `check_consistency.py`
+4. **User mentions registry issues** → Run `check_consistency.py` first, then `sync_registry.py --fix` if needed
+
+## Execution Steps
+
+### Step 1: Sync All Registries
+
+Invoke this when:
+- User has just completed installing a skill
+- User has just completed uninstalling a skill
+- User has just completed creating a skill
+- User explicitly asks to sync the registry
 
 ```bash
 python .trae/skills/skills-registry-sync/scripts/sync_registry.py
 ```
 
-This will:
+The script will:
 1. Scan `.trae/skills/` directory for all installed skills
 2. Update `skills.json` with current skill information
 3. Update `skill_map.json` with skill metadata
 4. Update `AGENTS.md` with skill documentation
 5. Report all changes made
 
-### Check Consistency
+**Why this matters:** Registry files must stay in sync to ensure accurate skill tracking, proper triggering, and consistent documentation across the system.
+
+### Step 2: Check Consistency
+
+Invoke this when:
+- User wants to verify registry consistency
+- User suspects registry issues
+- User mentions inconsistencies
 
 ```bash
 python .trae/skills/skills-registry-sync/scripts/check_consistency.py
 ```
 
-This will:
+The script will:
 1. Compare `skills.json` with actual skill directories
 2. Compare `skill_map.json` with `skills.json`
 3. Compare `AGENTS.md` with actual skills
-4. Generate a consistency report
+4. Generate a consistency report with specific issues
 
-### Fix Inconsistencies
+**Why this matters:** Inconsistencies can cause skills to be missing from detection, have incorrect metadata, or be documented incorrectly.
+
+### Step 3: Fix Inconsistencies
+
+If the consistency check reports issues, run:
 
 ```bash
 python .trae/skills/skills-registry-sync/scripts/sync_registry.py --fix
 ```
 
-Automatically fixes detected inconsistencies.
+This automatically fixes all detected inconsistencies.
 
-## Output
+## Output Format
 
-The sync process reports:
-- Skills added/removed from registries
-- Metadata changes (version, source, description)
-- Health status updates
-- AGENTS.md section updates
+Report sync results clearly:
 
-## Interaction Rules
+```
+[SYNC] Scanning skills directory...
+[INFO] Found N installed skills
+[SYNC] Updated skills.json with N skills
+[SYNC] Updated skill_map.json (X added, Y removed)
+[SYNC] Updated AGENTS.md with N skills
+[PASS] All registry files synchronized successfully
+```
 
-> **Important Rule for AI Assistants:**
->
-> **When to Invoke skills-registry-sync:**
-> - After successfully **installing** a skill (e.g., "安装 * skill", "install * skill")
-> - After successfully **uninstalling** a skill (e.g., "卸载 * skill", "uninstall * skill")
-> - After successfully **creating** a skill (e.g., "生成 * skill", "创建 * skill", "create * skill")
-> - Always invoke **AFTER** the operation completes successfully, **NOT** before.
->
-> **When NOT to Invoke skills-registry-sync:**
-> - If the install/uninstall/create operation fails or is cancelled
-> - If the user is only searching or viewing skills (no changes made)
->
-> **Examples that REQUIRE skills-registry-sync (after completion):**
-> - "安装 find-skills 这个 skill" → After installation completes, invoke skills-registry-sync
-> - "安装 find-skills" → After installation completes, invoke skills-registry-sync
-> - "install find-skills" → After installation completes, invoke skills-registry-sync
-> - "卸载 find-skills" → After uninstallation completes, invoke skills-registry-sync
-> - "uninstall find-skills" → After uninstallation completes, invoke skills-registry-sync
-> - "创建一个新的 skill" → After creation completes, invoke skills-registry-sync
-> - "create my-custom skill" → After creation completes, invoke skills-registry-sync
+For consistency checks:
 
-## Reference Files
+```
+[CHECK] Checking skills.json...
+[PASS/FAIL] Status message
+[CHECK] Checking skill_map.json...
+[PASS/FAIL] Status message
+[CHECK] Checking AGENTS.md...
+[PASS/FAIL] Status message
 
-- `references/description-guide.md` — Guidelines for writing skill descriptions in AGENTS.md
+CONSISTENCY REPORT
+Total issues found: N
+  Critical: X
+  Missing entries: Y
+  Orphan entries: Z
+```
 
-## Integration
+## Integration Rules
 
-This skill integrates with:
-- **skill-installer**: Automatically called after install/uninstall
-- **skill-auditor**: Uses health check results for validation
+**When to invoke this skill:**
+
+Invoke **AFTER** these operations complete successfully:
+- Installing a skill (e.g., after "安装 find-skills", "install find-skills")
+- Uninstalling a skill (e.g., after "卸载 find-skills", "uninstall find-skills")
+- Creating a skill (e.g., after "创建 skill", "create skill")
+
+**When NOT to invoke:**
+
+- If the install/uninstall/create operation fails or is cancelled
+- If the user is only searching or viewing skills (no changes made)
+- For bare commands like "install skill" without context of completion
+
+**Integration with other skills:**
+
+- **skill-installer**: Automatically call this skill after successful install/uninstall
+- **skill-creator**: Automatically call this skill after successful skill creation
+- **skill-auditor**: Health check results are used for validation

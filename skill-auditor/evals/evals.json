@@ -1,0 +1,23 @@
+{
+  "skill_name": "skill-auditor",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Audit the skill-installer skill to check if it meets all compliance standards before publishing",
+      "expected_output": "Run audit_skill.py against skill-installer and produce a comprehensive report with PASS/FAIL/WARN results for all 12 sections",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Check if my skill at .trae/skills/my-test-skill has proper encoding and cross-platform compatibility",
+      "expected_output": "Run audit with focus on encoding and cross-platform checks, report any issues with file encoding, path separators, and platform-specific commands",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Verify the skill-creator skill passes all security checks in strict mode",
+      "expected_output": "Run audit with --level strict flag, perform security analysis including malicious script injection, permission abuse, prompt injection checks",
+      "files": []
+    }
+  ]
+}

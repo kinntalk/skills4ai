@@ -1,8 +1,8 @@
 # AGENTS.md - Skills Registry
 
 **Version:** 1.0.0  
-**Last Updated:** 2026-03-11  
-**Total Skills:** 35
+**Last Updated:** 2026-03-12  
+**Total Skills:** 36
 
 ---
 
@@ -20,8 +20,8 @@ This document provides a comprehensive registry of all available skills in the `
 | Tool Skills | 4 | skill-auditor, skill-creator, skill-installer, skills-registry-sync |
 | Python Skills | 5 | async-python-patterns, python-design-patterns, python-packaging, python-performance-optimization, python-testing-patterns |
 | Obsidian Skills | 4 | obsidian-bases, obsidian-cli, obsidian-markdown, url-to-obsidian |
-| Other Skills | 17 | agent-browser, agentskills, brainstorming, dispatching-parallel-agents, executing-plans, find-skills, finishing-a-development-branch, receiving-code-review, requesting-code-review, subagent-driven-development, test-driven-development, using-git-worktrees, using-superpowers, web-design-guidelines, windows-app-manager, x-file-manager, xhs-search |
-| **Total** | **35** | |
+| Other Skills | 18 | agent-browser, agentskills, brainstorming, dispatching-parallel-agents, executing-plans, find-skills, finishing-a-development-branch, receiving-code-review, requesting-code-review, subagent-driven-development, test-driven-development, using-git-worktrees, using-superpowers, web-design-guidelines, windows-app-manager, x-file-manager, x-login-pw, xhs-search |
+| **Total** | **36** | |
 
 ---
 
@@ -71,7 +71,7 @@ This document provides a comprehensive registry of all available skills in the `
 
 ### skill-auditor
 
-**Description:** Standard compliance checker for Trae skills. Verifies dependency completeness, file encoding, path consistency, cross-platform compatibility, i18n support, and packaging structure. Use when auditing skills before publishing or verifying compliance.
+**Description:** Standard compliance checker for Agent skills. Verifies dependency completeness, file encoding, path consistency, cross-platform compatibility, i18n support, and packaging structure. Use when auditing skills before publishing or verifying compliance.
 
 **Path:** `skill-auditor/`
 
@@ -79,7 +79,7 @@ This document provides a comprehensive registry of all available skills in the `
 
 ### skill-creator
 
-**Description:** Create, update, and optimize skills with evaluation and benchmarking support. **MUST invoke for all skill development requests** — creation (e.g., "创建技能", "create skill"), update (e.g., "更新技能", "update skill"), or optimization (e.g., "优化技能", "improve skill").
+**Description:** Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, update or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.
 
 **Path:** `skill-creator/`
 
@@ -87,7 +87,7 @@ This document provides a comprehensive registry of all available skills in the `
 
 ### skill-installer
 
-**Description:** Install and manage skills from Git repositories into .trae/skills directory. Supports subdirectories, catalog browsing, dependency management, license verification, health checks, version rollback, encoding detection, and encoding conversion. Note: Registry synchronization (skills.json, skill_map.json, AGENTS.md) is handled by skills-registry-sync skill.
+**Description:** Install and manage skills from Git repositories into .trae/skills directory. Use this skill whenever the user wants to install, uninstall, update, or manage skills. Triggers on phrases like 'install skill', '安装 skill', '从 GitHub 安装', 'uninstall skill', '卸载 skill', 'update skills', 'list skills', '列出已安装的 skills'. Also handles encoding detection and conversion for skill files. Note: Registry synchronization is handled by skills-registry-sync skill.
 
 **Path:** `skill-installer/`
 
@@ -95,7 +95,7 @@ This document provides a comprehensive registry of all available skills in the `
 
 ### skills-registry-sync
 
-**Description:** Automatically check, update, and maintain consistency of skills registry files (skills.json, skill_map.json, AGENTS.md). Use when skills are installed/uninstalled, when registry files need synchronization, or for periodic maintenance to ensure all registration information is accurate and up-to-date.
+**Description:** Synchronize skills registry files (skills.json, skill_map.json, AGENTS.md) after skill operations. **MUST invoke after completing** install/uninstall/create operations, or when explicitly requesting registry sync/consistency checks (e.g., "同步注册表", "sync registry", "check consistency").
 
 **Path:** `skills-registry-sync/`
 
@@ -293,7 +293,7 @@ This document provides a comprehensive registry of all available skills in the `
 
 ### windows-app-manager
 
-**Description:** Windows Desktop Application Manager - Automatically start, stop, and manage Windows applications with intelligent path finding and process management
+**Description:** Windows application lifecycle management. Use when user requests to START or STOP desktop applications like WeChat, Feishu, DingTalk, Chrome, etc. Handles application launch and termination only. For login/authentication issues, use `x-login-pw` skill. / Windows 应用程序生命周期管理。当用户请求启动或关闭桌面应用（微信、飞书、钉钉、Chrome 等）时使用。仅处理应用启动和关闭。登录验证问题请使用 `x-login-pw` skill。
 
 **Path:** `windows-app-manager/`
 
@@ -304,6 +304,14 @@ This document provides a comprehensive registry of all available skills in the `
 **Description:** Local file perception and retrieval tool for AI Agents. Use when user wants to search files by name, type, size, hash, find duplicates, scan large files, or analyze local file system. Supports both Chinese and English queries like "查找大文件" or "find large files".
 
 **Path:** `x-file-manager/`
+
+---
+
+### x-login-pw
+
+**Description:** Desktop application login authentication handler. Use AFTER application is started (by `windows-app-manager`) and user needs login assistance. Handles QR code capture, SMS verification, and other authentication tasks. **Prerequisite: Target application MUST be running.** / 桌面应用登录验证处理器。在应用程序启动后（由 `windows-app-manager` 启动）且用户需要登录协助时使用。处理二维码捕获、短信验证等认证任务。**前置条件：目标应用必须已运行。**
+
+**Path:** `x-login-pw/`
 
 ---
 
@@ -322,12 +330,12 @@ This document provides a comprehensive registry of all available skills in the `
 
 | Category | Count | Percentage |
 |----------|--------|------------|
-| Core Skills | 5 | 14.3% |
-| Tool Skills | 4 | 11.4% |
-| Python Skills | 5 | 14.3% |
-| Obsidian Skills | 4 | 11.4% |
-| Other Skills | 17 | 48.6% |
-| **Total** | **35** | **100%** |
+| Core Skills | 5 | 13.9% |
+| Tool Skills | 4 | 11.1% |
+| Python Skills | 5 | 13.9% |
+| Obsidian Skills | 4 | 11.1% |
+| Other Skills | 18 | 50.0% |
+| **Total** | **36** | **100%** |
 
 ---
 

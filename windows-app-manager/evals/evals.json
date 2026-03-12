@@ -1,0 +1,90 @@
+{
+  "skill_name": "windows-app-manager",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "start-app-chinese",
+      "prompt": "Start Notepad (Chinese command)",
+      "expected_output": "Successfully start Notepad application, return success message and process info",
+      "files": [],
+      "assertions": [
+        {
+          "name": "returns_success",
+          "description": "Operation returns success status",
+          "check": "output contains 'success' or success message"
+        },
+        {
+          "name": "process_running",
+          "description": "Notepad process is running",
+          "check": "notepad process is running after command"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "stop-app-chinese",
+      "prompt": "Stop Notepad (Chinese command)",
+      "expected_output": "Successfully stop Notepad application, return success message",
+      "files": [],
+      "assertions": [
+        {
+          "name": "returns_success",
+          "description": "Operation returns success status",
+          "check": "output contains 'success' or success message"
+        },
+        {
+          "name": "process_stopped",
+          "description": "Notepad process is stopped",
+          "check": "notepad process is not running after command"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "eval_name": "start-app-english",
+      "prompt": "start notepad",
+      "expected_output": "Successfully start Notepad application, return success message and process info",
+      "files": [],
+      "assertions": [
+        {
+          "name": "returns_success",
+          "description": "Operation returns success status",
+          "check": "output contains 'success' or success message"
+        },
+        {
+          "name": "process_running",
+          "description": "Notepad process is running",
+          "check": "notepad process is running after command"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "eval_name": "list-apps",
+      "prompt": "List saved applications",
+      "expected_output": "Return list of saved applications",
+      "files": [],
+      "assertions": [
+        {
+          "name": "returns_list",
+          "description": "Returns application list",
+          "check": "output contains list of apps or 'apps' field"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "eval_name": "search-app",
+      "prompt": "Search Chrome",
+      "expected_output": "Return search results for Chrome applications",
+      "files": [],
+      "assertions": [
+        {
+          "name": "returns_results",
+          "description": "Returns search results",
+          "check": "output contains search results or 'results' field"
+        }
+      ]
+    }
+  ]
+}

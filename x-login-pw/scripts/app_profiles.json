@@ -1,0 +1,100 @@
+{
+  "apps": {
+    "feishu": {
+      "name": "Feishu",
+      "aliases": ["feishu", "lark", "Feishu", "Lark"],
+      "process_names": ["feishu.exe", "lark.exe"],
+      "window_patterns": ["Feishu", "Lark"],
+      "refresh_button": {
+        "method": "ocr",
+        "keywords": ["刷新", "refresh", "点击刷新", "click refresh"],
+        "fallback": {
+          "method": "position",
+          "position": {
+            "qr_center_x_ratio": 0.62,
+            "qr_center_y_ratio": 0.45,
+            "refresh_y_offset": 140
+          }
+        }
+      },
+      "qr_detection": {
+        "method": "auto",
+        "min_size": 150,
+        "max_size": 350,
+        "position_hint": {
+          "x_ratio": 0.62,
+          "y_ratio": 0.45,
+          "size": 250
+        }
+      },
+      "padding": 30,
+      "wait_after_refresh": 5
+    },
+    "dingtalk": {
+      "name": "DingTalk",
+      "aliases": ["dingtalk", "DingTalk"],
+      "process_names": ["dingtalk.exe", "dingtalklauncher.exe"],
+      "window_patterns": ["DingTalk", "钉钉"],
+      "refresh_button": {
+        "method": "ocr",
+        "keywords": ["刷新", "refresh", "点击刷新", "click refresh"],
+        "fallback": {
+          "method": "qr_below",
+          "refresh_y_offset": 80
+        }
+      },
+      "qr_detection": {
+        "method": "auto",
+        "min_size": 100,
+        "max_size": 300,
+        "position_hint": {
+          "x_ratio": 0.5,
+          "y_ratio": 0.5,
+          "size": 200
+        }
+      },
+      "padding": 30,
+      "wait_after_refresh": 4
+    },
+    "wechat": {
+      "name": "WeChat",
+      "aliases": ["wechat", "WeChat", "weixin"],
+      "process_names": ["wechat.exe", "weixin.exe"],
+      "window_patterns": ["WeChat"],
+      "refresh_button": {
+        "method": "ocr",
+        "keywords": ["刷新", "refresh", "点击刷新", "click refresh"],
+        "fallback": {
+          "method": "position",
+          "position": {
+            "qr_center_x_ratio": 0.5,
+            "qr_center_y_ratio": 0.5,
+            "refresh_y_offset": 200
+          }
+        }
+      },
+      "qr_detection": {
+        "method": "auto",
+        "min_size": 150,
+        "max_size": 350,
+        "position_hint": {
+          "x_ratio": 0.5,
+          "y_ratio": 0.5,
+          "size": 250
+        }
+      },
+      "padding": 30,
+      "wait_after_refresh": 3
+    }
+  },
+  "default": {
+    "padding": 30,
+    "wait_after_activate": 2,
+    "wait_after_refresh": 3,
+    "qr_detection": {
+      "method": "auto",
+      "min_size": 100,
+      "max_size": 500
+    }
+  }
+}
