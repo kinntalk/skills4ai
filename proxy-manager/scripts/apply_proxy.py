@@ -32,18 +32,16 @@ def apply_proxy_to_environment(config, smart_mode=True):
         print("提示: 请确保 v2rayN 或其他代理软件已启动")
         return False
     
-    env = config.get('environment', {})
+    print("注意: 不设置全局代理环境变量，使用按需代理模式")
+    print("      只有强制代理域名会走代理，其他服务按智能判断")
     
     if smart_mode:
         no_proxy = config.get('proxy', {}).get('no_proxy', '')
         if not no_proxy:
             no_proxy = get_auto_no_proxy()
-        env['NO_PROXY'] = no_proxy
-        env['no_proxy'] = no_proxy.lower()
-    
-    for key, value in env.items():
-        os.environ[key] = value
-        print(f"设置环境变量: {key}={value}")
+        os.environ['NO_PROXY'] = no_proxy
+        os.environ['no_proxy'] = no_proxy.lower()
+        print(f"设置环境变量: NO_PROXY={no_proxy}")
     
     return True
 
@@ -78,6 +76,9 @@ def test_proxy_connection(config):
     
     print("\n测试代理连接...")
     proxy_config = config.get('proxy', {})
+    force_domains = proxy_config.get('force_proxy_domains', [])
+    if force_domains:
+        print(f"  强制代理域名: {', '.join(force_domains)}")
     
     for url in test_urls:
         use_proxy, reason = should_use_proxy(url, proxy_config)
@@ -138,6 +139,10 @@ def show_status():
         print(f"   启用状态: {proxy_config.get('enabled', False)}")
         print(f"   代理类型: {proxy_config.get('type', 'http')}")
         print(f"   代理地址: {proxy_config.get('host', '')}:{proxy_config.get('port', '')}")
+        
+        force_domains = proxy_config.get('force_proxy_domains', [])
+        if force_domains:
+            print(f"   强制代理域名: {', '.join(force_domains)}")
         
         proxy_host = proxy_config.get('host', '127.0.0.1')
         proxy_port = proxy_config.get('port', 10808)

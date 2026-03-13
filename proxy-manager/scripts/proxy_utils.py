@@ -234,6 +234,37 @@ def is_proxy_server_available(host: str = '127.0.0.1', port: int = 10808, timeou
         return False, f"Connection error to proxy server: {e}"
 
 
+def is_force_proxy_domain(host: str, force_domains: List[str]) -> bool:
+    """
+    检查域名是否在强制代理列表中
+    
+    Args:
+        host: 目标主机名
+        force_domains: 强制代理域名列表（支持通配符，如 *.github.com）
+    
+    Returns:
+        是否需要强制代理
+    """
+    if not host or not force_domains:
+        return False
+    
+    host_lower = host.lower()
+    
+    for pattern in force_domains:
+        pattern_lower = pattern.lower()
+        if pattern_lower.startswith('*.'):
+            suffix = pattern_lower[2:]
+            if host_lower == suffix or host_lower.endswith('.' + suffix):
+                return True
+        elif pattern_lower.startswith('.'):
+            if host_lower.endswith(pattern_lower) or host_lower == pattern_lower[1:]:
+                return True
+        elif host_lower == pattern_lower:
+            return True
+    
+    return False
+
+
 def should_use_proxy(url: str, proxy_config: dict, timeout: float = 2.0) -> Tuple[bool, str]:
     """
     智能判断是否需要使用代理
@@ -254,6 +285,16 @@ def should_use_proxy(url: str, proxy_config: dict, timeout: float = 2.0) -> Tupl
     
     if not host:
         return False, "Invalid URL: no hostname"
+    
+    force_domains = proxy_config.get('force_proxy_domains', [])
+    if is_force_proxy_domain(host, force_domains):
+        proxy_host = proxy_config.get('host', '127.0.0.1')
+        proxy_port = proxy_config.get('port', 10808)
+        proxy_available, proxy_error = is_proxy_server_available(proxy_host, proxy_port)
+        if proxy_available:
+            return True, f"Forced proxy for domain: {host}"
+        else:
+            return False, f"Forced proxy domain but proxy unavailable: {proxy_error}"
     
     if is_local_address(host):
         return False, f"Local address: {host}"
