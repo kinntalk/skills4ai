@@ -248,18 +248,24 @@ class AppManager:
 
 def main():
     if len(sys.argv) < 2:
-        print(json.dumps({
-            "success": False,
-            "message": "Usage: python app_manager.py <command>",
-            "commands": ["start <app>", "stop <app>", "list", "search <keyword>"]
-        }, indent=2))
+        try:
+            print(json.dumps({
+                "success": False,
+                "message": "Usage: python app_manager.py <command>",
+                "commands": ["start <app>", "stop <app>", "list", "search <keyword>"]
+            }, indent=2))
+        except (TypeError, ValueError) as e:
+            print('{"success": false, "message": "Usage: python app_manager.py <command>"}')
         return
 
     manager = AppManager()
     command = " ".join(sys.argv[1:])
     result = manager.execute(command)
 
-    print(json.dumps(result, indent=2, ensure_ascii=False))
+    try:
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+    except (TypeError, ValueError) as e:
+        print(f'{{"success": false, "message": "Output serialization error: {e}"}}')
     sys.exit(0 if result.get("success", False) else 1)
 
 

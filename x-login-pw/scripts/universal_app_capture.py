@@ -8,7 +8,7 @@ from PIL import ImageGrab, Image
 import cv2
 import numpy as np
 import sys
-from typing import Optional, Tuple, Dict, Any, List
+from typing import Optional, Tuple, Dict, Any
 from pathlib import Path
 
 from app_profile_manager import AppProfileManager
@@ -111,6 +111,8 @@ class UniversalAppCapture:
             wait_time = self.profile_manager.get_app_config(app_id, "wait_after_activate", default=2)
             time.sleep(wait_time)
             return True
+        except (OSError, WindowsError):
+            return False
         except Exception:
             return False
     
@@ -134,6 +136,8 @@ class UniversalAppCapture:
             detector = cv2.QRCodeDetector()
             value, _, _ = detector.detectAndDecode(gray)
             return value if value else None
+        except cv2.error:
+            return None
         except Exception:
             return None
     

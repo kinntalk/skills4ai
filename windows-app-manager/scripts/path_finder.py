@@ -32,6 +32,24 @@ class PathFinder:
         self._config_cache: Optional[Dict] = None
         self._config_cache_time: float = 0
 
+    def _run_powershell_and_get_path(self, cmd: str, timeout: int = 5) -> Optional[str]:
+        try:
+            result = subprocess.run(
+                ["powershell.exe", "-Command", cmd],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=timeout
+            )
+            if result.stdout.strip():
+                path = result.stdout.strip().split('\n')[0].strip()
+                if Path(path).exists():
+                    return path
+        except (subprocess.TimeoutExpired, OSError):
+            pass
+        return None
+
     def _get_standard_paths(self) -> List[str]:
         paths = []
         for drive in ["C:", "D:"]:
@@ -137,22 +155,7 @@ foreach ($regPath in $regPaths) {{
     }}
 }}
 '''
-        try:
-            result = subprocess.run(
-                ["powershell.exe", "-Command", cmd],
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                timeout=3
-            )
-            if result.stdout.strip():
-                path = result.stdout.strip().split('\n')[0].strip()
-                if Path(path).exists():
-                    return path
-        except (subprocess.TimeoutExpired, OSError):
-            pass
-        return None
+        return self._run_powershell_and_get_path(cmd, timeout=3)
 
     def _search_start_menu(self, executables: List[str]) -> Optional[str]:
         start_menu_paths = [
@@ -212,22 +215,7 @@ foreach ($shortcutPath in $shortcuts) {{
     }} catch {{}}
 }}
 '''
-        try:
-            result = subprocess.run(
-                ["powershell.exe", "-Command", cmd],
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                timeout=5
-            )
-            if result.stdout.strip():
-                path = result.stdout.strip().split('\n')[0].strip()
-                if Path(path).exists():
-                    return path
-        except (subprocess.TimeoutExpired, OSError):
-            pass
-        return None
+        return self._run_powershell_and_get_path(cmd, timeout=5)
 
     def _search_common_install_dirs(self, executables: List[str]) -> Optional[str]:
         exe_names_lower = [e.lower() for e in executables]

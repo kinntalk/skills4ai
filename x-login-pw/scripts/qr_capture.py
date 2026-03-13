@@ -7,7 +7,6 @@ Capture QR codes from desktop applications.
 import argparse
 import json
 import sys
-import os
 from pathlib import Path
 
 from universal_app_capture import UniversalAppCapture
