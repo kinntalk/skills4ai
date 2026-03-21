@@ -38,7 +38,7 @@ MSG_DEST_EXISTS = f"{COLOR_YELLOW}Warning: Destination '{{path}}' already exists
 MSG_FORCE_OVERWRITE = f"{COLOR_YELLOW}Force mode enabled. Overwriting...{COLOR_RESET}"
 MSG_OVERWRITE_PROMPT = "Overwrite? (y/N): "
 MSG_INSTALL_ABORTED = "Installation aborted."
-MSG_INSTALLED_SUCCESS = f"{COLOR_GREEN}{ICON_SUCCESS} Installed '{{name}}' to {{path}}{COLOR_RESET}"
+MSG_INSTALLED_SUCCESS = f"{COLOR_GREEN}{ICON_SUCCESS} install skill success: '{{name}}' installed to {{path}}{COLOR_RESET}"
 MSG_AUDIT_RUNNING = f"\n{ICON_SEARCH} Running skill-auditor..."
 MSG_AUDIT_FAILED = f"{COLOR_YELLOW}Warning: Audit failed: {{error}}{COLOR_RESET}"
 MSG_AUDIT_SKIPPED = f"{COLOR_YELLOW}Warning: skill-auditor not found. Skipping audit.{COLOR_RESET}"
@@ -62,7 +62,7 @@ MSG_SKILL_LOCAL = f"{COLOR_YELLOW}Skipping {{name}}: Local skill or no source UR
 MSG_UPDATING_FROM = f"Updating {{name}} from: {{source}}"
 MSG_BACKUP_CREATED = f"{COLOR_YELLOW}Backed up existing skill to {{path}}{COLOR_RESET}"
 MSG_BACKUP_ERROR = f"{COLOR_RED}Error backing up skill: {{error}}{COLOR_RESET}"
-MSG_UPDATE_SUCCESS = f"{COLOR_GREEN}Successfully updated {{name}}.{COLOR_RESET}"
+MSG_UPDATE_SUCCESS = f"{COLOR_GREEN}[PASS] update skill success: '{{name}}' updated{COLOR_RESET}"
 MSG_BACKUP_REMOVED = f"{COLOR_GREEN}Removed backup.{COLOR_RESET}"
 MSG_UPDATE_FAILED = f"{COLOR_RED}Failed to update {{name}}. Restoring backup...{COLOR_RESET}"
 MSG_RESTORE_SUCCESS = f"{COLOR_GREEN}Restored previous version.{COLOR_RESET}"
@@ -345,35 +345,7 @@ MSG_LICENSE_INCOMPATIBLE = f"   {COLOR_RED}✗ Incompatible{COLOR_RESET}"
 MSG_LICENSE_CONFIRM_INCOMPATIBLE = "   Install anyway? (y/N): "
 
 # Registry Sync Reminder for Installation
-MSG_REGISTRY_SYNC_REQUIRED = f"""
-{COLOR_GREEN}{ICON_SUCCESS} Installation completed successfully.{COLOR_RESET}
-
-{COLOR_CYAN}╔════════════════════════════════════════════════════════════════╗{COLOR_RESET}
-{COLOR_CYAN}║  [REQUIRED ACTION] Invoke skills-registry-sync skill NOW      ║{COLOR_RESET}
-{COLOR_CYAN}╚════════════════════════════════════════════════════════════════╝{COLOR_RESET}
-
-{COLOR_YELLOW}AI Assistant: You MUST invoke the 'skills-registry-sync' skill using the Skill tool.{COLOR_RESET}
-{COLOR_YELLOW}Do NOT run scripts directly. Use: Skill tool with name='skills-registry-sync'{COLOR_RESET}
-
-{COLOR_CYAN}This will synchronize:{COLOR_RESET}
-   - skills.json (source, version, health status)
-   - skill_map.json (description, keywords, aliases)
-   - AGENTS.md (skill documentation)
-"""
+MSG_REGISTRY_SYNC_REQUIRED = ""
 
 # Registry Sync Reminder for Uninstallation
-MSG_REGISTRY_SYNC_REQUIRED_UNINSTALL = f"""
-{COLOR_GREEN}{ICON_SUCCESS} Uninstallation completed successfully.{COLOR_RESET}
-
-{COLOR_CYAN}╔════════════════════════════════════════════════════════════════╗{COLOR_RESET}
-{COLOR_CYAN}║  [REQUIRED ACTION] Invoke skills-registry-sync skill NOW      ║{COLOR_RESET}
-{COLOR_CYAN}╚════════════════════════════════════════════════════════════════╝{COLOR_RESET}
-
-{COLOR_YELLOW}AI Assistant: You MUST invoke the 'skills-registry-sync' skill using the Skill tool.{COLOR_RESET}
-{COLOR_YELLOW}Do NOT run scripts directly. Use: Skill tool with name='skills-registry-sync'{COLOR_RESET}
-
-{COLOR_CYAN}This will synchronize:{COLOR_RESET}
-   - skills.json (remove uninstalled skill entry)
-   - skill_map.json (remove skill metadata)
-   - AGENTS.md (remove skill documentation)
-"""
+MSG_REGISTRY_SYNC_REQUIRED_UNINSTALL = ""

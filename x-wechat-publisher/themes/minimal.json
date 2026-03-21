@@ -1,0 +1,88 @@
+{
+  "body": {
+    "font-family": "Georgia, 'Times New Roman', serif",
+    "font-size": "17px",
+    "line-height": "1.9",
+    "color": "#1a1a1a",
+    "padding": "30px 20px"
+  },
+  "h1": {
+    "font-size": "26px",
+    "font-weight": "normal",
+    "margin": "30px 0 20px 0",
+    "color": "#000000",
+    "text-align": "center",
+    "letter-spacing": "1px"
+  },
+  "h2": {
+    "font-size": "20px",
+    "font-weight": "normal",
+    "margin": "24px 0 12px 0",
+    "color": "#333333"
+  },
+  "h3": {
+    "font-size": "18px",
+    "font-weight": "normal",
+    "margin": "20px 0 10px 0",
+    "color": "#444444"
+  },
+  "p": {
+    "margin": "16px 0",
+    "text-align": "justify"
+  },
+  "blockquote": {
+    "border-left": "2px solid #cccccc",
+    "padding": "10px 20px",
+    "margin": "20px 0",
+    "color": "#666666",
+    "font-style": "italic"
+  },
+  "code": {
+    "font-family": "'Courier New', monospace",
+    "background": "#fafafa",
+    "padding": "2px 4px",
+    "font-size": "15px"
+  },
+  "pre": {
+    "background": "#fafafa",
+    "padding": "20px",
+    "margin": "20px 0",
+    "overflow-x": "auto"
+  },
+  "img": {
+    "max-width": "100%",
+    "height": "auto",
+    "display": "block",
+    "margin": "20px auto"
+  },
+  "ul": {
+    "padding-left": "20px",
+    "margin": "16px 0"
+  },
+  "ol": {
+    "padding-left": "20px",
+    "margin": "16px 0"
+  },
+  "li": {
+    "margin": "8px 0"
+  },
+  "a": {
+    "color": "#1a1a1a",
+    "text-decoration": "underline"
+  },
+  "table": {
+    "width": "100%",
+    "border-collapse": "collapse",
+    "margin": "20px 0"
+  },
+  "th": {
+    "padding": "12px",
+    "border-bottom": "1px solid #cccccc",
+    "font-weight": "normal",
+    "text-align": "left"
+  },
+  "td": {
+    "padding": "12px",
+    "border-bottom": "1px solid #eeeeee"
+  }
+}

@@ -184,12 +184,6 @@ def scan_skills():
             "subdir": subdir,
             "version": version,
             "last_update_time": datetime.datetime.now().isoformat(),
-            "health": {
-                "is_valid": is_valid,
-                "validation_error": validation_error,
-                "missing_deps": [],
-                "satisfied_deps": []
-            },
             "frontmatter": frontmatter if is_valid else {}
         }
     
@@ -212,8 +206,7 @@ def update_skills_json(skills):
             "source": normalized_source,
             "subdir": info["subdir"],
             "version": info["version"],
-            "last_update_time": info["last_update_time"],
-            "health": info["health"]
+            "last_update_time": info["last_update_time"]
         }
     
     try:

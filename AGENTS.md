@@ -1,8 +1,8 @@
 # AGENTS.md - Skills Registry
 
 **Version:** 1.0.0  
-**Last Updated:** 2026-03-12  
-**Total Skills:** 36
+**Last Updated:** 2026-03-20  
+**Total Skills:** 41
 
 ---
 
@@ -20,8 +20,8 @@ This document provides a comprehensive registry of all available skills in the `
 | Tool Skills | 4 | skill-auditor, skill-creator, skill-installer, skills-registry-sync |
 | Python Skills | 5 | async-python-patterns, python-design-patterns, python-packaging, python-performance-optimization, python-testing-patterns |
 | Obsidian Skills | 4 | obsidian-bases, obsidian-cli, obsidian-markdown, url-to-obsidian |
-| Other Skills | 18 | agent-browser, agentskills, brainstorming, dispatching-parallel-agents, executing-plans, find-skills, finishing-a-development-branch, receiving-code-review, requesting-code-review, subagent-driven-development, test-driven-development, using-git-worktrees, using-superpowers, web-design-guidelines, windows-app-manager, x-file-manager, x-login-pw, xhs-search |
-| **Total** | **36** | |
+| Other Skills | 22 | agent-browser, agentskills, baoyu-post-to-wechat, brainstorming, dispatching-parallel-agents, executing-plans, find-skills, finishing-a-development-branch, good-mp-post, receiving-code-review, requesting-code-review, self-improving-agent, subagent-driven-development, test-driven-development, theme-factory, using-git-worktrees, using-superpowers, web-design-guidelines, x-app-manager, x-file-manager, x-login-pw, x-wechat-publisher, xhs-search |
+| **Total** | **41** | |
 
 ---
 
@@ -61,7 +61,7 @@ This document provides a comprehensive registry of all available skills in the `
 
 ### proxy-manager
 
-**Description:** 代理配置管理工具，用于配置和管理代理设置，解决访问 GitHub 等远程仓库时的网络连接问题
+**Description:** 代理配置管理工具，用于配置和管理代理设置，解决访问 GitHub 等远程仓库时的网络连接问题。当用户遇到网络连接问题、需要配置代理、访问 GitHub 失败、Git 操作超时、或需要设置 HTTP/SOCKS5 代理时，必须使用此技能。即使没有明确提到"代理"，只要涉及网络连接问题、远程仓库访问、或 Git 操作失败，都应该触发此技能。
 
 **Path:** `proxy-manager/`
 
@@ -79,7 +79,7 @@ This document provides a comprehensive registry of all available skills in the `
 
 ### skill-creator
 
-**Description:** Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, update or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.
+**Description:** Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.
 
 **Path:** `skill-creator/`
 
@@ -95,7 +95,7 @@ This document provides a comprehensive registry of all available skills in the `
 
 ### skills-registry-sync
 
-**Description:** Synchronize skills registry files (skills.json, skill_map.json, AGENTS.md) after skill operations. **MUST invoke after completing** install/uninstall/create operations, or when explicitly requesting registry sync/consistency checks (e.g., "同步注册表", "sync registry", "check consistency").
+**Description:** Sync skills registry after skill operations. Triggers on: 'install skill success', '安装 skill 成功', 'uninstall skill success', '卸载 skill 成功', 'delete skill success', '删除 skill 成功', 'create skill success', '创建 skill 成功', 'update skill success', '更新 skill 成功', 'skill installed', 'skill uninstalled', 'skill created', 'skill updated'. Updates skills.json, skill_map.json, and AGENTS.md to maintain registry consistency.
 
 **Path:** `skills-registry-sync/`
 
@@ -195,6 +195,14 @@ This document provides a comprehensive registry of all available skills in the `
 
 ---
 
+### baoyu-post-to-wechat
+
+**Description:** Posts content to WeChat Official Account (微信公众号) via API or Chrome CDP. Supports article posting (文章) with HTML, markdown, or plain text input, and image-text posting (贴图, formerly 图文) with multiple images. Markdown article workflows default to converting ordinary external links into bottom citations for WeChat-friendly output. Use when user mentions "发布公众号", "post to wechat", "微信公众号", or "贴图/图文/文章".
+
+**Path:** `baoyu-post-to-wechat/`
+
+---
+
 ### brainstorming
 
 **Description:** You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.
@@ -235,6 +243,14 @@ This document provides a comprehensive registry of all available skills in the `
 
 ---
 
+### good-mp-post
+
+**Description:** 微信公众号文章发布完整流程管理，包括AI辅助创作、图片生成、排版和发布。
+
+**Path:** `good-mp-post/`
+
+---
+
 ### receiving-code-review
 
 **Description:** Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation
@@ -251,6 +267,14 @@ This document provides a comprehensive registry of all available skills in the `
 
 ---
 
+### self-improving-agent
+
+**Description:** A universal self-improving agent that learns from ALL skill experiences. Uses multi-memory architecture (semantic + episodic + working) to continuously evolve the codebase. Auto-triggers on skill completion/error with hooks-based self-correction.
+
+**Path:** `self-improving-agent/`
+
+---
+
 ### subagent-driven-development
 
 **Description:** Use when executing implementation plans with independent tasks in the current session
@@ -264,6 +288,14 @@ This document provides a comprehensive registry of all available skills in the `
 **Description:** Use when implementing any feature or bugfix, before writing implementation code
 
 **Path:** `test-driven-development/`
+
+---
+
+### theme-factory
+
+**Description:** Toolkit for styling artifacts with a theme. These artifacts can be slides, docs, reportings, HTML landing pages, etc. There are 10 pre-set themes with colors/fonts that you can apply to any artifact that has been creating, or can generate a new theme on-the-fly.
+
+**Path:** `theme-factory/`
 
 ---
 
@@ -291,11 +323,11 @@ This document provides a comprehensive registry of all available skills in the `
 
 ---
 
-### windows-app-manager
+### x-app-manager
 
 **Description:** Windows application lifecycle management. Use when user requests to START or STOP desktop applications like WeChat, Feishu, DingTalk, Chrome, etc. Handles application launch and termination only. For login/authentication issues, use `x-login-pw` skill. / Windows 应用程序生命周期管理。当用户请求启动或关闭桌面应用（微信、飞书、钉钉、Chrome 等）时使用。仅处理应用启动和关闭。登录验证问题请使用 `x-login-pw` skill。
 
-**Path:** `windows-app-manager/`
+**Path:** `x-app-manager/`
 
 ---
 
@@ -315,6 +347,14 @@ This document provides a comprehensive registry of all available skills in the `
 
 ---
 
+### x-wechat-publisher
+
+**Description:** WeChat Official Account publishing workflow with AI-powered content creation, Markdown-to-WeChat HTML rendering, and hybrid-drive synchronization. Use this skill whenever the user mentions '发布公众号', '微信公众号', '同步微信', '公众号草稿', 'WeChat Official Account', 'post to WeChat', or wants to create, format, or sync articles to WeChat Official Account.
+
+**Path:** `x-wechat-publisher/`
+
+---
+
 ### xhs-search
 
 **Description:** Search Xiaohongshu (小红书) notes and comments, save results to Obsidian vault. Use when user wants to search xiaohongshu.com, extract notes, get comments, or save xiaohongshu content to Obsidian. Supports both Chinese and English keywords like "搜索 英语学习" or "search Learning English".
@@ -330,12 +370,12 @@ This document provides a comprehensive registry of all available skills in the `
 
 | Category | Count | Percentage |
 |----------|--------|------------|
-| Core Skills | 5 | 13.9% |
-| Tool Skills | 4 | 11.1% |
-| Python Skills | 5 | 13.9% |
-| Obsidian Skills | 4 | 11.1% |
-| Other Skills | 18 | 50.0% |
-| **Total** | **36** | **100%** |
+| Core Skills | 5 | 12.5% |
+| Tool Skills | 4 | 10.0% |
+| Python Skills | 5 | 12.5% |
+| Obsidian Skills | 4 | 10.0% |
+| Other Skills | 23 | 56.1% |
+| **Total** | **41** | **100%** |
 
 ---
 

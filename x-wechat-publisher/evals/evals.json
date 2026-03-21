@@ -1,0 +1,23 @@
+{
+  "skill_name": "x-wechat-publisher",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a tech article about AI agents and sync it to my WeChat Official Account draft box",
+      "expected_output": "Generate structured Markdown with frontmatter, convert to WeChat HTML, and sync to draft box",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Convert this Markdown file to WeChat-compatible HTML with tech theme: the article is about Python best practices",
+      "expected_output": "Convert Markdown to WeChat HTML with inline CSS using tech theme",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Setup WeChat publisher session for first-time use",
+      "expected_output": "Guide user through QR code login and save session",
+      "files": []
+    }
+  ]
+}

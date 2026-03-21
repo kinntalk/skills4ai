@@ -1,0 +1,8 @@
+{
+  "apps": {},
+  "settings": {
+    "auto_verify": true,
+    "max_startup_wait": 5,
+    "search_drives": []
+  }
+}

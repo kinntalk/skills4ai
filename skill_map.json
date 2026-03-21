@@ -32,7 +32,7 @@
     },
     "skill-creator": {
       "name": "skill-creator",
-      "description": "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, update or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.",
+      "description": "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.",
       "keywords": [
         "skill-creator",
         "create",
@@ -173,10 +173,12 @@
     },
     "proxy-manager": {
       "name": "proxy-manager",
-      "description": "代理配置管理工具，用于配置和管理代理设置，解决访问 GitHub 等远程仓库时的网络连接问题",
+      "description": "代理配置管理工具，用于配置和管理代理设置，解决访问 GitHub 等远程仓库时的网络连接问题。当用户遇到网络连接问题、需要配置代理、访问 GitHub 失败、Git 操作超时、或需要设置 HTTP/SOCKS5 代理时，必须使用此技能。即使没有明确提到\"代理\"，只要涉及网络连接问题、远程仓库访问、或 Git 操作失败，都应该触发此技能。",
       "keywords": [
         "proxy-manager",
-        "github"
+        "github",
+        "github",
+        "http"
       ],
       "aliases": [
         "proxy-manager"
@@ -242,14 +244,14 @@
     },
     "skills-registry-sync": {
       "name": "skills-registry-sync",
-      "description": "Synchronize skills registry files (skills.json, skill_map.json, AGENTS.md) after skill operations. **MUST invoke after completing** install/uninstall/create operations, or when explicitly requesting registry sync/consistency checks (e.g., \"同步注册表\", \"sync registry\", \"check consistency\").",
+      "description": "Sync skills registry after skill operations. Triggers on: 'install skill success', '安装 skill 成功', 'uninstall skill success', '卸载 skill 成功', 'delete skill success', '删除 skill 成功', 'create skill success', '创建 skill 成功', 'update skill success', '更新 skill 成功', 'skill installed', 'skill uninstalled', 'skill created', 'skill updated'. Updates skills.json, skill_map.json, and AGENTS.md to maintain registry consistency.",
       "keywords": [
         "skills-registry-sync",
-        "synchronize",
+        "sync",
         "skills",
         "registry",
-        "files",
-        "skills"
+        "after",
+        "skill"
       ],
       "aliases": [
         "skills-registry-sync"
@@ -496,18 +498,87 @@
         "x-file-manager"
       ]
     },
-    "windows-app-manager": {
-      "name": "windows-app-manager",
+    "self-improving-agent": {
+      "name": "self-improving-agent",
+      "description": "A universal self-improving agent that learns from ALL skill experiences. Uses multi-memory architecture (semantic + episodic + working) to continuously evolve the codebase. Auto-triggers on skill completion/error with hooks-based self-correction.",
+      "keywords": [
+        "self-improving-agent",
+        "universal",
+        "self",
+        "improving",
+        "agent"
+      ],
+      "aliases": [
+        "self-improving-agent"
+      ]
+    },
+    "x-app-manager": {
+      "name": "x-app-manager",
       "description": "Windows application lifecycle management. Use when user requests to START or STOP desktop applications like WeChat, Feishu, DingTalk, Chrome, etc. Handles application launch and termination only. For login/authentication issues, use `x-login-pw` skill. / Windows 应用程序生命周期管理。当用户请求启动或关闭桌面应用（微信、飞书、钉钉、Chrome 等）时使用。仅处理应用启动和关闭。登录验证问题请使用 `x-login-pw` skill。",
       "keywords": [
-        "windows-app-manager",
+        "x-app-manager",
         "windows",
         "application",
         "lifecycle",
         "management"
       ],
       "aliases": [
-        "windows-app-manager"
+        "x-app-manager"
+      ]
+    },
+    "theme-factory": {
+      "name": "theme-factory",
+      "description": "Toolkit for styling artifacts with a theme. These artifacts can be slides, docs, reportings, HTML landing pages, etc. There are 10 pre-set themes with colors/fonts that you can apply to any artifact that has been creating, or can generate a new theme on-the-fly.",
+      "keywords": [
+        "theme-factory",
+        "toolkit",
+        "styling",
+        "artifacts",
+        "theme"
+      ],
+      "aliases": [
+        "theme-factory"
+      ]
+    },
+    "good-mp-post": {
+      "name": "good-mp-post",
+      "description": "微信公众号文章发布完整流程管理，包括AI辅助创作、图片生成、排版和发布。",
+      "keywords": [
+        "good-mp-post"
+      ],
+      "aliases": [
+        "good-mp-post"
+      ]
+    },
+    "baoyu-post-to-wechat": {
+      "name": "baoyu-post-to-wechat",
+      "description": "Posts content to WeChat Official Account (微信公众号) via API or Chrome CDP. Supports article posting (文章) with HTML, markdown, or plain text input, and image-text posting (贴图, formerly 图文) with multiple images. Markdown article workflows default to converting ordinary external links into bottom citations for WeChat-friendly output. Use when user mentions \"发布公众号\", \"post to wechat\", \"微信公众号\", or \"贴图/图文/文章\".",
+      "keywords": [
+        "baoyu-post-to-wechat",
+        "posts",
+        "content",
+        "wechat",
+        "official",
+        "account"
+      ],
+      "aliases": [
+        "baoyu-post-to-wechat"
+      ]
+    },
+    "x-wechat-publisher": {
+      "name": "x-wechat-publisher",
+      "description": "WeChat Official Account publishing workflow with AI-powered content creation, Markdown-to-WeChat HTML rendering, and hybrid-drive synchronization. Use this skill whenever the user mentions '发布公众号', '微信公众号', '同步微信', '公众号草稿', 'WeChat Official Account', 'post to WeChat', or wants to create, format, or sync articles to WeChat Official Account.",
+      "keywords": [
+        "x-wechat-publisher",
+        "wechat",
+        "official",
+        "account",
+        "publishing",
+        "markdown",
+        "html"
+      ],
+      "aliases": [
+        "x-wechat-publisher"
       ]
     }
   },
@@ -548,7 +619,12 @@
       "obsidian-markdown",
       "xhs-search",
       "x-file-manager",
-      "windows-app-manager"
+      "self-improving-agent",
+      "x-app-manager",
+      "theme-factory",
+      "good-mp-post",
+      "baoyu-post-to-wechat",
+      "x-wechat-publisher"
     ],
     "exact_match": {
       "image generation": "image-generation",
