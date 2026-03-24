@@ -24,8 +24,22 @@ def clear_environment_proxy():
     return cleared
 
 def disable_proxy_config():
-    """保留 proxy_config.json 配置，"""
-    pass
+    """禁用 proxy_config.json 中的代理配置"""
+    import json
+    config_path = PROXY_CONFIG_PATH
+    if not config_path.exists():
+        return False
+    
+    with open(config_path, 'r', encoding='utf-8') as f:
+        config = json.load(f)
+    
+    config['proxy']['enabled'] = False
+    config['proxy']['force_proxy_domains'] = []
+    
+    with open(config_path, 'w', encoding='utf-8') as f:
+        json.dump(config, f, indent=2, ensure_ascii=False)
+    
+    return True
 
 def main():
     print("=" * 50)

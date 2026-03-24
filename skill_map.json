@@ -498,6 +498,21 @@
         "x-file-manager"
       ]
     },
+    "x-mail-sender": {
+      "name": "x-mail-sender",
+      "description": "Local email sender via SMTP protocol supporting multiple providers (126, 163, QQ, Gmail, Outlook) with attachment capabilities. Use this skill whenever the user needs to send emails, send reports to email addresses, or mentions \"send email\", \"发邮件\", \"email\", \"mail\", \"邮件\". Trigger even when the user doesn't explicitly say \"send email\" but clearly intends to send content or files to an email address.",
+      "keywords": [
+        "x-mail-sender",
+        "local",
+        "email",
+        "sender",
+        "smtp",
+        "protocol"
+      ],
+      "aliases": [
+        "x-mail-sender"
+      ]
+    },
     "self-improving-agent": {
       "name": "self-improving-agent",
       "description": "A universal self-improving agent that learns from ALL skill experiences. Uses multi-memory architecture (semantic + episodic + working) to continuously evolve the codebase. Auto-triggers on skill completion/error with hooks-based self-correction.",
@@ -567,18 +582,42 @@
     },
     "x-wechat-publisher": {
       "name": "x-wechat-publisher",
-      "description": "WeChat Official Account publishing workflow with AI-powered content creation, Markdown-to-WeChat HTML rendering, and hybrid-drive synchronization. Use this skill whenever the user mentions '发布公众号', '微信公众号', '同步微信', '公众号草稿', 'WeChat Official Account', 'post to WeChat', or wants to create, format, or sync articles to WeChat Official Account.",
+      "description": "WeChat Official Account publishing workflow with AI-powered content creation, Markdown-to-WeChat HTML rendering, and hybrid-drive synchronization. Use this skill whenever the user mentions \"发布公众号\", \"微信公众号\", \"同步微信\", \"公众号草稿\", \"WeChat Official Account\", \"post to WeChat\", or wants to create, format, or sync articles to WeChat Official Account, even if they don't explicitly ask for a 'publisher' or 'WeChat'.",
       "keywords": [
         "x-wechat-publisher",
         "wechat",
         "official",
         "account",
         "publishing",
-        "markdown",
-        "html"
+        "workflow"
       ],
       "aliases": [
         "x-wechat-publisher"
+      ]
+    },
+    "email-and-password-best-practices": {
+      "name": "email-and-password-best-practices",
+      "description": "Configure email verification, implement password reset flows, set password policies, and customise hashing algorithms for Better Auth email/password authentication. Use when users need to set up login, sign-in, sign-up, credential authentication, or password security with Better Auth.",
+      "keywords": [
+        "email-and-password-best-practices",
+        "configure",
+        "email",
+        "verification",
+        "implement",
+        "password"
+      ],
+      "aliases": [
+        "email-and-password-best-practices"
+      ]
+    },
+    "cli-anything-drawio": {
+      "name": "cli-anything-drawio",
+      "description": "",
+      "keywords": [
+        "cli-anything-drawio"
+      ],
+      "aliases": [
+        "cli-anything-drawio"
       ]
     }
   },
@@ -619,12 +658,15 @@
       "obsidian-markdown",
       "xhs-search",
       "x-file-manager",
+      "x-mail-sender",
       "self-improving-agent",
       "x-app-manager",
       "theme-factory",
       "good-mp-post",
       "baoyu-post-to-wechat",
-      "x-wechat-publisher"
+      "x-wechat-publisher",
+      "email-and-password-best-practices",
+      "cli-anything-drawio"
     ],
     "exact_match": {
       "image generation": "image-generation",
@@ -685,7 +727,14 @@
       "大文件": "x-file-manager",
       "重复文件": "x-file-manager",
       "查找文件": "x-file-manager",
-      "文件哈希": "x-file-manager"
+      "文件哈希": "x-file-manager",
+      "email": "x-mail-sender",
+      "mail": "x-mail-sender",
+      "smtp": "x-mail-sender",
+      "发邮件": "x-mail-sender",
+      "发送邮件": "x-mail-sender",
+      "邮件": "x-mail-sender",
+      "附件": "x-mail-sender"
     }
   }
 }

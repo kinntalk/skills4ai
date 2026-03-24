@@ -4,247 +4,265 @@
       "source": "https://github.com/anthropics/skills.git",
       "subdir": "skills/skill-creator",
       "version": "7029232b9212482c0476da354b83364bd28fab2f",
-      "last_update_time": "2026-03-20T16:05:29.529296"
+      "last_update_time": "2026-03-24T18:58:17.816994"
     },
     "skill-installer": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.530166"
+      "last_update_time": "2026-03-24T18:58:17.818187"
     },
     "skill-auditor": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.528507"
+      "last_update_time": "2026-03-24T18:58:17.815955"
     },
     "skills-registry-sync": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.531067"
+      "last_update_time": "2026-03-24T18:58:17.819236"
     },
     "agent-browser": {
       "source": "https://github.com/vercel-labs/agent-browser.git",
       "subdir": "skills/agent-browser",
       "version": "8f6ad817f10b151b647234882f2a0fef6d2b43d1",
-      "last_update_time": "2026-03-20T16:05:29.462159"
+      "last_update_time": "2026-03-24T18:58:17.723859"
     },
     "agentskills": {
       "source": "local",
       "subdir": "",
       "version": "0c61f1efc081cbb1ffe3420f6bbcb5b08920e133",
-      "last_update_time": "2026-03-20T16:05:29.502691"
+      "last_update_time": "2026-03-24T18:58:17.784160"
     },
     "async-python-patterns": {
       "source": "https://github.com/wshobson/agents.git",
       "subdir": "plugins/python-development/skills/async-python-patterns",
       "version": "ade0c7a211d04fa1354d10359737cace5c6fc5b0",
-      "last_update_time": "2026-03-20T16:05:29.503486"
+      "last_update_time": "2026-03-24T18:58:17.785540"
     },
     "baoyu-post-to-wechat": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.504918"
+      "last_update_time": "2026-03-24T18:58:17.787739"
     },
     "brainstorming": {
       "source": "https://github.com/obra/superpowers.git",
       "subdir": "skills/brainstorming",
       "version": "e4a2375cb705ca5800f0833528ce36a3faf9017a",
-      "last_update_time": "2026-03-20T16:05:29.505648"
+      "last_update_time": "2026-03-24T18:58:17.788983"
+    },
+    "cli-anything-drawio": {
+      "source": "local",
+      "subdir": "",
+      "version": "unknown",
+      "last_update_time": "2026-03-24T18:58:17.789560"
     },
     "dispatching-parallel-agents": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.506239"
+      "last_update_time": "2026-03-24T18:58:17.790714"
+    },
+    "email-and-password-best-practices": {
+      "source": "local",
+      "subdir": "",
+      "version": "unknown",
+      "last_update_time": "2026-03-24T18:58:17.792224"
     },
     "executing-plans": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.506803"
+      "last_update_time": "2026-03-24T18:58:17.793691"
     },
     "find-skills": {
       "source": "https://github.com/vercel-labs/skills.git",
       "subdir": "skills/find-skills",
       "version": "7022ad39948c10024e451a56baba6fee62477df5",
-      "last_update_time": "2026-03-20T16:05:29.507545"
+      "last_update_time": "2026-03-24T18:58:17.795038"
     },
     "finishing-a-development-branch": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.508208"
+      "last_update_time": "2026-03-24T18:58:17.796062"
     },
     "good-mp-post": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.509009"
+      "last_update_time": "2026-03-24T18:58:17.797101"
     },
     "image-generation": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.509883"
+      "last_update_time": "2026-03-24T18:58:17.798320"
     },
     "obsidian-bases": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.510787"
+      "last_update_time": "2026-03-24T18:58:17.799880"
     },
     "obsidian-cli": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.511730"
+      "last_update_time": "2026-03-24T18:58:17.801088"
     },
     "obsidian-markdown": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.512484"
+      "last_update_time": "2026-03-24T18:58:17.802075"
     },
     "pdf-generation": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.513329"
+      "last_update_time": "2026-03-24T18:58:17.803050"
     },
     "planning-with-files": {
       "source": "https://github.com/OthmanAdi/planning-with-files.git",
       "subdir": "skills/planning-with-files",
       "version": "24442f5c8cfc062ac5e9704a1b6bfda10d983c45",
-      "last_update_time": "2026-03-20T16:05:29.515955"
+      "last_update_time": "2026-03-24T18:58:17.805673"
     },
     "powershell-windows": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.517135"
+      "last_update_time": "2026-03-24T18:58:17.806360"
     },
     "proxy-manager": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.518145"
+      "last_update_time": "2026-03-24T18:58:17.806957"
     },
     "python-design-patterns": {
       "source": "https://github.com/wshobson/agents.git",
       "subdir": "plugins/python-development/skills/python-design-patterns",
       "version": "ade0c7a211d04fa1354d10359737cace5c6fc5b0",
-      "last_update_time": "2026-03-20T16:05:29.519236"
+      "last_update_time": "2026-03-24T18:58:17.807607"
     },
     "python-packaging": {
       "source": "https://github.com/wshobson/agents.git",
       "subdir": "plugins/python-development/skills/python-packaging",
       "version": "ade0c7a211d04fa1354d10359737cace5c6fc5b0",
-      "last_update_time": "2026-03-20T16:05:29.520340"
+      "last_update_time": "2026-03-24T18:58:17.808712"
     },
     "python-performance-optimization": {
       "source": "https://github.com/wshobson/agents.git",
       "subdir": "plugins/python-development/skills/python-performance-optimization",
       "version": "ade0c7a211d04fa1354d10359737cace5c6fc5b0",
-      "last_update_time": "2026-03-20T16:05:29.521439"
+      "last_update_time": "2026-03-24T18:58:17.809640"
     },
     "python-testing-patterns": {
       "source": "https://github.com/wshobson/agents.git",
       "subdir": "plugins/python-development/skills/python-testing-patterns",
       "version": "ade0c7a211d04fa1354d10359737cace5c6fc5b0",
-      "last_update_time": "2026-03-20T16:05:29.522644"
+      "last_update_time": "2026-03-24T18:58:17.810518"
     },
     "receiving-code-review": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.523858"
+      "last_update_time": "2026-03-24T18:58:17.811501"
     },
     "requesting-code-review": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.524822"
+      "last_update_time": "2026-03-24T18:58:17.812139"
     },
     "self-improving-agent": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.527620"
+      "last_update_time": "2026-03-24T18:58:17.814902"
     },
     "subagent-driven-development": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.531775"
+      "last_update_time": "2026-03-24T18:58:17.819981"
     },
     "test-driven-development": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.532371"
+      "last_update_time": "2026-03-24T18:58:17.820710"
     },
     "theme-factory": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.533183"
+      "last_update_time": "2026-03-24T18:58:17.821789"
     },
     "url-to-obsidian": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.533848"
+      "last_update_time": "2026-03-24T18:58:17.822555"
     },
     "using-git-worktrees": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.534553"
+      "last_update_time": "2026-03-24T18:58:17.823317"
     },
     "using-superpowers": {
       "source": "local",
       "subdir": "",
       "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.535198"
+      "last_update_time": "2026-03-24T18:58:17.824681"
     },
     "web-design-guidelines": {
       "source": "https://github.com/vercel-labs/agent-skills.git",
       "subdir": "skills/web-design-guidelines",
       "version": "cc8bd7a5b51e41270f20b43466ffa4149c18cc01",
-      "last_update_time": "2026-03-20T16:05:29.536081"
+      "last_update_time": "2026-03-24T18:58:17.826282"
     },
     "x-app-manager": {
       "source": "local",
       "subdir": "",
       "version": "1.0.0",
-      "last_update_time": "2026-03-20T16:05:29.537015"
+      "last_update_time": "2026-03-24T18:58:17.827338"
     },
     "x-file-manager": {
       "source": "local",
       "subdir": "",
       "version": "1.0.0",
-      "last_update_time": "2026-03-20T16:05:29.537780"
+      "last_update_time": "2026-03-24T18:58:17.828458"
     },
     "x-login-pw": {
       "source": "local",
       "subdir": "",
       "version": "1.0.0",
-      "last_update_time": "2026-03-20T16:05:29.538526"
+      "last_update_time": "2026-03-24T18:58:17.829617"
     },
-    "xhs-search": {
+    "x-mail-sender": {
       "source": "local",
       "subdir": "",
-      "version": "unknown",
-      "last_update_time": "2026-03-20T16:05:29.539484"
+      "version": "1.0.0",
+      "last_update_time": "2026-03-24T18:58:17.831156"
     },
     "x-wechat-publisher": {
       "source": "local",
       "subdir": "",
       "version": "1.0.0",
-      "last_update_time": "2026-03-20T17:45:00.000000"
+      "last_update_time": "2026-03-24T18:58:17.832107"
+    },
+    "xhs-search": {
+      "source": "local",
+      "subdir": "",
+      "version": "unknown",
+      "last_update_time": "2026-03-24T18:58:17.832991"
     }
   }
 }

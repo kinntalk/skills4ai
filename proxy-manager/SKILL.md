@@ -33,6 +33,19 @@ description: 代理配置管理工具，用于配置和管理代理设置，解�
 
 ## 使用方法
 
+### 快速开启/关闭代理（推荐）
+
+```bash
+# 一键开启代理（设置 Git 全局代理 + 更新配置文件）
+python .trae/skills/proxy-manager/scripts/enable_proxy.py
+
+# 一键关闭代理（清除 Git 全局代理 + 更新配置文件）
+python .trae/skills/proxy-manager/scripts/disable_proxy.py
+
+# 关闭代理并清除 Windows 系统代理
+python .trae/skills/proxy-manager/scripts/disable_proxy.py --clear-windows
+```
+
 ### 配置代理
 ```bash
 # 配置 HTTP 代理

@@ -1,8 +1,8 @@
 # AGENTS.md - Skills Registry
 
 **Version:** 1.0.0  
-**Last Updated:** 2026-03-20  
-**Total Skills:** 41
+**Last Updated:** 2026-03-24  
+**Total Skills:** 44
 
 ---
 
@@ -20,8 +20,8 @@ This document provides a comprehensive registry of all available skills in the `
 | Tool Skills | 4 | skill-auditor, skill-creator, skill-installer, skills-registry-sync |
 | Python Skills | 5 | async-python-patterns, python-design-patterns, python-packaging, python-performance-optimization, python-testing-patterns |
 | Obsidian Skills | 4 | obsidian-bases, obsidian-cli, obsidian-markdown, url-to-obsidian |
-| Other Skills | 22 | agent-browser, agentskills, baoyu-post-to-wechat, brainstorming, dispatching-parallel-agents, executing-plans, find-skills, finishing-a-development-branch, good-mp-post, receiving-code-review, requesting-code-review, self-improving-agent, subagent-driven-development, test-driven-development, theme-factory, using-git-worktrees, using-superpowers, web-design-guidelines, x-app-manager, x-file-manager, x-login-pw, x-wechat-publisher, xhs-search |
-| **Total** | **41** | |
+| Other Skills | 26 | agent-browser, agentskills, baoyu-post-to-wechat, brainstorming, cli-anything-drawio, dispatching-parallel-agents, email-and-password-best-practices, executing-plans, find-skills, finishing-a-development-branch, good-mp-post, receiving-code-review, requesting-code-review, self-improving-agent, subagent-driven-development, test-driven-development, theme-factory, using-git-worktrees, using-superpowers, web-design-guidelines, x-app-manager, x-file-manager, x-login-pw, x-mail-sender, x-wechat-publisher, xhs-search |
+| **Total** | **44** | |
 
 ---
 
@@ -211,11 +211,27 @@ This document provides a comprehensive registry of all available skills in the `
 
 ---
 
+### cli-anything-drawio
+
+**Description:** No description available
+
+**Path:** `cli-anything-drawio/`
+
+---
+
 ### dispatching-parallel-agents
 
 **Description:** Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies
 
 **Path:** `dispatching-parallel-agents/`
+
+---
+
+### email-and-password-best-practices
+
+**Description:** Configure email verification, implement password reset flows, set password policies, and customise hashing algorithms for Better Auth email/password authentication. Use when users need to set up login, sign-in, sign-up, credential authentication, or password security with Better Auth.
+
+**Path:** `email-and-password-best-practices/`
 
 ---
 
@@ -347,9 +363,17 @@ This document provides a comprehensive registry of all available skills in the `
 
 ---
 
+### x-mail-sender
+
+**Description:** Local email sender via SMTP protocol supporting multiple providers (126, 163, QQ, Gmail, Outlook) with attachment capabilities. Use this skill whenever the user needs to send emails, send reports to email addresses, or mentions "send email", "发邮件", "email", "mail", "邮件". Trigger even when the user doesn't explicitly say "send email" but clearly intends to send content or files to an email address.
+
+**Path:** `x-mail-sender/`
+
+---
+
 ### x-wechat-publisher
 
-**Description:** WeChat Official Account publishing workflow with AI-powered content creation, Markdown-to-WeChat HTML rendering, and hybrid-drive synchronization. Use this skill whenever the user mentions '发布公众号', '微信公众号', '同步微信', '公众号草稿', 'WeChat Official Account', 'post to WeChat', or wants to create, format, or sync articles to WeChat Official Account.
+**Description:** WeChat Official Account publishing workflow with AI-powered content creation, Markdown-to-WeChat HTML rendering, and hybrid-drive synchronization. Use this skill whenever the user mentions "发布公众号", "微信公众号", "同步微信", "公众号草稿", "WeChat Official Account", "post to WeChat", or wants to create, format, or sync articles to WeChat Official Account, even if they don't explicitly ask for a 'publisher' or 'WeChat'.
 
 **Path:** `x-wechat-publisher/`
 
@@ -370,12 +394,12 @@ This document provides a comprehensive registry of all available skills in the `
 
 | Category | Count | Percentage |
 |----------|--------|------------|
-| Core Skills | 5 | 12.5% |
-| Tool Skills | 4 | 10.0% |
-| Python Skills | 5 | 12.5% |
-| Obsidian Skills | 4 | 10.0% |
-| Other Skills | 23 | 56.1% |
-| **Total** | **41** | **100%** |
+| Core Skills | 5 | 11.4% |
+| Tool Skills | 4 | 9.1% |
+| Python Skills | 5 | 11.4% |
+| Obsidian Skills | 4 | 9.1% |
+| Other Skills | 26 | 59.1% |
+| **Total** | **44** | **100%** |
 
 ---
 

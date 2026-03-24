@@ -1,0 +1,160 @@
+{
+  "skill_name": "x-mail-sender",
+  "description": "Local email sender with SMTP support and attachment capabilities",
+  "evals": [
+    {
+      "id": 1,
+      "name": "send_simple_email",
+      "prompt": "Send an email to test@example.com with subject 'Test Email' and body 'This is a test message'",
+      "expected_output": "Execute send_email.py script with correct parameters",
+      "assertions": [
+        {
+          "name": "uses_correct_script",
+          "description": "Should use send_email.py script",
+          "check": "command contains 'send_email.py'"
+        },
+        {
+          "name": "has_required_params",
+          "description": "Should include --to, --subject, --body parameters",
+          "check": "all required parameters present"
+        },
+        {
+          "name": "correct_recipient",
+          "description": "Should use the exact recipient email provided",
+          "check": "test@example.com in --to parameter"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "send_email_with_attachment",
+      "prompt": "Send D:/reports/monthly.xlsx to finance@company.com with subject 'Monthly Report'",
+      "expected_output": "Execute script with attachment parameter",
+      "assertions": [
+        {
+          "name": "includes_attachment",
+          "description": "Should include --attachments parameter",
+          "check": "command contains '--attachments'"
+        },
+        {
+          "name": "correct_file_path",
+          "description": "Should use the exact file path provided",
+          "check": "D:/reports/monthly.xlsx in command"
+        },
+        {
+          "name": "correct_recipient",
+          "description": "Should use the correct recipient email",
+          "check": "finance@company.com in --to parameter"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "send_html_email",
+      "prompt": "Send an HTML email to user@example.com with a heading and list in the content",
+      "expected_output": "Execute script with HTML flag and formatted content",
+      "assertions": [
+        {
+          "name": "uses_html_flag",
+          "description": "Should include --html flag",
+          "check": "command contains '--html'"
+        },
+        {
+          "name": "html_content_valid",
+          "description": "HTML content should be properly formatted",
+          "check": "body contains valid HTML tags"
+        },
+        {
+          "name": "correct_recipient",
+          "description": "Should use the correct recipient email",
+          "check": "user@example.com in --to parameter"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "multiple_recipients",
+      "prompt": "Send an email to team1@company.com and team2@company.com with subject 'Team Notification'",
+      "expected_output": "Correctly handle multiple recipients",
+      "assertions": [
+        {
+          "name": "handles_multiple_recipients",
+          "description": "Should accept comma-separated email addresses",
+          "check": "both email addresses in --to parameter"
+        },
+        {
+          "name": "correct_subject",
+          "description": "Should use the provided subject",
+          "check": "Team Notification in --subject parameter"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "config_validation",
+      "prompt": "Check if the email configuration is correct",
+      "expected_output": "Run configuration validation script",
+      "assertions": [
+        {
+          "name": "runs_config_check",
+          "description": "Should run config validation",
+          "check": "command contains 'validate' or '--validate-config'"
+        },
+        {
+          "name": "validates_smtp",
+          "description": "Should validate SMTP configuration",
+          "check": "validates SMTP settings"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "send_with_cc_bcc",
+      "prompt": "Send email to main@company.com, CC to manager@company.com, with subject 'Project Update'",
+      "expected_output": "Execute script with CC parameter",
+      "assertions": [
+        {
+          "name": "includes_cc",
+          "description": "Should include --cc parameter",
+          "check": "command contains '--cc'"
+        },
+        {
+          "name": "correct_cc_recipient",
+          "description": "Should use correct CC email",
+          "check": "manager@company.com in --cc parameter"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "view_history",
+      "prompt": "Show me the recent email sending history",
+      "expected_output": "Run history command or script",
+      "assertions": [
+        {
+          "name": "runs_history_command",
+          "description": "Should run history command",
+          "check": "command contains '--history' or 'email_history.py'"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "chinese_email_request",
+      "prompt": "发邮件给 boss@company.com，说我今天会迟到",
+      "expected_output": "Handle Chinese input and send email",
+      "assertions": [
+        {
+          "name": "handles_chinese",
+          "description": "Should handle Chinese input correctly",
+          "check": "extracts correct recipient and generates appropriate body"
+        },
+        {
+          "name": "correct_recipient",
+          "description": "Should use correct recipient",
+          "check": "boss@company.com in --to parameter"
+        }
+      ]
+    }
+  ]
+}
